@@ -22,15 +22,32 @@ export const palette = {
   textMuted: "#9aa6c7",
   accent: "#4d7cfe",
   accentText: "#ffffff",
+  danger: "#ff6b7d",
+  warning: "#ffcc66",
+} as const;
+
+/** Editor syntax-token colors, keyed to lexer token classes. */
+export const syntax = {
+  number: "#7ee3c7",
+  string: "#f0a97f",
+  keyword: "#b48ef2",
+  field: "#8fb7ff",
+  operator: "#c3cbe6",
+  punctuation: "#7c88ab",
+  comment: "#5f6b8c",
+  error: "#ff6b7d",
+} as const;
+
+export const font = {
+  sans: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+  mono: "'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace",
 } as const;
 
 export const theme = {
   product,
   palette,
-  font: {
-    sans: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
-    mono: "'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace",
-  },
+  syntax,
+  font,
 } as const;
 
 export type Theme = typeof theme;

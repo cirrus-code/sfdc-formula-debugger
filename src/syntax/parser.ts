@@ -72,7 +72,7 @@ class Parser {
 
   private advance(): Token {
     const t = this.current();
-    if (this.current().kind !== "eof") this.pos++;
+    if (this.current().kind !== "eof") {this.pos++;}
     return t;
   }
 
@@ -90,7 +90,7 @@ class Parser {
     if (this.current().kind !== "eof") {
       const start = this.current().span.start;
       let end = this.current().span.end;
-      while (this.current().kind !== "eof") end = this.advance().span.end;
+      while (this.current().kind !== "eof") {end = this.advance().span.end;}
       this.error("unexpected-token", span(start, end), "Unexpected trailing input after the formula.");
     }
     return expr;
@@ -101,10 +101,10 @@ class Parser {
   private parseExpr(minPrec: number): Expr {
     let left = this.parseUnary();
     for (;;) {
-      if (this.current().kind !== "operator") break;
+      if (this.current().kind !== "operator") {break;}
       const op = this.current().text as BinaryOperator;
       const prec = BINARY_PRECEDENCE[op];
-      if (prec === undefined || prec < minPrec) break;
+      if (prec === undefined || prec < minPrec) {break;}
       const opTok = this.advance();
       const rightAssoc = op === "^";
       const right = this.parseExpr(rightAssoc ? prec : prec + 1);
@@ -199,11 +199,11 @@ class Parser {
         this.advance();
         continue;
       }
-      if (this.current().kind === "rparen" || this.current().kind === "eof") break;
+      if (this.current().kind === "rparen" || this.current().kind === "eof") {break;}
       // Junk between arguments: report once, then resync to a separator.
       this.error("unexpected-token", this.current().span, "Expected ',' or ')' in argument list.");
       this.synchronizeArgs();
-      if (this.current().kind === "comma") this.advance();
+      if (this.current().kind === "comma") {this.advance();}
     }
     let end: number;
     if (this.current().kind === "rparen") {
@@ -260,18 +260,20 @@ class Parser {
   }
 }
 
+const ESCAPE_CHARS: Record<string, string> = { n: "\n", t: "\t", r: "\r" };
+
 /** Strip surrounding quotes and resolve backslash escapes. */
 function decodeString(raw: string): string {
-  if (raw.length === 0) return "";
+  if (raw.length === 0) {return "";}
   const quote = raw[0]!;
   let body = raw.slice(1);
-  if (body.length > 0 && body.endsWith(quote)) body = body.slice(0, -1);
+  if (body.length > 0 && body.endsWith(quote)) {body = body.slice(0, -1);}
   let out = "";
   for (let i = 0; i < body.length; i++) {
     const ch = body[i]!;
     if (ch === "\\" && i + 1 < body.length) {
       const next = body[++i]!;
-      out += next === "n" ? "\n" : next === "t" ? "\t" : next === "r" ? "\r" : next;
+      out += ESCAPE_CHARS[next] ?? next;
     } else {
       out += ch;
     }

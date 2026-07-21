@@ -31,8 +31,9 @@ export type TokenKind =
 export type TriviaKind = "whitespace" | "comment";
 
 /**
- * Non-semantic source text (whitespace, `/* *​/` comments) preserved so the
- * lexer is lossless and the formatter can reattach comments. Trivia is never
+ * Non-semantic source text (whitespace and slash-star block comments)
+ * preserved so the lexer is lossless and the formatter can reattach comments.
+ * Trivia is never
  * discarded — it is attached as leading trivia to the following token (trailing
  * trivia on the final `eof` token).
  */
@@ -65,7 +66,7 @@ export interface LexResult {
 export function tokensToSource(tokens: readonly Token[]): string {
   let out = "";
   for (const t of tokens) {
-    for (const tr of t.leadingTrivia) out += tr.text;
+    for (const tr of t.leadingTrivia) {out += tr.text;}
     out += t.text;
   }
   return out;
