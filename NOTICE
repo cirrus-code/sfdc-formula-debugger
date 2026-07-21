@@ -1,0 +1,24 @@
+Salesforce Formula Debugger
+Third-party attributions.
+
+================================================================================
+salesforce/formula-engine
+================================================================================
+The golden corpus under corpus/ is derived from test data in Salesforce's
+open-source formula engine (https://github.com/salesforce/formula-engine),
+used as a conformance oracle. See CONFORMANCE.md.
+
+  Copyright (c) 2021, Salesforce.com, Inc.
+  Licensed under the BSD 3-Clause License.
+
+corpus/sources/formulaTestV2.xml is a verbatim copy of that project's test
+corpus, retained for reproducible corpus generation.
+
+================================================================================
+formulon
+================================================================================
+Function implementations and tests are informed by formulon
+(https://github.com/leifg/formulon).
+
+  Copyright (c) leifg and contributors.
+  Licensed under the MIT License.

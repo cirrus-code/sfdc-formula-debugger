@@ -54,6 +54,23 @@ suppressed entirely for Tier 2 contexts, until org-verified:
   formula-definition length, not the compiled size (which cannot be computed
   client-side; the linter must say so).
 
+## Conformance backlog (from the WS2 oracle corpus)
+
+The corpus harness (`src/engine/conformance.test.ts`) currently sits at ~74% over
+the comparable subset. The gap is catalogued failures against Salesforce's own
+engine — real behaviors to match, but each needs the exact rule confirmed (via
+the WS3 JVM oracle or org) before a fix lands, so we don't trade one guess for
+another. Top categories, most-impactful first:
+
+- 🔬 **Numeric precision / scale.** SF caps result precision (e.g. `x ^ y` →
+  `0.0101010101010101010`, and very small magnitudes round to `0`); we keep full
+  decimal.js precision. Largest failure cluster — needs SF's exact scale rule.
+- 🔬 **Percent field semantics.** Arithmetic on Percent fields disagrees; confirm
+  whether a Percent value is used as-entered or divided by 100 in formulas.
+- 🔬 **Blank propagation through text functions.** `LEFT`/`RIGHT`/… on a blank
+  text input return blank in SF; we return empty string.
+- 🔬 **ROUND / MOD edge cases** with blank or out-of-range second arguments.
+
 ## Semantics (from CLAUDE.md NEEDS-VERIFICATION list)
 
 - ❓ Case sensitivity of text `=` / `<>` comparisons (per context, if it differs).
