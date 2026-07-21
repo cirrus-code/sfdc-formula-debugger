@@ -7,4 +7,5 @@
  *
  * May depend on: registry/, syntax/.
  */
-export {};
+export * from "./value.ts";
+export { evaluateFormula, type EvalEnv } from "./evaluator.ts";
