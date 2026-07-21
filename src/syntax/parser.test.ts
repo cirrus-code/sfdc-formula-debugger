@@ -95,10 +95,28 @@ describe("parser: operators and precedence", () => {
     expect((node.left as BinaryOp).op).toBe("<");
   });
 
-  it("treats ^ as right-associative", () => {
+  // Precedence/associativity below is transcribed from salesforce/formula-engine
+  // Formula.g4 (see CONFORMANCE.md), not from math intuition.
+
+  it("binds * and / tighter than ^ (per SF grammar)", () => {
+    // 2 * 3 ^ 4  ->  (2 * 3) ^ 4
+    const node = expectClean("2 * 3 ^ 4") as BinaryOp;
+    expect(node.op).toBe("^");
+    expect((node.left as BinaryOp).op).toBe("*");
+  });
+
+  it("treats ^ as left-associative (per SF grammar)", () => {
+    // 2 ^ 3 ^ 2  ->  (2 ^ 3) ^ 2
     const node = expectClean("2 ^ 3 ^ 2") as BinaryOp;
     expect(node.op).toBe("^");
-    expect((node.right as BinaryOp).op).toBe("^"); // 2 ^ (3 ^ 2)
+    expect((node.left as BinaryOp).op).toBe("^");
+  });
+
+  it("puts & at the additive level, left-associative (per SF grammar)", () => {
+    // "x" & 1 + 2  ->  ("x" & 1) + 2
+    const node = expectClean('"x" & 1 + 2') as BinaryOp;
+    expect(node.op).toBe("+");
+    expect((node.left as BinaryOp).op).toBe("&");
   });
 
   it("treats & as left-associative", () => {

@@ -10,17 +10,30 @@ Status legend: ❓ unverified · 🔬 verifying · ✅ verified (golden test id)
 
 ## Syntax / parsing
 
-- ❓ **Operator precedence table** (`syntax/parser.ts` `BINARY_PRECEDENCE`).
-  Currently encodes DESIGN §3.2's stated order (highest→lowest): unary sign; `^`;
-  `* /`; `+ -`; `&`; comparisons (`< <= > >=`); equality (`= <>`). Two specific
-  points need org confirmation:
-  - Whether unary `-` binds tighter than `^` (so `-2^2` = `(-2)^2` = 4) or looser
-    (`-(2^2)` = -4). The current prefix-unary structure yields the former.
-  - Whether comparison truly binds tighter than equality in Salesforce, or they
-    share one level.
-- ❓ **`==` / `!=` operators.** Lexed and parsed as equality operators for
-  recovery, but Salesforce formulas use only `=` / `<>`. Analysis should decide
-  whether these are a hard error or a lenient alias; not yet settled.
+Operator precedence is now transcribed from the Salesforce open-source grammar
+(`salesforce/formula-engine` `Formula.g4`) — see CONFORMANCE.md. Nesting there
+gives, tightest→loosest: `* /` > `^` > `+ - &` > relational > equality, all
+left-associative, with unary tighter than everything.
+
+- ✅ **Unary binds tighter than `^`**; **comparison binds tighter than equality**
+  — both confirmed by the grammar (`Formula.g4`), matching what we already had.
+- ✅ **`&` shares the additive level** with `+`/`-` (was encoded below them; fixed).
+- 🔬 **`* /` bind tighter than `^`** — grammar-backed but surprising vs the usual
+  math convention; confirm the grammar reflects runtime via the WS3 eval oracle
+  or org before treating as settled.
+- 🔬 **`^` is left-associative** (`2^3^2` = `(2^3)^2`) — grammar-backed but
+  surprising; same cross-check as above.
+- ❓ **`&&` / `||` operators.** The OSS grammar accepts them (`INFIX_AND`/
+  `INFIX_OR`) below equality precedence, but the product docs don't list them and
+  DESIGN assumed they are not operators. Our lexer does not tokenize them yet
+  (`&&`→two `&`, `|`→error). Verify OSS-vs-product before deciding to lex them.
+- ❓ **`==` / `!=` operators.** The OSS grammar accepts them as first-class
+  equality operators (`EQUAL2`/`NOT_EQUAL2`), yet the product documents only
+  `=` / `<>`. We currently parse them and warn `nonstandard-operator`; revisit
+  the warning once product parity is verified.
+- ❓ **Identifier continuation chars.** `LexerRules.g4` lists `$ : . #` among
+  identifier chars; we currently allow `[A-Za-z0-9_]` and split `.` as a path
+  separator. Review whether `:`/`#` ever appear in real field references.
 
 ## Registry data (Phase 2)
 

@@ -21,26 +21,32 @@ export interface ParseResult {
 }
 
 /**
- * Binary operator precedence (higher binds tighter). Precedence is data, not
- * control flow, per DESIGN §3.2. NOTE: the exact table — including whether unary
- * sign binds tighter than `^` — is flagged for org verification in
- * VERIFICATION.md; this encodes DESIGN's stated ordering.
+ * Binary operator precedence (higher binds tighter), transcribed from the
+ * Salesforce open-source grammar (salesforce/formula-engine `Formula.g4`), which
+ * is authoritative — see CONFORMANCE.md. Rule nesting there gives, tightest to
+ * loosest: `* /` > `^` > `+ - &` > relational > equality. All are
+ * left-associative. Two points are surprising versus the usual math conventions
+ * and are queued for eval-oracle cross-check (VERIFICATION.md): `* /` bind
+ * tighter than `^`, and `^` is left- (not right-) associative.
+ *
+ * `&` (concat) shares the additive level with `+`/`-`, so `"x" & 1 + 2` parses
+ * as `("x" & 1) + 2`, not `"x" & (1 + 2)`.
  */
 const BINARY_PRECEDENCE: Record<BinaryOperator, number> = {
-  "^": 7,
-  "*": 6,
-  "/": 6,
+  "*": 7,
+  "/": 7,
+  "^": 6,
   "+": 5,
   "-": 5,
-  "&": 4,
-  "<": 3,
-  "<=": 3,
-  ">": 3,
-  ">=": 3,
-  "=": 2,
-  "<>": 2,
-  "==": 2,
-  "!=": 2,
+  "&": 5,
+  "<": 4,
+  "<=": 4,
+  ">": 4,
+  ">=": 4,
+  "=": 3,
+  "<>": 3,
+  "==": 3,
+  "!=": 3,
 };
 
 export function parse(source: string): ParseResult {
@@ -106,8 +112,8 @@ class Parser {
       const prec = BINARY_PRECEDENCE[op];
       if (prec === undefined || prec < minPrec) {break;}
       const opTok = this.advance();
-      const rightAssoc = op === "^";
-      const right = this.parseExpr(rightAssoc ? prec : prec + 1);
+      // All Salesforce binary operators are left-associative (Formula.g4).
+      const right = this.parseExpr(prec + 1);
       left = {
         kind: "BinaryOp",
         op,
