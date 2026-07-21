@@ -62,7 +62,7 @@ test("surfaces positioned diagnostics for a broken formula", async () => {
 test("re-checks against the selected context", async () => {
   const screen = await render(<App />);
   // The sample returns Number; a validation rule must return Boolean.
-  await screen.getByRole("combobox").selectOptions("validation_rule");
+  await screen.getByRole("combobox", { name: "Context" }).selectOptions("validation_rule");
   await expect.element(screen.getByText(/must return Boolean/)).toBeInTheDocument();
 });
 
@@ -76,6 +76,18 @@ test("offers registry-driven autocomplete", async () => {
   await expect
     .poll(() => screen.container.ownerDocument.querySelector(".cm-tooltip-autocomplete")?.textContent ?? "")
     .toContain("ISBLANK");
+});
+
+test("simulates the formula live from field inputs", async () => {
+  const screen = await render(<App />);
+  await expect.element(screen.getByText("Simulate")).toBeInTheDocument();
+
+  // The sample IF(ISBLANK(Amount), 0, Amount * 1.1): set Amount=100 => 110.
+  await expect.poll(() => screen.container.querySelector('input[placeholder="value"]')).toBeTruthy();
+  const valueInput = screen.container.querySelector<HTMLInputElement>('input[placeholder="value"]')!;
+  await userEvent.fill(valueInput, "100");
+
+  await expect.element(screen.getByText("110")).toBeInTheDocument();
 });
 
 test("renders without console errors", async () => {

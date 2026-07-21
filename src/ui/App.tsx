@@ -4,6 +4,7 @@ import { analyze } from "../analysis/index.ts";
 import { CONTEXTS, DEFAULT_CONTEXT_ID, getContext } from "../registry/index.ts";
 import { palette, font, product } from "../theme/theme.ts";
 import { FormulaEditor } from "./editor/FormulaEditor.tsx";
+import { SimulatePanel } from "./simulate/SimulatePanel.tsx";
 import { offsetToLineCol } from "./util/position.ts";
 
 const SAMPLE = "IF(ISBLANK(Amount), 0, Amount * 1.1)";
@@ -73,6 +74,8 @@ export function App() {
             {context.notes}
           </p>
         ) : null}
+
+        {source.trim() === "" ? null : <SimulatePanel ast={ast} blankToggle={context?.blankModeToggle ?? false} />}
 
         <ProblemsPanel source={source} diagnostics={diagnostics} astKind={ast.kind} />
       </div>

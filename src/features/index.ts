@@ -7,4 +7,4 @@
  *
  * May depend on: analysis/, engine/, registry/, syntax/.
  */
-export {};
+export { extractFields, type ExtractedField } from "./field-extraction.ts";
