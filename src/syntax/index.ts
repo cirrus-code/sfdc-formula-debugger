@@ -8,4 +8,6 @@
 export * from "./span.ts";
 export * from "./diagnostic.ts";
 export * from "./token.ts";
+export * from "./ast.ts";
 export { lex } from "./lexer.ts";
+export { parse, type ParseResult } from "./parser.ts";

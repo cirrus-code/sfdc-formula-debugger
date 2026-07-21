@@ -12,7 +12,12 @@ export type DiagnosticCode =
   // Lexer
   | "unterminated-string"
   | "unterminated-comment"
-  | "unexpected-character";
+  | "unexpected-character"
+  // Parser
+  | "expected-expression"
+  | "expected-closing-paren"
+  | "expected-field-name"
+  | "unexpected-token";
 
 export interface Diagnostic {
   readonly code: DiagnosticCode;

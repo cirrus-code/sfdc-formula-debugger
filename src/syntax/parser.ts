@@ -1,0 +1,280 @@
+import { lex } from "./lexer.ts";
+import { mergeSpans, span, type Span } from "./span.ts";
+import type { Diagnostic, DiagnosticCode } from "./diagnostic.ts";
+import type { Token } from "./token.ts";
+import type {
+  BinaryOperator,
+  Expr,
+  FieldRef,
+  FunctionCall,
+  Paren,
+  UnaryOperator,
+} from "./ast.ts";
+
+export interface ParseResult {
+  /** Always present; an `ErrorNode` for empty or wholly-unparseable input. */
+  readonly ast: Expr;
+  /** Lexer + parser diagnostics, merged, in source order. */
+  readonly diagnostics: readonly Diagnostic[];
+  /** The token stream (drives highlighting even when parsing fails). */
+  readonly tokens: readonly Token[];
+}
+
+/**
+ * Binary operator precedence (higher binds tighter). Precedence is data, not
+ * control flow, per DESIGN §3.2. NOTE: the exact table — including whether unary
+ * sign binds tighter than `^` — is flagged for org verification in
+ * VERIFICATION.md; this encodes DESIGN's stated ordering.
+ */
+const BINARY_PRECEDENCE: Record<BinaryOperator, number> = {
+  "^": 7,
+  "*": 6,
+  "/": 6,
+  "+": 5,
+  "-": 5,
+  "&": 4,
+  "<": 3,
+  "<=": 3,
+  ">": 3,
+  ">=": 3,
+  "=": 2,
+  "<>": 2,
+  "==": 2,
+  "!=": 2,
+};
+
+export function parse(source: string): ParseResult {
+  const { tokens, diagnostics: lexDiagnostics } = lex(source);
+  const parser = new Parser(tokens);
+  const ast = parser.parseFormula();
+  return {
+    ast,
+    diagnostics: [...lexDiagnostics, ...parser.diagnostics].sort((a, b) => a.span.start - b.span.start),
+    tokens,
+  };
+}
+
+class Parser {
+  readonly diagnostics: Diagnostic[] = [];
+  private pos = 0;
+
+  constructor(private readonly tokens: readonly Token[]) {}
+
+  /** Current token. A method, not a getter, so TS re-reads it after advance(). */
+  private current(): Token {
+    // The stream always ends with an eof token, so this is always defined.
+    return this.tokens[Math.min(this.pos, this.tokens.length - 1)]!;
+  }
+
+  private peek(offset = 1): Token {
+    return this.tokens[Math.min(this.pos + offset, this.tokens.length - 1)]!;
+  }
+
+  private advance(): Token {
+    const t = this.current();
+    if (this.current().kind !== "eof") this.pos++;
+    return t;
+  }
+
+  private error(code: DiagnosticCode, s: Span, message: string): void {
+    this.diagnostics.push({ code, severity: "error", span: s, message });
+  }
+
+  /** End offset of the most recently consumed token (for synthetic spans). */
+  private prevEnd(): number {
+    return this.pos > 0 ? this.tokens[this.pos - 1]!.span.end : 0;
+  }
+
+  parseFormula(): Expr {
+    const expr = this.parseExpr(0);
+    if (this.current().kind !== "eof") {
+      const start = this.current().span.start;
+      let end = this.current().span.end;
+      while (this.current().kind !== "eof") end = this.advance().span.end;
+      this.error("unexpected-token", span(start, end), "Unexpected trailing input after the formula.");
+    }
+    return expr;
+  }
+
+  // --- Expressions (Pratt) ------------------------------------------------
+
+  private parseExpr(minPrec: number): Expr {
+    let left = this.parseUnary();
+    for (;;) {
+      if (this.current().kind !== "operator") break;
+      const op = this.current().text as BinaryOperator;
+      const prec = BINARY_PRECEDENCE[op];
+      if (prec === undefined || prec < minPrec) break;
+      const opTok = this.advance();
+      const rightAssoc = op === "^";
+      const right = this.parseExpr(rightAssoc ? prec : prec + 1);
+      left = {
+        kind: "BinaryOp",
+        op,
+        opSpan: opTok.span,
+        left,
+        right,
+        span: mergeSpans(left.span, right.span),
+      };
+    }
+    return left;
+  }
+
+  private parseUnary(): Expr {
+    if (this.current().kind === "operator" && (this.current().text === "-" || this.current().text === "+")) {
+      const opTok = this.advance();
+      const operand = this.parseUnary();
+      return {
+        kind: "UnaryOp",
+        op: opTok.text as UnaryOperator,
+        opSpan: opTok.span,
+        operand,
+        span: mergeSpans(opTok.span, operand.span),
+      };
+    }
+    return this.parsePrimary();
+  }
+
+  private parsePrimary(): Expr {
+    const tok = this.current();
+    switch (tok.kind) {
+      case "number":
+        this.advance();
+        return { kind: "NumberLit", raw: tok.text, span: tok.span };
+      case "string":
+        this.advance();
+        return { kind: "StringLit", value: decodeString(tok.text), raw: tok.text, span: tok.span };
+      case "true":
+      case "false":
+        this.advance();
+        return { kind: "BooleanLit", value: tok.kind === "true", span: tok.span };
+      case "null":
+        this.advance();
+        return { kind: "NullLit", span: tok.span };
+      case "identifier":
+        return this.parseIdentifier();
+      case "lparen":
+        return this.parseParen();
+      default:
+        return this.parseErrorPrimary();
+    }
+  }
+
+  private parseIdentifier(): Expr {
+    const first = this.current();
+    // A bare (non-global) identifier immediately followed by `(` is a call.
+    if (!first.text.startsWith("$") && this.peek().kind === "lparen") {
+      return this.parseCall();
+    }
+    return this.parseFieldRef();
+  }
+
+  private parseFieldRef(): FieldRef {
+    const first = this.advance();
+    const path = [first.text];
+    const isGlobal = first.text.startsWith("$");
+    let end = first.span.end;
+    while (this.current().kind === "dot") {
+      const dot = this.advance();
+      if (this.current().kind === "identifier") {
+        path.push(this.current().text);
+        end = this.current().span.end;
+        this.advance();
+      } else {
+        this.error("expected-field-name", dot.span, "Expected a field name after '.'.");
+        end = dot.span.end;
+        break;
+      }
+    }
+    return { kind: "FieldRef", path, isGlobal, span: span(first.span.start, end) };
+  }
+
+  private parseCall(): FunctionCall {
+    const calleeTok = this.advance(); // identifier
+    this.advance(); // `(`
+    const args: Expr[] = [];
+    while (this.current().kind !== "rparen" && this.current().kind !== "eof") {
+      args.push(this.parseExpr(0));
+      if (this.current().kind === "comma") {
+        this.advance();
+        continue;
+      }
+      if (this.current().kind === "rparen" || this.current().kind === "eof") break;
+      // Junk between arguments: report once, then resync to a separator.
+      this.error("unexpected-token", this.current().span, "Expected ',' or ')' in argument list.");
+      this.synchronizeArgs();
+      if (this.current().kind === "comma") this.advance();
+    }
+    let end: number;
+    if (this.current().kind === "rparen") {
+      end = this.advance().span.end;
+    } else {
+      const at = span(this.prevEnd(), this.prevEnd());
+      this.error("expected-closing-paren", at, "Expected ')' to close the function call.");
+      end = this.prevEnd();
+    }
+    return {
+      kind: "FunctionCall",
+      callee: calleeTok.text,
+      calleeSpan: calleeTok.span,
+      args,
+      span: span(calleeTok.span.start, end),
+    };
+  }
+
+  private parseParen(): Paren {
+    const open = this.advance(); // `(`
+    const inner = this.parseExpr(0);
+    let end: number;
+    if (this.current().kind === "rparen") {
+      end = this.advance().span.end;
+    } else {
+      const at = span(this.prevEnd(), this.prevEnd());
+      this.error("expected-closing-paren", at, "Expected ')' to close the group.");
+      end = inner.span.end;
+    }
+    return { kind: "Paren", expr: inner, span: span(open.span.start, end) };
+  }
+
+  private parseErrorPrimary(): Expr {
+    const tok = this.current();
+    const at = tok.kind === "eof" ? span(tok.span.start, tok.span.start) : tok.span;
+    this.error("expected-expression", at, "Expected an expression.");
+    // Consume the offending token unless it is a separator the caller needs to
+    // see (prevents infinite loops without swallowing structural tokens).
+    if (tok.kind !== "eof" && tok.kind !== "comma" && tok.kind !== "rparen") {
+      this.advance();
+    }
+    return { kind: "ErrorNode", span: at };
+  }
+
+  /** Skip tokens until a separator or end, for argument-list recovery. */
+  private synchronizeArgs(): void {
+    while (
+      this.current().kind !== "comma" &&
+      this.current().kind !== "rparen" &&
+      this.current().kind !== "eof"
+    ) {
+      this.advance();
+    }
+  }
+}
+
+/** Strip surrounding quotes and resolve backslash escapes. */
+function decodeString(raw: string): string {
+  if (raw.length === 0) return "";
+  const quote = raw[0]!;
+  let body = raw.slice(1);
+  if (body.length > 0 && body.endsWith(quote)) body = body.slice(0, -1);
+  let out = "";
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i]!;
+    if (ch === "\\" && i + 1 < body.length) {
+      const next = body[++i]!;
+      out += next === "n" ? "\n" : next === "t" ? "\t" : next === "r" ? "\r" : next;
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
