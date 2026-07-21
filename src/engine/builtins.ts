@@ -116,14 +116,14 @@ export const BUILTINS: Record<string, Builtin> = {
 
   // Text
   LEN: ([a]) => num(dstr(a!).length),
-  LEFT: ([a, n]) => text(dstr(a!).slice(0, Math.max(0, toInt(n!)))),
+  LEFT: ([a, n]) => textOrBlank(dstr(a!).slice(0, Math.max(0, toInt(n!)))),
   RIGHT: ([a, n]) => {
     const k = toInt(n!);
-    return text(k <= 0 ? "" : dstr(a!).slice(-k));
+    return textOrBlank(k <= 0 ? "" : dstr(a!).slice(-k));
   },
   MID: ([a, start, len]) => {
     const from = Math.max(0, toInt(start!) - 1);
-    return text(dstr(a!).slice(from, from + Math.max(0, toInt(len!))));
+    return textOrBlank(dstr(a!).slice(from, from + Math.max(0, toInt(len!))));
   },
   TRIM: ([a]) => text(dstr(a!).trim()),
   UPPER: ([a]) => text(dstr(a!).toUpperCase()),
@@ -148,16 +148,18 @@ export const BUILTINS: Record<string, Builtin> = {
 
   // Math
   ABS: ([a]) => num(dnum(a!).abs()),
-  ROUND: ([a, digits]) => num(dnum(a!).toDecimalPlaces(toInt(digits!))),
+  ROUND: ([a, digits]) => num(roundTo(dnum(a!), toInt(digits!))),
   FLOOR: ([a]) => num(dnum(a!).floor()),
   CEILING: ([a]) => num(dnum(a!).ceil()),
   MOD: ([a, b]) => {
     const d = dnum(b!);
-    return d.isZero() ? num(dnum(a!)) : num(dnum(a!).mod(d));
+    // Salesforce MOD(x, 0) is a runtime error (not x), verified against the oracle.
+    return d.isZero() ? error("#Error! (MOD by zero)") : num(dnum(a!).mod(d));
   },
   SQRT: ([a]) => {
     const d = dnum(a!);
-    return d.isNegative() ? error("#Error! (SQRT of negative)") : num(d.sqrt());
+    // Salesforce computes SQRT at double precision (SQRT(2) = 1.4142135623730951).
+    return d.isNegative() ? error("#Error! (SQRT of negative)") : num(new Decimal(Math.sqrt(d.toNumber())));
   },
   MAX: (args) => num(Decimal.max(...args.map(dnum))),
   MIN: (args) => num(Decimal.min(...args.map(dnum))),
@@ -222,6 +224,18 @@ export const SPECIAL_FORMS: Record<string, SpecialForm> = {
 
 function toInt(v: SfValue): number {
   return dnum(v).toNumber();
+}
+
+/** Salesforce text functions return blank, not empty string, for an empty result. */
+function textOrBlank(s: string): SfValue {
+  return s === "" ? blank("Text") : text(s);
+}
+
+/** ROUND with round-half-up, supporting negative digits (round left of the point). */
+function roundTo(d: Decimal, digits: number): Decimal {
+  if (digits >= 0) {return d.toDecimalPlaces(digits);}
+  const factor = new Decimal(10).pow(-digits);
+  return d.div(factor).toDecimalPlaces(0).times(factor);
 }
 
 function isParsableNumber(s: string): boolean {

@@ -36,7 +36,9 @@ export function buildFieldValue(type: SfType, raw: string, isBlank: boolean): Sf
     case "Currency":
     case "Percent":
       try {
-        return { type, blank: false, data: new Decimal(raw === "" ? 0 : raw) };
+        // A Percent field's arithmetic value is the entered value / 100 (99% → 0.99).
+        const d = new Decimal(raw === "" ? 0 : raw);
+        return { type, blank: false, data: type === "Percent" ? d.div(100) : d };
       } catch {
         return blank(type);
       }

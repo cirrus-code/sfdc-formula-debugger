@@ -10,10 +10,10 @@ import { runRow, type RowStatus } from "./conformance.ts";
  * that should only ever move up.
  */
 
-// Locked baseline: raise as the evaluator improves, never lower silently. The
-// gap to 100% is catalogued in VERIFICATION.md (numeric scale, Percent handling,
-// blank propagation) and awaits org/oracle verification before fixes land.
-const BASELINE = 0.73;
+// Locked baseline: raise as the evaluator improves, never lower silently. Rules
+// verified via the WS3 JVM oracle (oracle/) lifted this from 0.74 → 0.86; the
+// remaining gap (date rendering, FLOOR/CEIL+ROUND nuances) is in VERIFICATION.md.
+const BASELINE = 0.85;
 
 const rows: CorpusRow[] = JSON.parse(readFileSync("corpus/salesforce-v2.json", "utf8"));
 

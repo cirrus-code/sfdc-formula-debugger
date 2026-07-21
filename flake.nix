@@ -30,6 +30,14 @@
           CHROMIUM_BIN = "${pkgs.chromium}/bin/chromium";
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1";
         };
+
+        # Toolchain for the JVM conformance oracle harness (oracle/README.md).
+        devShells.oracle = pkgs.mkShell {
+          packages = with pkgs; [
+            jdk21
+            maven
+          ];
+        };
       };
     };
 }

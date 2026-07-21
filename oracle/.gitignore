@@ -1,0 +1,6 @@
+# The formula-engine source is fetched on demand, not vendored (see README.md).
+formula-engine/
+# Maven build output and the local repo used for the from-source install.
+target/
+.m2repo/
+cp.txt

@@ -118,6 +118,15 @@ function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
   }
 }
 
+// Salesforce caps arithmetic results at 32 decimal places, rounding per operation
+// (round-half-up), verified against its open-source engine: 1/3 →
+// 0.333…(32 places), (1/3)*(1/3) → 0.111…(32 places). See CONFORMANCE.md.
+const MAX_SCALE = 32;
+
+function scaled(d: Decimal): SfValue {
+  return num(d.toDecimalPlaces(MAX_SCALE));
+}
+
 function arithmetic(op: "+" | "-" | "*" | "/" | "^", l: SfValue, r: SfValue, env: EvalEnv): EvalResult {
   // In "blank" mode, a blank numeric operand makes the whole result blank.
   if (env.blankMode === "blank" && ((isNumericType(l) && l.blank) || (isNumericType(r) && r.blank))) {
@@ -127,16 +136,18 @@ function arithmetic(op: "+" | "-" | "*" | "/" | "^", l: SfValue, r: SfValue, env
   const b = toDecimal(r, env);
   switch (op) {
     case "+":
-      return num(a.plus(b));
+      return scaled(a.plus(b));
     case "-":
-      return num(a.minus(b));
+      return scaled(a.minus(b));
     case "*":
-      return num(a.times(b));
+      return scaled(a.times(b));
     case "/":
       if (b.isZero()) {return error("#Error! (division by zero)");}
-      return num(a.div(b));
+      return scaled(a.div(b));
     case "^":
-      return num(a.pow(b));
+      // Salesforce's `^` rejects non-integer exponents (use SQRT for roots).
+      if (!b.isInteger()) {return error("#Error! (^ requires an integer exponent)");}
+      return scaled(a.pow(b));
     default:
       return assertNever(op);
   }

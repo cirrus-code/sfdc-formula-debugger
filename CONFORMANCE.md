@@ -102,16 +102,20 @@ Write a **Node XML extractor** → `corpus/salesforce-v2/*.json`, taking the Jav
 `formula`/`formulaNullAsNull` expected values (faithful for div-by-zero).
 Secondary: 113 legacy fixture files (rounding/date edge cases).
 
-### WS3 — JVM oracle harness *(Phase 3 / 5, offline)*
-A small Maven module (`oracle/`) depending on `formula-engine-{api,impl,test-utils}`,
-**reusing test-utils' `MockFormulaContext`/`BeanFormulaContext`** to avoid
-bootstrapping hooks from scratch. Batch mode: read `(formula, context, fields,
-blankMode)` tuples → `create` + `evaluate` under both blank modes → emit JSON
-(value or typed error). Build **from source** (Maven Central lags: 0.9.4 vs
-0.9.13); pin a tag, vendor as a submodule. Nix: a separate `.#oracle` devShell
-with `jdk` + `maven` (GraalJS auto-included by their build) so the JS devShell
-stays lean; run `nix develop .#oracle -c mvn … exec:java`. Output committed to
-`corpus/`.
+### WS3 — JVM oracle harness ✅ *(built — `oracle/`)*
+Implemented: a Maven harness reusing test-utils' `MockLocalizerContext` +
+`MockFormulaContext`, driving `FormulaEngine.getFactory().create(...).evaluate(...)`
+— the faithful Java path. Reads `TYPE<TAB>FORMULA` probes, prints the oracle's
+result/error. formula-engine is built **from source** at the pinned tag `v0.9.13`
+(Maven Central lags); a `.#oracle` Nix devShell provides `jdk` + `maven`. See
+`oracle/README.md`.
+
+Used to derive and verify the numeric-scale, `^`, `SQRT`, `MOD`, `ROUND`,
+Percent, and case-sensitivity rules that lifted conformance **74% → 86%** (all
+recorded in VERIFICATION.md). Current scope evaluates constant expressions
+(blank fields), enough for the numeric/precision/error levers. Field-valued
+generation (`MapFormulaContext`) for full corpus regeneration and WS4 fuzzing is
+the next extension.
 
 ### WS4 — Differential fuzzing *("no excuse to be incorrect")*
 A grammar-driven random formula generator (derived from `Formula.g4`) feeds both

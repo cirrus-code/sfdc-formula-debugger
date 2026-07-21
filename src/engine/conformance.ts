@@ -7,7 +7,6 @@ import {
   bool,
   Decimal,
   isError,
-  num,
   text,
   UnsupportedError,
   asBool,
@@ -84,7 +83,10 @@ function buildField(f: CorpusField): SfValue {
     case "Currency":
     case "Percent":
       try {
-        return num(new Decimal(f.value));
+        // Salesforce uses a Percent field's value divided by 100 in arithmetic
+        // (a 99% field reads as 0.99). Verified against the oracle.
+        const d = new Decimal(f.value);
+        return { type: f.type, blank: false, data: f.type === "Percent" ? d.div(100) : d };
       } catch {
         throw new Unsupported(`unparsable number ${f.value}`);
       }
@@ -117,9 +119,11 @@ function compare(result: ReturnType<typeof evaluateFormula>, row: CorpusRow): Ro
   switch (row.dataType.toLowerCase()) {
     case "double":
     case "currency":
-    case "percent":
     case "number":
-      return numberCompare(result, expected);
+      return numberCompare(result, expected, false);
+    case "percent":
+      // A Percent-typed result renders as the internal value × 100.
+      return numberCompare(result, expected, true);
     case "boolean":
       return { status: matchBool(result, expected) ? "pass" : "fail", got: describe(result) };
     case "text":
@@ -131,7 +135,7 @@ function compare(result: ReturnType<typeof evaluateFormula>, row: CorpusRow): Ro
   }
 }
 
-function numberCompare(result: SfValue, expected: string): RowOutcome {
+function numberCompare(result: SfValue, expected: string, isPercent: boolean): RowOutcome {
   if (!isNumber(result)) {return { status: "fail", got: describe(result) };}
   let expectedDec: Decimal;
   try {
@@ -139,7 +143,8 @@ function numberCompare(result: SfValue, expected: string): RowOutcome {
   } catch {
     return { status: "quarantine" };
   }
-  return { status: asDecimal(result).equals(expectedDec) ? "pass" : "fail", got: asDecimal(result).toString() };
+  const actual = isPercent ? asDecimal(result).times(100) : asDecimal(result);
+  return { status: actual.equals(expectedDec) ? "pass" : "fail", got: actual.toString() };
 }
 
 function matchBool(result: SfValue, expected: string): boolean {

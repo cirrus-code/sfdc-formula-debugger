@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  WS3 JVM oracle harness (CONFORMANCE.md). Depends on Salesforce's own
+  formula-engine, built from source into the local Maven repo (see README.md).
+  Not part of the app build — a dev/offline tool for deriving verified behavior.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.salesforce.formuladebugger</groupId>
+  <artifactId>oracle-harness</artifactId>
+  <version>1.0.0</version>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <formula-engine.version>0.9.13</formula-engine.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.salesforce.formula</groupId>
+      <artifactId>formula-engine-api</artifactId>
+      <version>${formula-engine.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.salesforce.formula</groupId>
+      <artifactId>formula-engine-impl</artifactId>
+      <version>${formula-engine.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.salesforce.formula</groupId>
+      <artifactId>formula-engine-test-utils</artifactId>
+      <version>${formula-engine.version}</version>
+    </dependency>
+  </dependencies>
+</project>
