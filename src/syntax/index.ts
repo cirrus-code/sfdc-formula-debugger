@@ -5,4 +5,7 @@
  * specific functions (names are just identifiers at parse time). Lexing never
  * fails; parsing recovers and always returns `{ ast, diagnostics[] }`.
  */
-export {};
+export * from "./span.ts";
+export * from "./diagnostic.ts";
+export * from "./token.ts";
+export { lex } from "./lexer.ts";
