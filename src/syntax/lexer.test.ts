@@ -126,9 +126,22 @@ describe("lexer: strings", () => {
 describe("lexer: operators", () => {
   it("lexes multi-character operators greedily", () => {
     expect(kinds("<> <= >= == != = < > + - * / ^ &")).toEqual(
-      ["<>", "<=", ">=", "==", "!=", "=", "<", ">", "+", "-", "*", "/", "^", "&"].map(
-        (t) => ["operator", t] as [TokenKind, string],
-      ),
+      [
+        "<>",
+        "<=",
+        ">=",
+        "==",
+        "!=",
+        "=",
+        "<",
+        ">",
+        "+",
+        "-",
+        "*",
+        "/",
+        "^",
+        "&",
+      ].map((t) => ["operator", t] as [TokenKind, string]),
     );
   });
 
@@ -153,7 +166,10 @@ describe("lexer: trivia and comments", () => {
     expect(diagnostics).toHaveLength(0);
     const num = tokens[0]!;
     expect(num.kind).toBe("number");
-    expect(num.leadingTrivia.map((t) => t.kind)).toEqual(["comment", "whitespace"]);
+    expect(num.leadingTrivia.map((t) => t.kind)).toEqual([
+      "comment",
+      "whitespace",
+    ]);
     expect(num.leadingTrivia[0]!.text).toBe("/* note */");
   });
 
@@ -161,7 +177,10 @@ describe("lexer: trivia and comments", () => {
     const { tokens } = lex("1 /* end */");
     const eof = tokens.at(-1)!;
     expect(eof.kind).toBe("eof");
-    expect(eof.leadingTrivia.map((t) => t.kind)).toEqual(["whitespace", "comment"]);
+    expect(eof.leadingTrivia.map((t) => t.kind)).toEqual([
+      "whitespace",
+      "comment",
+    ]);
   });
 
   it("reports an unterminated comment", () => {
@@ -210,9 +229,12 @@ describe("lexer: properties", () => {
       "Null_Check__c",
     );
     fc.assert(
-      fc.property(fc.array(piece).map((ps) => ps.join("")), (source) => {
-        expect(tokensToSource(lex(source).tokens)).toBe(source);
-      }),
+      fc.property(
+        fc.array(piece).map((ps) => ps.join("")),
+        (source) => {
+          expect(tokensToSource(lex(source).tokens)).toBe(source);
+        },
+      ),
     );
   });
 

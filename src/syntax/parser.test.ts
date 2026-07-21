@@ -20,9 +20,19 @@ function expectClean(source: string): Expr {
 describe("parser: literals", () => {
   it("parses each literal kind", () => {
     expect(expectClean("42")).toMatchObject({ kind: "NumberLit", raw: "42" });
-    expect(expectClean('"hi"')).toMatchObject({ kind: "StringLit", value: "hi", raw: '"hi"' });
-    expect(expectClean("TRUE")).toMatchObject({ kind: "BooleanLit", value: true });
-    expect(expectClean("false")).toMatchObject({ kind: "BooleanLit", value: false });
+    expect(expectClean('"hi"')).toMatchObject({
+      kind: "StringLit",
+      value: "hi",
+      raw: '"hi"',
+    });
+    expect(expectClean("TRUE")).toMatchObject({
+      kind: "BooleanLit",
+      value: true,
+    });
+    expect(expectClean("false")).toMatchObject({
+      kind: "BooleanLit",
+      value: false,
+    });
     expect(expectClean("NULL")).toMatchObject({ kind: "NullLit" });
   });
 
@@ -39,7 +49,11 @@ describe("parser: literals", () => {
 
 describe("parser: field references", () => {
   it("parses a plain field", () => {
-    expect(expectClean("Amount")).toMatchObject({ kind: "FieldRef", path: ["Amount"], isGlobal: false });
+    expect(expectClean("Amount")).toMatchObject({
+      kind: "FieldRef",
+      path: ["Amount"],
+      isGlobal: false,
+    });
   });
 
   it("parses a dotted cross-object path as one flat reference", () => {
@@ -59,7 +73,10 @@ describe("parser: field references", () => {
   });
 
   it("parses keyword-prefixed identifiers as fields", () => {
-    expect(expectClean("Null_Check__c")).toMatchObject({ kind: "FieldRef", path: ["Null_Check__c"] });
+    expect(expectClean("Null_Check__c")).toMatchObject({
+      kind: "FieldRef",
+      path: ["Null_Check__c"],
+    });
   });
 });
 
@@ -72,7 +89,11 @@ describe("parser: function calls", () => {
   });
 
   it("parses a zero-argument call", () => {
-    expect(expectClean("TODAY()")).toMatchObject({ kind: "FunctionCall", callee: "TODAY", args: [] });
+    expect(expectClean("TODAY()")).toMatchObject({
+      kind: "FunctionCall",
+      callee: "TODAY",
+      args: [],
+    });
   });
 
   it("parses nested calls", () => {
@@ -136,7 +157,18 @@ describe("parser: operators and precedence", () => {
 
 describe("parser: error recovery", () => {
   it("never throws and always returns an AST", () => {
-    for (const src of ["", "(", ")", "IF(", ",", "1 +", "@", "1 2 3", "a.", "* 5"]) {
+    for (const src of [
+      "",
+      "(",
+      ")",
+      "IF(",
+      ",",
+      "1 +",
+      "@",
+      "1 2 3",
+      "a.",
+      "* 5",
+    ]) {
       expect(() => parse(src)).not.toThrow();
       expect(parse(src).ast).toBeTruthy();
     }
@@ -205,14 +237,37 @@ describe("parser: properties", () => {
 
   it("never throws on formula-shaped input and always yields an AST", () => {
     const piece = fc.constantFrom(
-      "IF", "AND", "(", ")", ",", "x", "Account.Name", "$User.Id",
-      "1", "2.5", '"s"', "+", "-", "*", "/", "&", "=", "<>", "^", " ", "TRUE", "NULL",
+      "IF",
+      "AND",
+      "(",
+      ")",
+      ",",
+      "x",
+      "Account.Name",
+      "$User.Id",
+      "1",
+      "2.5",
+      '"s"',
+      "+",
+      "-",
+      "*",
+      "/",
+      "&",
+      "=",
+      "<>",
+      "^",
+      " ",
+      "TRUE",
+      "NULL",
     );
     fc.assert(
-      fc.property(fc.array(piece).map((ps) => ps.join("")), (source) => {
-        const r = parse(source);
-        expect(r.ast).toBeTruthy();
-      }),
+      fc.property(
+        fc.array(piece).map((ps) => ps.join("")),
+        (source) => {
+          const r = parse(source);
+          expect(r.ast).toBeTruthy();
+        },
+      ),
     );
   });
 });

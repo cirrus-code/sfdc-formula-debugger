@@ -19,7 +19,11 @@ import {
 
 export type Builtin = (args: SfValue[], env: EvalEnv) => EvalResult;
 export type Evaluate = (node: Expr, env: EvalEnv) => EvalResult;
-export type SpecialForm = (args: readonly Expr[], env: EvalEnv, evaluate: Evaluate) => EvalResult;
+export type SpecialForm = (
+  args: readonly Expr[],
+  env: EvalEnv,
+  evaluate: Evaluate,
+) => EvalResult;
 
 // --- Coercion helpers ----------------------------------------------------
 
@@ -32,19 +36,30 @@ function dnum(v: SfValue): Decimal {
 
 /** Text input: a blank reads as empty string. */
 function dstr(v: SfValue): string {
-  if (v.blank) {return "";}
+  if (v.blank) {
+    return "";
+  }
   return isTextType(v) ? asText(v) : concatString(v);
 }
 
 /** Boolean input: a null checkbox reads as false (DESIGN §Salesforce semantics). */
 function boolCoerce(v: SfValue): boolean {
-  if (v.blank) {return false;}
-  if (v.type === "Boolean") {return v.data;}
+  if (v.blank) {
+    return false;
+  }
+  if (v.type === "Boolean") {
+    return v.data;
+  }
   throw new Error(`Expected a boolean, got ${v.type}`);
 }
 
 function isTextType(v: SfValue): boolean {
-  return v.type === "Text" || v.type === "Id" || v.type === "Picklist" || v.type === "Multipicklist";
+  return (
+    v.type === "Text" ||
+    v.type === "Id" ||
+    v.type === "Picklist" ||
+    v.type === "Multipicklist"
+  );
 }
 
 function isBlankText(v: SfValue): boolean {
@@ -53,7 +68,9 @@ function isBlankText(v: SfValue): boolean {
 
 /** Render a value for `&`/CONCATENATE (blank concatenates as empty). */
 export function concatString(v: SfValue): string {
-  if (v.blank) {return "";}
+  if (v.blank) {
+    return "";
+  }
   switch (v.type) {
     case "Text":
     case "Id":
@@ -84,11 +101,18 @@ function isLeap(y: number): boolean {
 }
 
 function daysInMonth(y: number, m: number): number {
-  return [31, isLeap(y) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1]!;
+  return [31, isLeap(y) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][
+    m - 1
+  ]!;
 }
 
 function isValidDate(p: DateParts): boolean {
-  return p.month >= 1 && p.month <= 12 && p.day >= 1 && p.day <= daysInMonth(p.year, p.month);
+  return (
+    p.month >= 1 &&
+    p.month <= 12 &&
+    p.day >= 1 &&
+    p.day <= daysInMonth(p.year, p.month)
+  );
 }
 
 function formatDate(p: DateParts): string {
@@ -99,7 +123,11 @@ function formatDate(p: DateParts): string {
 
 function dateFromEpoch(ms: number): DateParts {
   const d = new Date(ms);
-  return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() };
+  return {
+    year: d.getUTCFullYear(),
+    month: d.getUTCMonth() + 1,
+    day: d.getUTCDate(),
+  };
 }
 
 // --- Function table ------------------------------------------------------
@@ -143,7 +171,9 @@ export const BUILTINS: Record<string, Builtin> = {
   TEXT: ([a]) => text(concatString(a!)),
   VALUE: ([a]) => {
     const s = dstr(a!).trim();
-    return isParsableNumber(s) ? num(new Decimal(s)) : error("#Error! (VALUE: not a number)");
+    return isParsableNumber(s)
+      ? num(new Decimal(s))
+      : error("#Error! (VALUE: not a number)");
   },
 
   // Math
@@ -159,18 +189,26 @@ export const BUILTINS: Record<string, Builtin> = {
   SQRT: ([a]) => {
     const d = dnum(a!);
     // Salesforce computes SQRT at double precision (SQRT(2) = 1.4142135623730951).
-    return d.isNegative() ? error("#Error! (SQRT of negative)") : num(new Decimal(Math.sqrt(d.toNumber())));
+    return d.isNegative()
+      ? error("#Error! (SQRT of negative)")
+      : num(new Decimal(Math.sqrt(d.toNumber())));
   },
   MAX: (args) => num(Decimal.max(...args.map(dnum))),
   MIN: (args) => num(Decimal.min(...args.map(dnum))),
   POWER: ([a, b]) => num(dnum(a!).pow(dnum(b!))),
 
   // Date & time
-  TODAY: (_args, env) => (env.now ? dateValue(dateFromEpoch(env.now.epochMillis)) : error("#Error! (no clock)")),
-  NOW: (_args, env) => (env.now ? datetimeValue(env.now.epochMillis) : error("#Error! (no clock)")),
+  TODAY: (_args, env) =>
+    env.now
+      ? dateValue(dateFromEpoch(env.now.epochMillis))
+      : error("#Error! (no clock)"),
+  NOW: (_args, env) =>
+    env.now ? datetimeValue(env.now.epochMillis) : error("#Error! (no clock)"),
   DATE: ([y, m, d]) => {
     const parts = { year: toInt(y!), month: toInt(m!), day: toInt(d!) };
-    return isValidDate(parts) ? dateValue(parts) : error("#Error! (invalid date)");
+    return isValidDate(parts)
+      ? dateValue(parts)
+      : error("#Error! (invalid date)");
   },
   DATEVALUE: ([a]) => parseDate(dstr(a!)),
   YEAR: ([a]) => dateField(a!, (p) => p.year),
@@ -178,42 +216,64 @@ export const BUILTINS: Record<string, Builtin> = {
   DAY: ([a]) => dateField(a!, (p) => p.day),
   ADDMONTHS: ([a, n]) => {
     const p = datePartsOf(a!);
-    return p ? dateValue(addMonths(p, toInt(n!))) : error("#Error! (ADDMONTHS: not a date)");
+    return p
+      ? dateValue(addMonths(p, toInt(n!)))
+      : error("#Error! (ADDMONTHS: not a date)");
   },
 };
 
 export const SPECIAL_FORMS: Record<string, SpecialForm> = {
   IF: (args, env, evaluate) => {
-    if (args.length < 3) {return error("#Error! (IF needs 3 arguments)");}
+    if (args.length < 3) {
+      return error("#Error! (IF needs 3 arguments)");
+    }
     const cond = evaluate(args[0]!, env);
-    if (isError(cond)) {return cond;}
+    if (isError(cond)) {
+      return cond;
+    }
     return evaluate(boolCoerce(cond) ? args[1]! : args[2]!, env);
   },
   AND: (args, env, evaluate) => {
     for (const argNode of args) {
       const v = evaluate(argNode, env);
-      if (isError(v)) {return v;}
-      if (!boolCoerce(v)) {return bool(false);}
+      if (isError(v)) {
+        return v;
+      }
+      if (!boolCoerce(v)) {
+        return bool(false);
+      }
     }
     return bool(true);
   },
   OR: (args, env, evaluate) => {
     for (const argNode of args) {
       const v = evaluate(argNode, env);
-      if (isError(v)) {return v;}
-      if (boolCoerce(v)) {return bool(true);}
+      if (isError(v)) {
+        return v;
+      }
+      if (boolCoerce(v)) {
+        return bool(true);
+      }
     }
     return bool(false);
   },
   CASE: (args, env, evaluate) => {
-    if (args.length < 1) {return error("#Error! (CASE needs arguments)");}
+    if (args.length < 1) {
+      return error("#Error! (CASE needs arguments)");
+    }
     const subject = evaluate(args[0]!, env);
-    if (isError(subject)) {return subject;}
+    if (isError(subject)) {
+      return subject;
+    }
     let i = 1;
     for (; i + 1 < args.length; i += 2) {
       const when = evaluate(args[i]!, env);
-      if (isError(when)) {return when;}
-      if (caseEqual(subject, when)) {return evaluate(args[i + 1]!, env);}
+      if (isError(when)) {
+        return when;
+      }
+      if (caseEqual(subject, when)) {
+        return evaluate(args[i + 1]!, env);
+      }
     }
     // Trailing argument is the else value; if absent, blank.
     return i < args.length ? evaluate(args[i]!, env) : blank("Unknown");
@@ -233,13 +293,17 @@ function textOrBlank(s: string): SfValue {
 
 /** ROUND with round-half-up, supporting negative digits (round left of the point). */
 function roundTo(d: Decimal, digits: number): Decimal {
-  if (digits >= 0) {return d.toDecimalPlaces(digits);}
+  if (digits >= 0) {
+    return d.toDecimalPlaces(digits);
+  }
   const factor = new Decimal(10).pow(-digits);
   return d.div(factor).toDecimalPlaces(0).times(factor);
 }
 
 function isParsableNumber(s: string): boolean {
-  if (s.trim() === "") {return false;}
+  if (s.trim() === "") {
+    return false;
+  }
   try {
     void new Decimal(s.trim());
     return true;
@@ -249,18 +313,31 @@ function isParsableNumber(s: string): boolean {
 }
 
 function caseEqual(a: SfValue, b: SfValue): boolean {
-  if (a.blank || b.blank) {return a.blank && b.blank;}
-  if (!a.blank && !b.blank && a.type === "Boolean" && b.type === "Boolean") {return a.data === b.data;}
-  if ((a.type === "Number" || a.type === "Currency" || a.type === "Percent") && !b.blank) {
+  if (a.blank || b.blank) {
+    return a.blank && b.blank;
+  }
+  if (!a.blank && !b.blank && a.type === "Boolean" && b.type === "Boolean") {
+    return a.data === b.data;
+  }
+  if (
+    (a.type === "Number" || a.type === "Currency" || a.type === "Percent") &&
+    !b.blank
+  ) {
     return asDecimal(a).equals(dnum(b));
   }
   return concatString(a) === concatString(b);
 }
 
 function datePartsOf(v: SfValue): DateParts | null {
-  if (v.blank) {return null;}
-  if (v.type === "Date") {return v.data;}
-  if (v.type === "Datetime") {return dateFromEpoch(v.data.epochMillis);}
+  if (v.blank) {
+    return null;
+  }
+  if (v.type === "Date") {
+    return v.data;
+  }
+  if (v.type === "Datetime") {
+    return dateFromEpoch(v.data.epochMillis);
+  }
   return null;
 }
 
@@ -271,9 +348,13 @@ function dateField(v: SfValue, pick: (p: DateParts) => number): EvalResult {
 
 function parseDate(s: string): EvalResult {
   const m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s.trim());
-  if (!m) {return error("#Error! (DATEVALUE: cannot parse)");}
+  if (!m) {
+    return error("#Error! (DATEVALUE: cannot parse)");
+  }
   const parts = { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]) };
-  return isValidDate(parts) ? dateValue(parts) : error("#Error! (DATEVALUE: invalid date)");
+  return isValidDate(parts)
+    ? dateValue(parts)
+    : error("#Error! (DATEVALUE: invalid date)");
 }
 
 function addMonths(p: DateParts, n: number): DateParts {

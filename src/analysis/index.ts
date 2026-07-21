@@ -18,7 +18,12 @@ export * from "./types.ts";
  * (types, arity, availability, return type) — and return all findings in source
  * order. The single entry point for both the editor linter and the UI panel.
  */
-export function diagnose(source: string, contextId: string): readonly Diagnostic[] {
+export function diagnose(
+  source: string,
+  contextId: string,
+): readonly Diagnostic[] {
   const { ast, diagnostics } = parse(source);
-  return [...diagnostics, ...analyze(ast, contextId)].sort((a, b) => a.span.start - b.span.start);
+  return [...diagnostics, ...analyze(ast, contextId)].sort(
+    (a, b) => a.span.start - b.span.start,
+  );
 }

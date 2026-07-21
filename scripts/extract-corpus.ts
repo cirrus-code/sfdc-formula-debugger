@@ -20,7 +20,8 @@ const PROVENANCE = "salesforce/formula-engine formulaTestV2.xml";
 const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: "@_",
-  isArray: (name) => name === "testcase" || name === "referenceField" || name === "testData",
+  isArray: (name) =>
+    name === "testcase" || name === "referenceField" || name === "testData",
 });
 
 interface RawTestcase {
@@ -35,7 +36,9 @@ interface RawTestcase {
 /** Decode XML entities the parser leaves encoded (notably numeric refs like &#34;). */
 function decodeEntities(s: string): string {
   return s
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) =>
+      String.fromCodePoint(parseInt(h, 16)),
+    )
     .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)))
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
@@ -53,7 +56,12 @@ const doc = parser.parse(xml);
 const testcases: RawTestcase[] = doc["formula-test"].testcase ?? [];
 
 const rows: CorpusRow[] = [];
-const stats = { testcases: testcases.length, dataRows: 0, emitted: 0, skippedShape: 0 };
+const stats = {
+  testcases: testcases.length,
+  dataRows: 0,
+  emitted: 0,
+  skippedShape: 0,
+};
 
 for (const tc of testcases) {
   const paths = tc["@_executionPaths"].split(",").map((p) => p.trim());
@@ -68,7 +76,8 @@ for (const tc of testcases) {
       stats.skippedShape += 1;
       continue;
     }
-    const inputs = td["@_input"] !== undefined ? splitValues(td["@_input"]) : [];
+    const inputs =
+      td["@_input"] !== undefined ? splitValues(td["@_input"]) : [];
     if (refFields.length > 0 && inputs.length !== refFields.length) {
       stats.skippedShape += 1;
       continue;
@@ -84,7 +93,9 @@ for (const tc of testcases) {
       ["zero", zeroIdx],
       ["blank", blankIdx],
     ] as const) {
-      if (idx < 0) {continue;}
+      if (idx < 0) {
+        continue;
+      }
       rows.push({
         source: PROVENANCE,
         name: tc["@_testName"],

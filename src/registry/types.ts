@@ -38,7 +38,8 @@ export interface ParamSpec {
  * How a function's return type is determined: a fixed type, or a rule such as
  * "same as argument N" (e.g. `IF`, `MAX`).
  */
-export type TypeRule = { kind: "fixed"; type: SfType } | { kind: "sameAsArg"; index: number };
+export type TypeRule =
+  { kind: "fixed"; type: SfType } | { kind: "sameAsArg"; index: number };
 
 export interface LintNote {
   readonly id: string;

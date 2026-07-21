@@ -66,7 +66,9 @@ export interface LexResult {
 export function tokensToSource(tokens: readonly Token[]): string {
   let out = "";
   for (const t of tokens) {
-    for (const tr of t.leadingTrivia) {out += tr.text;}
+    for (const tr of t.leadingTrivia) {
+      out += tr.text;
+    }
     out += t.text;
   }
   return out;

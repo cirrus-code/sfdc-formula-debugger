@@ -1,7 +1,12 @@
 import { useMemo, useState } from "react";
 import type { Expr } from "../../syntax/index.ts";
 import { extractFields } from "../../features/index.ts";
-import { evaluateFormula, UnsupportedError, type BlankMode, type SfValue } from "../../engine/index.ts";
+import {
+  evaluateFormula,
+  UnsupportedError,
+  type BlankMode,
+  type SfValue,
+} from "../../engine/index.ts";
 import type { SfType } from "../../registry/index.ts";
 import { palette, font } from "../../theme/theme.ts";
 import { buildFieldValue, FIELD_TYPES, renderResult } from "./fieldValue.ts";
@@ -27,22 +32,39 @@ export function SimulatePanel({ ast, blankToggle }: SimulatePanelProps) {
   const getInput = (name: string, inferred: SfType): FieldInput =>
     inputs[name] ?? { type: inferred, value: "", blank: false };
 
-  const update = (name: string, inferred: SfType, patch: Partial<FieldInput>): void => {
-    setInputs((prev) => ({ ...prev, [name]: { ...getInput(name, inferred), ...patch } }));
+  const update = (
+    name: string,
+    inferred: SfType,
+    patch: Partial<FieldInput>,
+  ): void => {
+    setInputs((prev) => ({
+      ...prev,
+      [name]: { ...getInput(name, inferred), ...patch },
+    }));
   };
 
   const outcome = useMemo(() => {
     const map = new Map<string, SfValue>();
     for (const f of fields) {
-      const input = inputs[f.name] ?? { type: f.inferredType, value: "", blank: false };
+      const input = inputs[f.name] ?? {
+        type: f.inferredType,
+        value: "",
+        blank: false,
+      };
       map.set(f.name, buildFieldValue(input.type, input.value, input.blank));
     }
     try {
-      return { result: renderResult(evaluateFormula(ast, { fields: map, blankMode, now })) };
+      return {
+        result: renderResult(
+          evaluateFormula(ast, { fields: map, blankMode, now }),
+        ),
+      };
     } catch (e) {
       // evaluateFormula only throws UnsupportedError; anything else already
       // degraded to #Error inside it.
-      if (e instanceof UnsupportedError) {return { unsupported: e.functionName };}
+      if (e instanceof UnsupportedError) {
+        return { unsupported: e.functionName };
+      }
       return { result: "#Error!" };
     }
   }, [ast, fields, inputs, blankMode, now]);
@@ -52,7 +74,15 @@ export function SimulatePanel({ ast, blankToggle }: SimulatePanelProps) {
       <div style={headerStyle}>
         <span style={{ fontWeight: 600 }}>Simulate</span>
         {blankToggle ? (
-          <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", color: palette.textMuted, fontSize: "0.78rem" }}>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              color: palette.textMuted,
+              fontSize: "0.78rem",
+            }}
+          >
             Blank fields as
             <select
               value={blankMode}
@@ -67,19 +97,38 @@ export function SimulatePanel({ ast, blankToggle }: SimulatePanelProps) {
       </div>
 
       {fields.length === 0 ? (
-        <p style={{ padding: "0.7rem 1rem", color: palette.textMuted, fontSize: "0.85rem" }}>No fields referenced.</p>
+        <p
+          style={{
+            padding: "0.7rem 1rem",
+            color: palette.textMuted,
+            fontSize: "0.85rem",
+          }}
+        >
+          No fields referenced.
+        </p>
       ) : (
         <div style={{ padding: "0.4rem 0" }}>
           {fields.map((f) => {
             const input = getInput(f.name, f.inferredType);
             return (
               <div key={f.name} style={rowStyle}>
-                <code style={{ fontFamily: font.mono, fontSize: "0.82rem", color: palette.accent, minWidth: "9rem" }}>
+                <code
+                  style={{
+                    fontFamily: font.mono,
+                    fontSize: "0.82rem",
+                    color: palette.accent,
+                    minWidth: "9rem",
+                  }}
+                >
                   {f.name}
                 </code>
                 <select
                   value={input.type}
-                  onChange={(e) => update(f.name, f.inferredType, { type: e.target.value as SfType })}
+                  onChange={(e) =>
+                    update(f.name, f.inferredType, {
+                      type: e.target.value as SfType,
+                    })
+                  }
                   style={selectStyle}
                 >
                   {FIELD_TYPES.map((t) => (
@@ -88,12 +137,27 @@ export function SimulatePanel({ ast, blankToggle }: SimulatePanelProps) {
                     </option>
                   ))}
                 </select>
-                <FieldWidget input={input} onChange={(patch) => update(f.name, f.inferredType, patch)} />
-                <label style={{ display: "flex", alignItems: "center", gap: "0.3rem", color: palette.textMuted, fontSize: "0.75rem" }}>
+                <FieldWidget
+                  input={input}
+                  onChange={(patch) => update(f.name, f.inferredType, patch)}
+                />
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.3rem",
+                    color: palette.textMuted,
+                    fontSize: "0.75rem",
+                  }}
+                >
                   <input
                     type="checkbox"
                     checked={input.blank}
-                    onChange={(e) => update(f.name, f.inferredType, { blank: e.target.checked })}
+                    onChange={(e) =>
+                      update(f.name, f.inferredType, {
+                        blank: e.target.checked,
+                      })
+                    }
                   />
                   blank
                 </label>
@@ -108,14 +172,38 @@ export function SimulatePanel({ ast, blankToggle }: SimulatePanelProps) {
   );
 }
 
-function FieldWidget({ input, onChange }: { input: FieldInput; onChange: (patch: Partial<FieldInput>) => void }) {
+function FieldWidget({
+  input,
+  onChange,
+}: {
+  input: FieldInput;
+  onChange: (patch: Partial<FieldInput>) => void;
+}) {
   if (input.blank) {
-    return <span style={{ flex: 1, color: palette.textMuted, fontSize: "0.8rem" }}>null</span>;
+    return (
+      <span style={{ flex: 1, color: palette.textMuted, fontSize: "0.8rem" }}>
+        null
+      </span>
+    );
   }
   if (input.type === "Boolean") {
     return (
-      <label style={{ flex: 1, display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.82rem" }}>
-        <input type="checkbox" checked={input.value === "true"} onChange={(e) => onChange({ value: e.target.checked ? "true" : "false" })} />
+      <label
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          gap: "0.35rem",
+          fontSize: "0.82rem",
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={input.value === "true"}
+          onChange={(e) =>
+            onChange({ value: e.target.checked ? "true" : "false" })
+          }
+        />
         {input.value === "true" ? "TRUE" : "FALSE"}
       </label>
     );
@@ -124,7 +212,13 @@ function FieldWidget({ input, onChange }: { input: FieldInput; onChange: (patch:
     <input
       type={input.type === "Date" ? "date" : "text"}
       value={input.value}
-      inputMode={input.type === "Number" || input.type === "Currency" || input.type === "Percent" ? "decimal" : undefined}
+      inputMode={
+        input.type === "Number" ||
+        input.type === "Currency" ||
+        input.type === "Percent"
+          ? "decimal"
+          : undefined
+      }
       placeholder={input.type === "Date" ? "" : "value"}
       onChange={(e) => onChange({ value: e.target.value })}
       style={inputStyle}
@@ -132,26 +226,63 @@ function FieldWidget({ input, onChange }: { input: FieldInput; onChange: (patch:
   );
 }
 
-function resultLabel(outcome: { result?: string; unsupported?: string }): string {
-  if (outcome.unsupported) {return `Cannot simulate: ${outcome.unsupported} depends on org state`;}
-  if (outcome.result === "#Error!") {return "Salesforce would show #Error! here";}
+function resultLabel(outcome: {
+  result?: string;
+  unsupported?: string;
+}): string {
+  if (outcome.unsupported) {
+    return `Cannot simulate: ${outcome.unsupported} depends on org state`;
+  }
+  if (outcome.result === "#Error!") {
+    return "Salesforce would show #Error! here";
+  }
   return outcome.result ?? "";
 }
 
-function resultColor(outcome: { result?: string; unsupported?: string }): string {
-  if (outcome.unsupported) {return palette.textMuted;}
-  if (outcome.result === "#Error!") {return palette.danger;}
+function resultColor(outcome: {
+  result?: string;
+  unsupported?: string;
+}): string {
+  if (outcome.unsupported) {
+    return palette.textMuted;
+  }
+  if (outcome.result === "#Error!") {
+    return palette.danger;
+  }
   return palette.text;
 }
 
-function ResultBar({ outcome }: { outcome: { result?: string; unsupported?: string } }) {
+function ResultBar({
+  outcome,
+}: {
+  outcome: { result?: string; unsupported?: string };
+}) {
   const label = resultLabel(outcome);
   const color = resultColor(outcome);
 
   return (
-    <div style={{ borderTop: `1px solid ${palette.border}`, padding: "0.7rem 1rem", display: "flex", alignItems: "baseline", gap: "0.6rem" }}>
-      <span style={{ color: palette.textMuted, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Result</span>
-      <span style={{ fontFamily: font.mono, fontSize: "1rem", color }}>{label || "—"}</span>
+    <div
+      style={{
+        borderTop: `1px solid ${palette.border}`,
+        padding: "0.7rem 1rem",
+        display: "flex",
+        alignItems: "baseline",
+        gap: "0.6rem",
+      }}
+    >
+      <span
+        style={{
+          color: palette.textMuted,
+          fontSize: "0.75rem",
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+        }}
+      >
+        Result
+      </span>
+      <span style={{ fontFamily: font.mono, fontSize: "1rem", color }}>
+        {label || "—"}
+      </span>
     </div>
   );
 }

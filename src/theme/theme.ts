@@ -9,7 +9,8 @@
 
 export const product = {
   name: "Formula Debugger",
-  tagline: "Debug Salesforce formulas in your browser. Nothing leaves the page.",
+  tagline:
+    "Debug Salesforce formulas in your browser. Nothing leaves the page.",
   /** Marketing surface for the parent platform; link target TBD before launch. */
   platformUrl: null as string | null,
 } as const;

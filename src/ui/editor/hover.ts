@@ -38,9 +38,13 @@ function tooltipDom(spec: FunctionSpec): HTMLElement {
 /** Hover a function name to see its signature, summary, and docs link. */
 export const sfHover = hoverTooltip((view, pos): Tooltip | null => {
   const word = view.state.wordAt(pos);
-  if (!word) {return null;}
+  if (!word) {
+    return null;
+  }
   const spec = getFunction(view.state.sliceDoc(word.from, word.to));
-  if (!spec) {return null;}
+  if (!spec) {
+    return null;
+  }
   return {
     pos: word.from,
     end: word.to,

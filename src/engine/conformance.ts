@@ -38,7 +38,9 @@ export function runRow(row: CorpusRow): RowOutcome {
   try {
     ast = parse(row.formula).ast;
     assertSupportedFunctions(ast);
-    const fields = new Map<string, SfValue>(row.fields.map((f) => [f.name, buildField(f)]));
+    const fields = new Map<string, SfValue>(
+      row.fields.map((f) => [f.name, buildField(f)]),
+    );
     const result = evaluateFormula(ast, {
       fields,
       blankMode: row.blankMode,
@@ -46,7 +48,9 @@ export function runRow(row: CorpusRow): RowOutcome {
     });
     return compare(result, row);
   } catch (e) {
-    if (e instanceof Unsupported || e instanceof UnsupportedError) {return { status: "unsupported" };}
+    if (e instanceof Unsupported || e instanceof UnsupportedError) {
+      return { status: "unsupported" };
+    }
     throw e;
   }
 }
@@ -56,7 +60,9 @@ function assertSupportedFunctions(node: Expr): void {
   switch (node.kind) {
     case "FunctionCall": {
       const spec = getFunction(node.callee);
-      if (!spec || !spec.simulatable) {throw new Unsupported(node.callee);}
+      if (!spec || !spec.simulatable) {
+        throw new Unsupported(node.callee);
+      }
       node.args.forEach(assertSupportedFunctions);
       return;
     }
@@ -77,7 +83,9 @@ function assertSupportedFunctions(node: Expr): void {
 
 function buildField(f: CorpusField): SfValue {
   // An empty input cell means the field is left blank.
-  if (f.value === null || f.value === "") {return blank(f.type);}
+  if (f.value === null || f.value === "") {
+    return blank(f.type);
+  }
   switch (f.type) {
     case "Number":
     case "Currency":
@@ -86,7 +94,11 @@ function buildField(f: CorpusField): SfValue {
         // Salesforce uses a Percent field's value divided by 100 in arithmetic
         // (a 99% field reads as 0.99). Verified against the oracle.
         const d = new Decimal(f.value);
-        return { type: f.type, blank: false, data: f.type === "Percent" ? d.div(100) : d };
+        return {
+          type: f.type,
+          blank: false,
+          data: f.type === "Percent" ? d.div(100) : d,
+        };
       } catch {
         throw new Unsupported(`unparsable number ${f.value}`);
       }
@@ -103,7 +115,10 @@ function buildField(f: CorpusField): SfValue {
   }
 }
 
-function compare(result: ReturnType<typeof evaluateFormula>, row: CorpusRow): RowOutcome {
+function compare(
+  result: ReturnType<typeof evaluateFormula>,
+  row: CorpusRow,
+): RowOutcome {
   const expected = row.expected;
 
   if (expected.startsWith("Error:")) {
@@ -113,8 +128,12 @@ function compare(result: ReturnType<typeof evaluateFormula>, row: CorpusRow): Ro
     const isBlank = !isError(result) && result.blank;
     return { status: isBlank ? "pass" : "fail", got: describe(result) };
   }
-  if (isError(result)) {return { status: "fail", got: `#Error(${result.reason})` }; }
-  if (result.blank) {return { status: "fail", got: "blank" };}
+  if (isError(result)) {
+    return { status: "fail", got: `#Error(${result.reason})` };
+  }
+  if (result.blank) {
+    return { status: "fail", got: "blank" };
+  }
 
   switch (row.dataType.toLowerCase()) {
     case "double":
@@ -125,18 +144,30 @@ function compare(result: ReturnType<typeof evaluateFormula>, row: CorpusRow): Ro
       // A Percent-typed result renders as the internal value × 100.
       return numberCompare(result, expected, true);
     case "boolean":
-      return { status: matchBool(result, expected) ? "pass" : "fail", got: describe(result) };
+      return {
+        status: matchBool(result, expected) ? "pass" : "fail",
+        got: describe(result),
+      };
     case "text":
     case "string":
     case "id":
-      return { status: isText(result) && asText(result) === expected ? "pass" : "fail", got: describe(result) };
+      return {
+        status: isText(result) && asText(result) === expected ? "pass" : "fail",
+        got: describe(result),
+      };
     default:
       return { status: "quarantine" };
   }
 }
 
-function numberCompare(result: SfValue, expected: string, isPercent: boolean): RowOutcome {
-  if (!isNumber(result)) {return { status: "fail", got: describe(result) };}
+function numberCompare(
+  result: SfValue,
+  expected: string,
+  isPercent: boolean,
+): RowOutcome {
+  if (!isNumber(result)) {
+    return { status: "fail", got: describe(result) };
+  }
   let expectedDec: Decimal;
   try {
     expectedDec = new Decimal(expected);
@@ -144,11 +175,16 @@ function numberCompare(result: SfValue, expected: string, isPercent: boolean): R
     return { status: "quarantine" };
   }
   const actual = isPercent ? asDecimal(result).times(100) : asDecimal(result);
-  return { status: actual.equals(expectedDec) ? "pass" : "fail", got: actual.toString() };
+  return {
+    status: actual.equals(expectedDec) ? "pass" : "fail",
+    got: actual.toString(),
+  };
 }
 
 function matchBool(result: SfValue, expected: string): boolean {
-  return result.type === "Boolean" && asBool(result) === /^true$/i.test(expected);
+  return (
+    result.type === "Boolean" && asBool(result) === /^true$/i.test(expected)
+  );
 }
 
 function isNumber(v: SfValue): boolean {
@@ -156,14 +192,29 @@ function isNumber(v: SfValue): boolean {
 }
 
 function isText(v: SfValue): boolean {
-  return v.type === "Text" || v.type === "Id" || v.type === "Picklist" || v.type === "Multipicklist";
+  return (
+    v.type === "Text" ||
+    v.type === "Id" ||
+    v.type === "Picklist" ||
+    v.type === "Multipicklist"
+  );
 }
 
 function describe(result: ReturnType<typeof evaluateFormula>): string {
-  if (isError(result)) {return `#Error(${result.reason})`;}
-  if (result.blank) {return "blank";}
-  if (isNumber(result)) {return asDecimal(result).toString();}
-  if (isText(result)) {return asText(result);}
-  if (result.type === "Boolean") {return String(asBool(result));}
+  if (isError(result)) {
+    return `#Error(${result.reason})`;
+  }
+  if (result.blank) {
+    return "blank";
+  }
+  if (isNumber(result)) {
+    return asDecimal(result).toString();
+  }
+  if (isText(result)) {
+    return asText(result);
+  }
+  if (result.type === "Boolean") {
+    return String(asBool(result));
+  }
   return result.type;
 }

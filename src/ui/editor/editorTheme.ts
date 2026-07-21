@@ -20,9 +20,10 @@ export const sfEditorTheme = EditorView.theme(
     "&.cm-focused": { outline: "none" },
     "&.cm-editor.cm-focused": { boxShadow: `0 0 0 2px ${palette.accent}55` },
     ".cm-cursor, .cm-dropCursor": { borderLeftColor: palette.accent },
-    ".cm-selectionBackground, &.cm-focused .cm-selectionBackground, ::selection": {
-      backgroundColor: `${palette.accent}33`,
-    },
+    ".cm-selectionBackground, &.cm-focused .cm-selectionBackground, ::selection":
+      {
+        backgroundColor: `${palette.accent}33`,
+      },
     ".cm-placeholder": { color: palette.textMuted, fontStyle: "italic" },
 
     ".cm-sf-number": { color: syntax.number },

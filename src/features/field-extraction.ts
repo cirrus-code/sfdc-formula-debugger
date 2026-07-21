@@ -1,5 +1,9 @@
 import { type Expr } from "../syntax/index.ts";
-import { getFunction, type FunctionSpec, type SfType } from "../registry/index.ts";
+import {
+  getFunction,
+  type FunctionSpec,
+  type SfType,
+} from "../registry/index.ts";
 
 /**
  * Field extraction + light type inference for the simulation form (DESIGN §8.1).
@@ -47,7 +51,9 @@ export function extractFields(ast: Expr): ExtractedField[] {
         return;
       case "FunctionCall": {
         const spec = getFunction(node.callee);
-        node.args.forEach((arg, i) => walk(arg, spec ? paramType(spec, i) : "Unknown"));
+        node.args.forEach((arg, i) =>
+          walk(arg, spec ? paramType(spec, i) : "Unknown"),
+        );
         return;
       }
       default:
@@ -64,7 +70,10 @@ export function extractFields(ast: Expr): ExtractedField[] {
   }));
 }
 
-function walkBinary(node: Extract<Expr, { kind: "BinaryOp" }>, walk: (n: Expr, t: SfType) => void): void {
+function walkBinary(
+  node: Extract<Expr, { kind: "BinaryOp" }>,
+  walk: (n: Expr, t: SfType) => void,
+): void {
   switch (node.op) {
     case "+":
     case "-":
@@ -94,7 +103,9 @@ function walkBinary(node: Extract<Expr, { kind: "BinaryOp" }>, walk: (n: Expr, t
 
 function paramType(spec: FunctionSpec, i: number): SfType {
   const { params } = spec;
-  if (i < params.length) {return params[i]!.type;}
+  if (i < params.length) {
+    return params[i]!.type;
+  }
   const last = params[params.length - 1];
   return last?.variadic ? last.type : "Unknown";
 }

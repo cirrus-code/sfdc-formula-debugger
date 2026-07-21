@@ -51,8 +51,17 @@ class Lexer {
     return this.src[this.pos + offset] ?? "";
   }
 
-  private token(kind: TokenKind, start: number, leading: readonly Trivia[]): Token {
-    return { kind, text: this.src.slice(start, this.pos), span: span(start, this.pos), leadingTrivia: leading };
+  private token(
+    kind: TokenKind,
+    start: number,
+    leading: readonly Trivia[],
+  ): Token {
+    return {
+      kind,
+      text: this.src.slice(start, this.pos),
+      span: span(start, this.pos),
+      leadingTrivia: leading,
+    };
   }
 
   private error(code: Diagnostic["code"], s: Span, message: string): void {
@@ -65,11 +74,19 @@ class Lexer {
     const trivia: Trivia[] = [];
     for (;;) {
       const c = this.peek();
-      if (c === "") {break;}
+      if (c === "") {
+        break;
+      }
       if (isWhitespace(c)) {
         const start = this.pos;
-        while (isWhitespace(this.peek())) {this.pos++;}
-        trivia.push({ kind: "whitespace", text: this.src.slice(start, this.pos), span: span(start, this.pos) });
+        while (isWhitespace(this.peek())) {
+          this.pos++;
+        }
+        trivia.push({
+          kind: "whitespace",
+          text: this.src.slice(start, this.pos),
+          span: span(start, this.pos),
+        });
       } else if (c === "/" && this.peek(1) === "*") {
         trivia.push(this.scanBlockComment());
       } else {
@@ -82,15 +99,26 @@ class Lexer {
   private scanBlockComment(): Trivia {
     const start = this.pos;
     this.pos += 2; // consume "/*"
-    while (this.pos < this.src.length && !(this.peek() === "*" && this.peek(1) === "/")) {
+    while (
+      this.pos < this.src.length &&
+      !(this.peek() === "*" && this.peek(1) === "/")
+    ) {
       this.pos++;
     }
     if (this.pos >= this.src.length) {
-      this.error("unterminated-comment", span(start, this.pos), "Unterminated comment: missing closing '*/'.");
+      this.error(
+        "unterminated-comment",
+        span(start, this.pos),
+        "Unterminated comment: missing closing '*/'.",
+      );
     } else {
       this.pos += 2; // consume "*/"
     }
-    return { kind: "comment", text: this.src.slice(start, this.pos), span: span(start, this.pos) };
+    return {
+      kind: "comment",
+      text: this.src.slice(start, this.pos),
+      span: span(start, this.pos),
+    };
   }
 
   // --- Tokens -------------------------------------------------------------
@@ -99,11 +127,21 @@ class Lexer {
     const start = this.pos;
     const c = this.peek();
 
-    if (c === '"' || c === "'") {return this.scanString(start, leading);}
-    if (isDigit(c)) {return this.scanNumber(start, leading);}
-    if (c === "." && isDigit(this.peek(1))) {return this.scanNumber(start, leading);}
-    if (isIdentStart(c)) {return this.scanIdentifier(start, leading);}
-    if (c === "$") {return this.scanGlobalIdentifier(start, leading);}
+    if (c === '"' || c === "'") {
+      return this.scanString(start, leading);
+    }
+    if (isDigit(c)) {
+      return this.scanNumber(start, leading);
+    }
+    if (c === "." && isDigit(this.peek(1))) {
+      return this.scanNumber(start, leading);
+    }
+    if (isIdentStart(c)) {
+      return this.scanIdentifier(start, leading);
+    }
+    if (c === "$") {
+      return this.scanGlobalIdentifier(start, leading);
+    }
 
     return this.scanPunctuationOrOperator(start, leading, c);
   }
@@ -114,7 +152,11 @@ class Lexer {
     for (;;) {
       const c = this.peek();
       if (c === "") {
-        this.error("unterminated-string", span(start, this.pos), "Unterminated string literal.");
+        this.error(
+          "unterminated-string",
+          span(start, this.pos),
+          "Unterminated string literal.",
+        );
         break;
       }
       if (c === "\\" && this.peek(1) !== "") {
@@ -122,43 +164,64 @@ class Lexer {
         continue;
       }
       this.pos++;
-      if (c === quote) {break;}
+      if (c === quote) {
+        break;
+      }
     }
     return this.token("string", start, leading);
   }
 
   private scanNumber(start: number, leading: readonly Trivia[]): Token {
-    while (isDigit(this.peek())) {this.pos++;}
+    while (isDigit(this.peek())) {
+      this.pos++;
+    }
     // Fractional part only when a digit follows the dot, so `1.` lexes as
     // number `1` + `.` and `ADDMONTHS(x,1).Field` splits cleanly.
     if (this.peek() === "." && isDigit(this.peek(1))) {
       this.pos++; // consume "."
-      while (isDigit(this.peek())) {this.pos++;}
+      while (isDigit(this.peek())) {
+        this.pos++;
+      }
     }
     return this.token("number", start, leading);
   }
 
   private scanIdentifier(start: number, leading: readonly Trivia[]): Token {
-    while (isIdentContinue(this.peek())) {this.pos++;}
+    while (isIdentContinue(this.peek())) {
+      this.pos++;
+    }
     const text = this.src.slice(start, this.pos);
     const keyword = KEYWORD_KINDS[text.toUpperCase()];
     return this.token(keyword ?? "identifier", start, leading);
   }
 
-  private scanGlobalIdentifier(start: number, leading: readonly Trivia[]): Token {
+  private scanGlobalIdentifier(
+    start: number,
+    leading: readonly Trivia[],
+  ): Token {
     this.pos++; // consume "$"
     if (!isIdentStart(this.peek())) {
       // A lone `$` is not a valid identifier; emit an error token so the rest
       // of the formula still lexes.
-      this.error("unexpected-character", span(start, this.pos), "Unexpected '$': expected a global name.");
+      this.error(
+        "unexpected-character",
+        span(start, this.pos),
+        "Unexpected '$': expected a global name.",
+      );
       return this.token("error", start, leading);
     }
-    while (isIdentContinue(this.peek())) {this.pos++;}
+    while (isIdentContinue(this.peek())) {
+      this.pos++;
+    }
     // Globals are never keywords ($TRUE is a field reference, not a boolean).
     return this.token("identifier", start, leading);
   }
 
-  private scanPunctuationOrOperator(start: number, leading: readonly Trivia[], c: string): Token {
+  private scanPunctuationOrOperator(
+    start: number,
+    leading: readonly Trivia[],
+    c: string,
+  ): Token {
     switch (c) {
       case "(":
         this.pos++;
@@ -182,15 +245,21 @@ class Lexer {
         return this.token("operator", start, leading);
       case "=":
         this.pos++;
-        if (this.peek() === "=") {this.pos++;} // `==`
+        if (this.peek() === "=") {
+          this.pos++;
+        } // `==`
         return this.token("operator", start, leading);
       case "<":
         this.pos++;
-        if (this.peek() === "=" || this.peek() === ">") {this.pos++;} // `<=` / `<>`
+        if (this.peek() === "=" || this.peek() === ">") {
+          this.pos++;
+        } // `<=` / `<>`
         return this.token("operator", start, leading);
       case ">":
         this.pos++;
-        if (this.peek() === "=") {this.pos++;} // `>=`
+        if (this.peek() === "=") {
+          this.pos++;
+        } // `>=`
         return this.token("operator", start, leading);
       case "!":
         this.pos++;
@@ -198,18 +267,33 @@ class Lexer {
           this.pos++; // `!=`
           return this.token("operator", start, leading);
         }
-        this.error("unexpected-character", span(start, this.pos), "Unexpected '!'.");
+        this.error(
+          "unexpected-character",
+          span(start, this.pos),
+          "Unexpected '!'.",
+        );
         return this.token("error", start, leading);
       default:
         this.pos++;
-        this.error("unexpected-character", span(start, this.pos), `Unexpected character '${c}'.`);
+        this.error(
+          "unexpected-character",
+          span(start, this.pos),
+          `Unexpected character '${c}'.`,
+        );
         return this.token("error", start, leading);
     }
   }
 }
 
 function isWhitespace(c: string): boolean {
-  return c === " " || c === "\t" || c === "\n" || c === "\r" || c === "\f" || c === "\v";
+  return (
+    c === " " ||
+    c === "\t" ||
+    c === "\n" ||
+    c === "\r" ||
+    c === "\f" ||
+    c === "\v"
+  );
 }
 
 function isDigit(c: string): boolean {

@@ -13,7 +13,9 @@ export const contextField = StateField.define<string>({
   update(value, tr) {
     let next = value;
     for (const effect of tr.effects) {
-      if (effect.is(setContext)) {next = effect.value;}
+      if (effect.is(setContext)) {
+        next = effect.value;
+      }
     }
     return next;
   },

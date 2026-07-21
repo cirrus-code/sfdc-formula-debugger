@@ -1,9 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { parse } from "../syntax/index.ts";
 import { evaluateFormula, type EvalEnv } from "./evaluator.ts";
-import { asBool, asDecimal, asText, blank, isError, UnsupportedError, type BlankMode, type SfValue } from "./value.ts";
+import {
+  asBool,
+  asDecimal,
+  asText,
+  blank,
+  isError,
+  UnsupportedError,
+  type BlankMode,
+  type SfValue,
+} from "./value.ts";
 
-function ev(source: string, opts: { fields?: Record<string, SfValue>; blankMode?: BlankMode } = {}) {
+function ev(
+  source: string,
+  opts: { fields?: Record<string, SfValue>; blankMode?: BlankMode } = {},
+) {
   const env: EvalEnv = {
     fields: new Map(Object.entries(opts.fields ?? {})),
     blankMode: opts.blankMode ?? "zero",
@@ -14,19 +26,25 @@ function ev(source: string, opts: { fields?: Record<string, SfValue>; blankMode?
 
 function n(source: string, opts?: Parameters<typeof ev>[1]): string {
   const r = ev(source, opts);
-  if (isError(r)) {throw new Error(`unexpected #Error: ${r.reason}`);}
+  if (isError(r)) {
+    throw new Error(`unexpected #Error: ${r.reason}`);
+  }
   return asDecimal(r).toString();
 }
 
 function s(source: string, opts?: Parameters<typeof ev>[1]): string {
   const r = ev(source, opts);
-  if (isError(r)) {throw new Error(`unexpected #Error: ${r.reason}`);}
+  if (isError(r)) {
+    throw new Error(`unexpected #Error: ${r.reason}`);
+  }
   return asText(r);
 }
 
 function b(source: string, opts?: Parameters<typeof ev>[1]): boolean {
   const r = ev(source, opts);
-  if (isError(r)) {throw new Error(`unexpected #Error: ${r.reason}`);}
+  if (isError(r)) {
+    throw new Error(`unexpected #Error: ${r.reason}`);
+  }
   return asBool(r);
 }
 
@@ -55,11 +73,19 @@ describe("engine: division by zero", () => {
 
 describe("engine: blank-handling mode", () => {
   it("treats a blank number as zero in zero mode", () => {
-    expect(n("Amount + 1", { fields: { Amount: blank("Number") }, blankMode: "zero" })).toBe("1");
+    expect(
+      n("Amount + 1", {
+        fields: { Amount: blank("Number") },
+        blankMode: "zero",
+      }),
+    ).toBe("1");
   });
 
   it("propagates blank in blank mode", () => {
-    const r = ev("Amount + 1", { fields: { Amount: blank("Number") }, blankMode: "blank" });
+    const r = ev("Amount + 1", {
+      fields: { Amount: blank("Number") },
+      blankMode: "blank",
+    });
     expect(isError(r)).toBe(false);
     expect((r as SfValue).blank).toBe(true);
   });
@@ -76,7 +102,9 @@ describe("engine: blank predicates", () => {
   });
 
   it("treats a null checkbox as false", () => {
-    expect(s('IF(Flag, "y", "n")', { fields: { Flag: blank("Boolean") } })).toBe("n");
+    expect(
+      s('IF(Flag, "y", "n")', { fields: { Flag: blank("Boolean") } }),
+    ).toBe("n");
   });
 });
 
@@ -130,7 +158,9 @@ describe("engine: dates", () => {
     expect(isError(r)).toBe(false);
     const v = r as SfValue;
     expect(v.type).toBe("Date");
-    if (v.type === "Date") {expect(v.data).toEqual({ year: 2020, month: 2, day: 29 });}
+    if (v.type === "Date") {
+      expect(v.data).toEqual({ year: 2020, month: 2, day: 29 });
+    }
   });
 
   it("rejects an invalid date", () => {

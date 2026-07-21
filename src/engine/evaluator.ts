@@ -1,4 +1,9 @@
-import { assertNever, type BinaryOp, type Expr, type FunctionCall } from "../syntax/index.ts";
+import {
+  assertNever,
+  type BinaryOp,
+  type Expr,
+  type FunctionCall,
+} from "../syntax/index.ts";
 import { getFunction } from "../registry/index.ts";
 import {
   asDecimal,
@@ -37,7 +42,9 @@ export function evaluateFormula(ast: Expr, env: EvalEnv): EvalResult {
   try {
     return evaluate(ast, env);
   } catch (e) {
-    if (e instanceof UnsupportedError) {throw e;}
+    if (e instanceof UnsupportedError) {
+      throw e;
+    }
     return error("#Error!");
   }
 }
@@ -60,7 +67,9 @@ function evaluate(node: Expr, env: EvalEnv): EvalResult {
       return evaluate(node.expr, env);
     case "UnaryOp": {
       const operand = evaluate(node.operand, env);
-      if (isError(operand)) {return operand;}
+      if (isError(operand)) {
+        return operand;
+      }
       const d = toDecimal(operand, env);
       return node.op === "-" ? num(d.negated()) : num(d);
     }
@@ -76,7 +85,9 @@ function evaluate(node: Expr, env: EvalEnv): EvalResult {
 /** Coerce a value to a Decimal, applying blank-handling mode for blank numbers. */
 function toDecimal(v: SfValue, env: EvalEnv): Decimal {
   if (v.blank) {
-    if (env.blankMode === "zero") {return new Decimal(0);}
+    if (env.blankMode === "zero") {
+      return new Decimal(0);
+    }
     // Signal "blank" via a sentinel the callers check through isBlankNumber.
     return new Decimal(0);
   }
@@ -89,9 +100,13 @@ function isNumericType(v: SfValue): boolean {
 
 function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
   const l = evaluate(node.left, env);
-  if (isError(l)) {return l;}
+  if (isError(l)) {
+    return l;
+  }
   const r = evaluate(node.right, env);
-  if (isError(r)) {return r;}
+  if (isError(r)) {
+    return r;
+  }
 
   switch (node.op) {
     case "&":
@@ -127,9 +142,17 @@ function scaled(d: Decimal): SfValue {
   return num(d.toDecimalPlaces(MAX_SCALE));
 }
 
-function arithmetic(op: "+" | "-" | "*" | "/" | "^", l: SfValue, r: SfValue, env: EvalEnv): EvalResult {
+function arithmetic(
+  op: "+" | "-" | "*" | "/" | "^",
+  l: SfValue,
+  r: SfValue,
+  env: EvalEnv,
+): EvalResult {
   // In "blank" mode, a blank numeric operand makes the whole result blank.
-  if (env.blankMode === "blank" && ((isNumericType(l) && l.blank) || (isNumericType(r) && r.blank))) {
+  if (
+    env.blankMode === "blank" &&
+    ((isNumericType(l) && l.blank) || (isNumericType(r) && r.blank))
+  ) {
     return blank("Number");
   }
   const a = toDecimal(l, env);
@@ -142,11 +165,15 @@ function arithmetic(op: "+" | "-" | "*" | "/" | "^", l: SfValue, r: SfValue, env
     case "*":
       return scaled(a.times(b));
     case "/":
-      if (b.isZero()) {return error("#Error! (division by zero)");}
+      if (b.isZero()) {
+        return error("#Error! (division by zero)");
+      }
       return scaled(a.div(b));
     case "^":
       // Salesforce's `^` rejects non-integer exponents (use SQRT for roots).
-      if (!b.isInteger()) {return error("#Error! (^ requires an integer exponent)");}
+      if (!b.isInteger()) {
+        return error("#Error! (^ requires an integer exponent)");
+      }
       return scaled(a.pow(b));
     default:
       return assertNever(op);
@@ -154,26 +181,48 @@ function arithmetic(op: "+" | "-" | "*" | "/" | "^", l: SfValue, r: SfValue, env
 }
 
 function valuesEqual(l: SfValue, r: SfValue): boolean {
-  if (l.blank || r.blank) {return l.blank && r.blank;}
-  if (isNumericType(l) && isNumericType(r)) {return asDecimal(l).equals(asDecimal(r));}
-  if (l.type === "Boolean" && r.type === "Boolean") {return l.data === r.data;}
+  if (l.blank || r.blank) {
+    return l.blank && r.blank;
+  }
+  if (isNumericType(l) && isNumericType(r)) {
+    return asDecimal(l).equals(asDecimal(r));
+  }
+  if (l.type === "Boolean" && r.type === "Boolean") {
+    return l.data === r.data;
+  }
   // Text equality is currently case-sensitive; case-sensitivity of `=`/`<>` is a
   // NEEDS-VERIFICATION item (VERIFICATION.md) to be settled by the oracle corpus.
-  if (isTextType(l) && isTextType(r)) {return asText(l) === asText(r);}
+  if (isTextType(l) && isTextType(r)) {
+    return asText(l) === asText(r);
+  }
   return false;
 }
 
 function isTextType(v: SfValue): boolean {
-  return v.type === "Text" || v.type === "Id" || v.type === "Picklist" || v.type === "Multipicklist";
+  return (
+    v.type === "Text" ||
+    v.type === "Id" ||
+    v.type === "Picklist" ||
+    v.type === "Multipicklist"
+  );
 }
 
 function strcmp(a: string, b: string): number {
-  if (a < b) {return -1;}
-  if (a > b) {return 1;}
+  if (a < b) {
+    return -1;
+  }
+  if (a > b) {
+    return 1;
+  }
   return 0;
 }
 
-function compare(op: "<" | "<=" | ">" | ">=", l: SfValue, r: SfValue, env: EvalEnv): EvalResult {
+function compare(
+  op: "<" | "<=" | ">" | ">=",
+  l: SfValue,
+  r: SfValue,
+  env: EvalEnv,
+): EvalResult {
   let cmp: number;
   if (isTextType(l) && isTextType(r) && !l.blank && !r.blank) {
     cmp = strcmp(asText(l), asText(r));
@@ -196,20 +245,30 @@ function compare(op: "<" | "<=" | ">" | ">=", l: SfValue, r: SfValue, env: EvalE
 
 function evalCall(node: FunctionCall, env: EvalEnv): EvalResult {
   const spec = getFunction(node.callee);
-  if (!spec) {return error(`#Error! (unknown function ${node.callee})`);}
-  if (!spec.simulatable) {throw new UnsupportedError(spec.name);}
+  if (!spec) {
+    return error(`#Error! (unknown function ${node.callee})`);
+  }
+  if (!spec.simulatable) {
+    throw new UnsupportedError(spec.name);
+  }
 
   const special = SPECIAL_FORMS[spec.name];
-  if (special) {return special(node.args, env, evaluate);}
+  if (special) {
+    return special(node.args, env, evaluate);
+  }
 
   const args: SfValue[] = [];
   for (const argNode of node.args) {
     const v = evaluate(argNode, env);
-    if (isError(v)) {return v;}
+    if (isError(v)) {
+      return v;
+    }
     args.push(v);
   }
 
   const impl = BUILTINS[spec.name];
-  if (!impl) {throw new UnsupportedError(spec.name);}
+  if (!impl) {
+    throw new UnsupportedError(spec.name);
+  }
   return impl(args, env);
 }

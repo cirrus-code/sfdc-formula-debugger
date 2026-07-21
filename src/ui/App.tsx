@@ -21,8 +21,13 @@ export function App() {
 
   const { ast, diagnostics } = useMemo(() => {
     const parsed = parse(source);
-    if (source.trim() === "") {return { ast: parsed.ast, diagnostics: [] as ReturnType<typeof analyze> };}
-    const merged = [...parsed.diagnostics, ...analyze(parsed.ast, contextId)].sort((a, b) => a.span.start - b.span.start);
+    if (source.trim() === "") {
+      return { ast: parsed.ast, diagnostics: [] as ReturnType<typeof analyze> };
+    }
+    const merged = [
+      ...parsed.diagnostics,
+      ...analyze(parsed.ast, contextId),
+    ].sort((a, b) => a.span.start - b.span.start);
     return { ast: parsed.ast, diagnostics: merged };
   }, [source, contextId]);
 
@@ -52,13 +57,21 @@ export function App() {
           >
             Client-side · No backend
           </p>
-          <h1 style={{ fontSize: "1.8rem", fontWeight: 700, lineHeight: 1.1 }}>{product.name}</h1>
-          <p style={{ marginTop: "0.4rem", color: palette.textMuted }}>{product.tagline}</p>
+          <h1 style={{ fontSize: "1.8rem", fontWeight: 700, lineHeight: 1.1 }}>
+            {product.name}
+          </h1>
+          <p style={{ marginTop: "0.4rem", color: palette.textMuted }}>
+            {product.tagline}
+          </p>
         </header>
 
         <ContextPicker contextId={contextId} onChange={setContextId} />
 
-        <FormulaEditor initialDoc={SAMPLE} contextId={contextId} onChange={setSource} />
+        <FormulaEditor
+          initialDoc={SAMPLE}
+          contextId={contextId}
+          onChange={setSource}
+        />
 
         {context?.notes ? (
           <p
@@ -75,9 +88,18 @@ export function App() {
           </p>
         ) : null}
 
-        {source.trim() === "" ? null : <SimulatePanel ast={ast} blankToggle={context?.blankModeToggle ?? false} />}
+        {source.trim() === "" ? null : (
+          <SimulatePanel
+            ast={ast}
+            blankToggle={context?.blankModeToggle ?? false}
+          />
+        )}
 
-        <ProblemsPanel source={source} diagnostics={diagnostics} astKind={ast.kind} />
+        <ProblemsPanel
+          source={source}
+          diagnostics={diagnostics}
+          astKind={ast.kind}
+        />
       </div>
     </main>
   );
@@ -90,7 +112,15 @@ interface ContextPickerProps {
 
 function ContextPicker({ contextId, onChange }: ContextPickerProps) {
   return (
-    <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem", fontSize: "0.85rem" }}>
+    <label
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "0.6rem",
+        marginBottom: "0.75rem",
+        fontSize: "0.85rem",
+      }}
+    >
       <span style={{ color: palette.textMuted }}>Context</span>
       <select
         value={contextId}
@@ -144,15 +174,31 @@ function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
         }}
       >
         <span style={{ fontWeight: 600 }}>Problems</span>
-        <span style={{ color: palette.textMuted, fontFamily: font.mono, fontSize: "0.75rem" }}>
-          {diagnostics.length === 0 ? "no problems" : `${diagnostics.length} problem${diagnostics.length === 1 ? "" : "s"}`}
+        <span
+          style={{
+            color: palette.textMuted,
+            fontFamily: font.mono,
+            fontSize: "0.75rem",
+          }}
+        >
+          {diagnostics.length === 0
+            ? "no problems"
+            : `${diagnostics.length} problem${diagnostics.length === 1 ? "" : "s"}`}
           {" · "}
           {astKind}
         </span>
       </div>
 
       {diagnostics.length === 0 ? (
-        <p style={{ padding: "0.8rem 1rem", color: palette.textMuted, fontSize: "0.9rem" }}>Parses cleanly.</p>
+        <p
+          style={{
+            padding: "0.8rem 1rem",
+            color: palette.textMuted,
+            fontSize: "0.9rem",
+          }}
+        >
+          Parses cleanly.
+        </p>
       ) : (
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {diagnostics.map((d, i) => {
@@ -181,7 +227,14 @@ function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
                 </span>
                 <span>
                   {d.message}
-                  <span style={{ color: palette.textMuted, fontFamily: font.mono, fontSize: "0.72rem", marginLeft: "0.5rem" }}>
+                  <span
+                    style={{
+                      color: palette.textMuted,
+                      fontFamily: font.mono,
+                      fontSize: "0.72rem",
+                      marginLeft: "0.5rem",
+                    }}
+                  >
                     {d.code}
                   </span>
                 </span>

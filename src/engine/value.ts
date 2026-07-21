@@ -35,11 +35,27 @@ export interface TimeVal {
  * signal and must be checked before the data is used semantically.
  */
 export type SfValue =
-  | { readonly type: "Number" | "Currency" | "Percent"; readonly blank: boolean; readonly data: Decimal }
-  | { readonly type: "Text" | "Id" | "Picklist" | "Multipicklist"; readonly blank: boolean; readonly data: string }
-  | { readonly type: "Boolean"; readonly blank: boolean; readonly data: boolean }
+  | {
+      readonly type: "Number" | "Currency" | "Percent";
+      readonly blank: boolean;
+      readonly data: Decimal;
+    }
+  | {
+      readonly type: "Text" | "Id" | "Picklist" | "Multipicklist";
+      readonly blank: boolean;
+      readonly data: string;
+    }
+  | {
+      readonly type: "Boolean";
+      readonly blank: boolean;
+      readonly data: boolean;
+    }
   | { readonly type: "Date"; readonly blank: boolean; readonly data: DateParts }
-  | { readonly type: "Datetime"; readonly blank: boolean; readonly data: DatetimeVal }
+  | {
+      readonly type: "Datetime";
+      readonly blank: boolean;
+      readonly data: DatetimeVal;
+    }
   | { readonly type: "Time"; readonly blank: boolean; readonly data: TimeVal }
   | { readonly type: "Unknown"; readonly blank: boolean; readonly data: null };
 
@@ -116,7 +132,11 @@ export function blank(type: SfType): SfValue {
     case "Boolean":
       return { type: "Boolean", blank: true, data: false };
     case "Date":
-      return { type: "Date", blank: true, data: { year: 1970, month: 1, day: 1 } };
+      return {
+        type: "Date",
+        blank: true,
+        data: { year: 1970, month: 1, day: 1 },
+      };
     case "Datetime":
       return { type: "Datetime", blank: true, data: { epochMillis: 0 } };
     case "Time":
@@ -131,16 +151,27 @@ export function blank(type: SfType): SfValue {
 // --- Typed accessors (trust the `type` discriminant) ---------------------
 
 export function asDecimal(v: SfValue): Decimal {
-  if (v.type === "Number" || v.type === "Currency" || v.type === "Percent") {return v.data;}
+  if (v.type === "Number" || v.type === "Currency" || v.type === "Percent") {
+    return v.data;
+  }
   throw new Error(`Expected a number, got ${v.type}`);
 }
 
 export function asText(v: SfValue): string {
-  if (v.type === "Text" || v.type === "Id" || v.type === "Picklist" || v.type === "Multipicklist") {return v.data;}
+  if (
+    v.type === "Text" ||
+    v.type === "Id" ||
+    v.type === "Picklist" ||
+    v.type === "Multipicklist"
+  ) {
+    return v.data;
+  }
   throw new Error(`Expected text, got ${v.type}`);
 }
 
 export function asBool(v: SfValue): boolean {
-  if (v.type === "Boolean") {return v.data;}
+  if (v.type === "Boolean") {
+    return v.data;
+  }
   throw new Error(`Expected a boolean, got ${v.type}`);
 }

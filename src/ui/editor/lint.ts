@@ -11,7 +11,9 @@ import { contextField, setContext } from "./contextField.ts";
 export const sfLinter = linter(
   (view) => {
     const doc = view.state.doc.toString();
-    if (doc.trim() === "") {return [];}
+    if (doc.trim() === "") {
+      return [];
+    }
 
     const contextId = view.state.field(contextField);
     const len = doc.length;
@@ -26,12 +28,21 @@ export const sfLinter = linter(
           from = Math.max(0, from - 1);
         }
       }
-      return { from, to, severity: d.severity, message: d.message, source: d.code };
+      return {
+        from,
+        to,
+        severity: d.severity,
+        message: d.message,
+        source: d.code,
+      };
     });
   },
   {
     delay: 120,
     // Re-lint when the context changes, not only on document edits.
-    needsRefresh: (update) => update.transactions.some((tr) => tr.effects.some((e) => e.is(setContext))),
+    needsRefresh: (update) =>
+      update.transactions.some((tr) =>
+        tr.effects.some((e) => e.is(setContext)),
+      ),
   },
 );

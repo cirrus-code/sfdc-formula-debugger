@@ -24,7 +24,11 @@ interface FormulaEditorProps {
  * the update listener from capturing a stale closure. The active context is
  * pushed in as an editor-state effect so the linter can read it live.
  */
-export function FormulaEditor({ initialDoc, contextId, onChange }: FormulaEditorProps) {
+export function FormulaEditor({
+  initialDoc,
+  contextId,
+  onChange,
+}: FormulaEditorProps) {
   const host = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
@@ -33,7 +37,9 @@ export function FormulaEditor({ initialDoc, contextId, onChange }: FormulaEditor
   }, [onChange]);
 
   useEffect(() => {
-    if (!host.current) {return;}
+    if (!host.current) {
+      return;
+    }
 
     const view = new EditorView({
       parent: host.current,
@@ -52,7 +58,9 @@ export function FormulaEditor({ initialDoc, contextId, onChange }: FormulaEditor
           sfEditorTheme,
           EditorView.lineWrapping,
           EditorView.updateListener.of((u) => {
-            if (u.docChanged) {onChangeRef.current(u.state.doc.toString());}
+            if (u.docChanged) {
+              onChangeRef.current(u.state.doc.toString());
+            }
           }),
         ],
       }),

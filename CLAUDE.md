@@ -140,7 +140,7 @@ those nearly verbatim. Their PEG grammar is reference-only — we write our own 
   from inference + user selection only.
 - Org-state functions in simulation: `PRIORVALUE`, `ISCHANGED`, `ISNEW`, `ISCLONE`, `VLOOKUP`,
   `IMAGE`, `GETSESSIONID`, `CURRENCYRATE`, `$CustomMetadata`/`$Setup`/`$Permission` resolution.
-  These parse, highlight, format, and lint normally — they only refuse to *simulate* (hard
+  These parse, highlight, format, and lint normally — they only refuse to _simulate_ (hard
   error per rule 1).
 - Accounts, persistence, server-side anything, telemetry containing formula text.
 - Exact compiled-size calculation (Salesforce's compiled-character limit is not computable

@@ -33,7 +33,10 @@ export function analyze(root: Expr, contextId: string): readonly Diagnostic[] {
   const rootType = checker.check(root);
 
   const context = getContext(contextId);
-  if (context?.requiredReturnType && !isAssignable(rootType, context.requiredReturnType)) {
+  if (
+    context?.requiredReturnType &&
+    !isAssignable(rootType, context.requiredReturnType)
+  ) {
     checker.report(
       "return-type-mismatch",
       "warning",
@@ -53,7 +56,12 @@ class Checker {
     this.tier2 = getContext(contextId)?.tier === 2;
   }
 
-  report(code: DiagnosticCode, severity: Severity, span: Span, message: string): void {
+  report(
+    code: DiagnosticCode,
+    severity: Severity,
+    span: Span,
+    message: string,
+  ): void {
     this.diagnostics.push({ code, severity, span, message });
   }
 
@@ -78,7 +86,12 @@ class Checker {
       case "UnaryOp": {
         const operand = this.check(node.operand);
         if (operand !== "Unknown" && !isNumeric(operand)) {
-          this.report("operator-type-mismatch", "warning", node.operand.span, `Unary '${node.op}' expects a number, got ${operand}.`);
+          this.report(
+            "operator-type-mismatch",
+            "warning",
+            node.operand.span,
+            `Unary '${node.op}' expects a number, got ${operand}.`,
+          );
         }
         return "Number";
       }
@@ -112,7 +125,12 @@ class Checker {
       case ">":
       case ">=":
         if (!isComparable(left, right)) {
-          this.report("operator-type-mismatch", "warning", node.opSpan, `Cannot compare ${left} and ${right} with '${node.op}'.`);
+          this.report(
+            "operator-type-mismatch",
+            "warning",
+            node.opSpan,
+            `Cannot compare ${left} and ${right} with '${node.op}'.`,
+          );
         }
         return "Boolean";
       case "=":
@@ -120,7 +138,12 @@ class Checker {
         return "Boolean";
       case "==":
       case "!=":
-        this.report("nonstandard-operator", "warning", node.opSpan, `'${node.op}' is not a Salesforce operator; use '${node.op === "==" ? "=" : "<>"}'.`);
+        this.report(
+          "nonstandard-operator",
+          "warning",
+          node.opSpan,
+          `'${node.op}' is not a Salesforce operator; use '${node.op === "==" ? "=" : "<>"}'.`,
+        );
         return "Boolean";
       default:
         return assertNever(node.op);
@@ -130,8 +153,12 @@ class Checker {
   /** `+`/`-` are numeric, plus Salesforce date arithmetic (Date ± Number, Date − Date). */
   private checkAdditive(node: BinaryOp, left: SfType, right: SfType): SfType {
     if (isDatelike(left)) {
-      if (node.op === "-" && isDatelike(right)) {return "Number";}
-      if (isNumeric(right) || right === "Unknown") {return left;}
+      if (node.op === "-" && isDatelike(right)) {
+        return "Number";
+      }
+      if (isNumeric(right) || right === "Unknown") {
+        return left;
+      }
     }
     this.expectNumeric(left, node.left.span, node.op);
     this.expectNumeric(right, node.right.span, node.op);
@@ -140,15 +167,27 @@ class Checker {
 
   private expectNumeric(type: SfType, span: Span, op: string): void {
     if (type !== "Unknown" && !isNumeric(type)) {
-      this.report("operator-type-mismatch", "warning", span, `Operator '${op}' expects a number, got ${type}.`);
+      this.report(
+        "operator-type-mismatch",
+        "warning",
+        span,
+        `Operator '${op}' expects a number, got ${type}.`,
+      );
     }
   }
 
   private checkCall(node: FunctionCall): SfType {
     const spec = getFunction(node.callee);
     if (!spec) {
-      this.report("unknown-function", "error", node.calleeSpan, `Unknown function '${node.callee}'.`);
-      for (const arg of node.args) {this.check(arg);}
+      this.report(
+        "unknown-function",
+        "error",
+        node.calleeSpan,
+        `Unknown function '${node.callee}'.`,
+      );
+      for (const arg of node.args) {
+        this.check(arg);
+      }
       return "Unknown";
     }
 
@@ -157,7 +196,9 @@ class Checker {
     this.checkArgTypes(node, spec, argTypes);
     this.checkAvailability(node, spec);
 
-    if (spec.returnType.kind === "fixed") {return spec.returnType.type;}
+    if (spec.returnType.kind === "fixed") {
+      return spec.returnType.type;
+    }
     return argTypes[spec.returnType.index] ?? "Unknown";
   }
 
@@ -165,39 +206,71 @@ class Checker {
     const { min, max } = functionArity(spec);
     const n = node.args.length;
     if (n < min || n > max) {
-      this.report("wrong-arity", "error", node.span, `${spec.name} expects ${describeArity(min, max)} argument(s), got ${n}.`);
+      this.report(
+        "wrong-arity",
+        "error",
+        node.span,
+        `${spec.name} expects ${describeArity(min, max)} argument(s), got ${n}.`,
+      );
     }
   }
 
-  private checkArgTypes(node: FunctionCall, spec: FunctionSpec, argTypes: readonly SfType[]): void {
+  private checkArgTypes(
+    node: FunctionCall,
+    spec: FunctionSpec,
+    argTypes: readonly SfType[],
+  ): void {
     node.args.forEach((arg, i) => {
       const param = paramAt(spec, i);
-      if (!param) {return;}
+      if (!param) {
+        return;
+      }
       const actual = argTypes[i]!;
       if (!isAssignable(actual, param.type)) {
-        this.report("argument-type-mismatch", "warning", arg.span, `${spec.name} argument '${param.name}' expects ${param.type}, got ${actual}.`);
+        this.report(
+          "argument-type-mismatch",
+          "warning",
+          arg.span,
+          `${spec.name} argument '${param.name}' expects ${param.type}, got ${actual}.`,
+        );
       }
     });
   }
 
   private checkAvailability(node: FunctionCall, spec: FunctionSpec): void {
-    if (spec.contexts === "all" || this.tier2) {return;}
+    if (spec.contexts === "all" || this.tier2) {
+      return;
+    }
     if (!spec.contexts.includes(this.contextId)) {
       const label = getContext(this.contextId)?.label ?? this.contextId;
-      this.report("function-not-available", "warning", node.calleeSpan, `${spec.name} is not available in ${label}.`);
+      this.report(
+        "function-not-available",
+        "warning",
+        node.calleeSpan,
+        `${spec.name} is not available in ${label}.`,
+      );
     }
   }
 }
 
 function describeArity(min: number, max: number): string {
-  if (max === Number.POSITIVE_INFINITY) {return `at least ${min}`;}
-  if (min === max) {return `${min}`;}
+  if (max === Number.POSITIVE_INFINITY) {
+    return `at least ${min}`;
+  }
+  if (min === max) {
+    return `${min}`;
+  }
   return `${min}–${max}`;
 }
 
 /** The param governing argument `i`, following a trailing variadic param. */
-function paramAt(spec: FunctionSpec, i: number): FunctionSpec["params"][number] | undefined {
-  if (i < spec.params.length) {return spec.params[i];}
+function paramAt(
+  spec: FunctionSpec,
+  i: number,
+): FunctionSpec["params"][number] | undefined {
+  if (i < spec.params.length) {
+    return spec.params[i];
+  }
   const last = spec.params[spec.params.length - 1];
   return last?.variadic ? last : undefined;
 }

@@ -55,7 +55,9 @@ export function parse(source: string): ParseResult {
   const ast = parser.parseFormula();
   return {
     ast,
-    diagnostics: [...lexDiagnostics, ...parser.diagnostics].sort((a, b) => a.span.start - b.span.start),
+    diagnostics: [...lexDiagnostics, ...parser.diagnostics].sort(
+      (a, b) => a.span.start - b.span.start,
+    ),
     tokens,
   };
 }
@@ -78,7 +80,9 @@ class Parser {
 
   private advance(): Token {
     const t = this.current();
-    if (this.current().kind !== "eof") {this.pos++;}
+    if (this.current().kind !== "eof") {
+      this.pos++;
+    }
     return t;
   }
 
@@ -96,8 +100,14 @@ class Parser {
     if (this.current().kind !== "eof") {
       const start = this.current().span.start;
       let end = this.current().span.end;
-      while (this.current().kind !== "eof") {end = this.advance().span.end;}
-      this.error("unexpected-token", span(start, end), "Unexpected trailing input after the formula.");
+      while (this.current().kind !== "eof") {
+        end = this.advance().span.end;
+      }
+      this.error(
+        "unexpected-token",
+        span(start, end),
+        "Unexpected trailing input after the formula.",
+      );
     }
     return expr;
   }
@@ -107,10 +117,14 @@ class Parser {
   private parseExpr(minPrec: number): Expr {
     let left = this.parseUnary();
     for (;;) {
-      if (this.current().kind !== "operator") {break;}
+      if (this.current().kind !== "operator") {
+        break;
+      }
       const op = this.current().text as BinaryOperator;
       const prec = BINARY_PRECEDENCE[op];
-      if (prec === undefined || prec < minPrec) {break;}
+      if (prec === undefined || prec < minPrec) {
+        break;
+      }
       const opTok = this.advance();
       // All Salesforce binary operators are left-associative (Formula.g4).
       const right = this.parseExpr(prec + 1);
@@ -127,7 +141,10 @@ class Parser {
   }
 
   private parseUnary(): Expr {
-    if (this.current().kind === "operator" && (this.current().text === "-" || this.current().text === "+")) {
+    if (
+      this.current().kind === "operator" &&
+      (this.current().text === "-" || this.current().text === "+")
+    ) {
       const opTok = this.advance();
       const operand = this.parseUnary();
       return {
@@ -149,11 +166,20 @@ class Parser {
         return { kind: "NumberLit", raw: tok.text, span: tok.span };
       case "string":
         this.advance();
-        return { kind: "StringLit", value: decodeString(tok.text), raw: tok.text, span: tok.span };
+        return {
+          kind: "StringLit",
+          value: decodeString(tok.text),
+          raw: tok.text,
+          span: tok.span,
+        };
       case "true":
       case "false":
         this.advance();
-        return { kind: "BooleanLit", value: tok.kind === "true", span: tok.span };
+        return {
+          kind: "BooleanLit",
+          value: tok.kind === "true",
+          span: tok.span,
+        };
       case "null":
         this.advance();
         return { kind: "NullLit", span: tok.span };
@@ -187,12 +213,21 @@ class Parser {
         end = this.current().span.end;
         this.advance();
       } else {
-        this.error("expected-field-name", dot.span, "Expected a field name after '.'.");
+        this.error(
+          "expected-field-name",
+          dot.span,
+          "Expected a field name after '.'.",
+        );
         end = dot.span.end;
         break;
       }
     }
-    return { kind: "FieldRef", path, isGlobal, span: span(first.span.start, end) };
+    return {
+      kind: "FieldRef",
+      path,
+      isGlobal,
+      span: span(first.span.start, end),
+    };
   }
 
   private parseCall(): FunctionCall {
@@ -205,18 +240,30 @@ class Parser {
         this.advance();
         continue;
       }
-      if (this.current().kind === "rparen" || this.current().kind === "eof") {break;}
+      if (this.current().kind === "rparen" || this.current().kind === "eof") {
+        break;
+      }
       // Junk between arguments: report once, then resync to a separator.
-      this.error("unexpected-token", this.current().span, "Expected ',' or ')' in argument list.");
+      this.error(
+        "unexpected-token",
+        this.current().span,
+        "Expected ',' or ')' in argument list.",
+      );
       this.synchronizeArgs();
-      if (this.current().kind === "comma") {this.advance();}
+      if (this.current().kind === "comma") {
+        this.advance();
+      }
     }
     let end: number;
     if (this.current().kind === "rparen") {
       end = this.advance().span.end;
     } else {
       const at = span(this.prevEnd(), this.prevEnd());
-      this.error("expected-closing-paren", at, "Expected ')' to close the function call.");
+      this.error(
+        "expected-closing-paren",
+        at,
+        "Expected ')' to close the function call.",
+      );
       end = this.prevEnd();
     }
     return {
@@ -236,7 +283,11 @@ class Parser {
       end = this.advance().span.end;
     } else {
       const at = span(this.prevEnd(), this.prevEnd());
-      this.error("expected-closing-paren", at, "Expected ')' to close the group.");
+      this.error(
+        "expected-closing-paren",
+        at,
+        "Expected ')' to close the group.",
+      );
       end = inner.span.end;
     }
     return { kind: "Paren", expr: inner, span: span(open.span.start, end) };
@@ -244,7 +295,8 @@ class Parser {
 
   private parseErrorPrimary(): Expr {
     const tok = this.current();
-    const at = tok.kind === "eof" ? span(tok.span.start, tok.span.start) : tok.span;
+    const at =
+      tok.kind === "eof" ? span(tok.span.start, tok.span.start) : tok.span;
     this.error("expected-expression", at, "Expected an expression.");
     // Consume the offending token unless it is a separator the caller needs to
     // see (prevents infinite loops without swallowing structural tokens).
@@ -270,10 +322,14 @@ const ESCAPE_CHARS: Record<string, string> = { n: "\n", t: "\t", r: "\r" };
 
 /** Strip surrounding quotes and resolve backslash escapes. */
 function decodeString(raw: string): string {
-  if (raw.length === 0) {return "";}
+  if (raw.length === 0) {
+    return "";
+  }
   const quote = raw[0]!;
   let body = raw.slice(1);
-  if (body.length > 0 && body.endsWith(quote)) {body = body.slice(0, -1);}
+  if (body.length > 0 && body.endsWith(quote)) {
+    body = body.slice(0, -1);
+  }
   let out = "";
   for (let i = 0; i < body.length; i++) {
     const ch = body[i]!;

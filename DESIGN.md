@@ -105,14 +105,14 @@ The semantic single source of truth. One typed data table, one entry per functio
 
 ```ts
 interface FunctionSpec {
-  name: string;                    // canonical uppercase
-  params: ParamSpec[];             // types, variadic flags, min/max arity
-  returnType: TypeRule;            // fixed type or rule (e.g. SameAsArg(0))
-  contexts: ContextId[] | "all";   // where Salesforce allows it
-  simulatable: boolean;            // false ⇒ hard "unsupported" in simulation
-  evalImpl?: EvalFn;               // required iff simulatable
+  name: string; // canonical uppercase
+  params: ParamSpec[]; // types, variadic flags, min/max arity
+  returnType: TypeRule; // fixed type or rule (e.g. SameAsArg(0))
+  contexts: ContextId[] | "all"; // where Salesforce allows it
+  simulatable: boolean; // false ⇒ hard "unsupported" in simulation
+  evalImpl?: EvalFn; // required iff simulatable
   docsUrl: string;
-  summary: string;                 // hover text
+  summary: string; // hover text
   lintNotes?: LintNote[];
 }
 ```
@@ -132,14 +132,14 @@ Contexts are pure configuration:
 
 ```ts
 interface FormulaContext {
-  id: string;                      // "formula_field", "validation_rule", ...
+  id: string; // "formula_field", "validation_rule", ...
   label: string;
-  tier: 1 | 2;                     // verification status (see below)
-  globals: GlobalSpec[];           // $Record? $User? $Flow? $Api? $System? ...
-  requiredReturnType?: SfType;     // e.g. Boolean for validation rules
-  blankModeToggle: boolean;        // formula fields: yes; others per-verified behavior
-  charLimit?: number;              // source-length lint threshold
-  notes?: string;                  // shown in UI, e.g. Tier 2 disclaimer
+  tier: 1 | 2; // verification status (see below)
+  globals: GlobalSpec[]; // $Record? $User? $Flow? $Api? $System? ...
+  requiredReturnType?: SfType; // e.g. Boolean for validation rules
+  blankModeToggle: boolean; // formula fields: yes; others per-verified behavior
+  charLimit?: number; // source-length lint threshold
+  notes?: string; // shown in UI, e.g. Tier 2 disclaimer
 }
 ```
 
@@ -214,7 +214,7 @@ suggestion, redundant parens. Applied to fixpoint with a step log; the UI render
 step-by-step transformation (each step: rule name, before → after) — trust-building and
 shareable. Every rule must be blank-safe (rule 7 in CLAUDE.md); each rule ships with
 property-test coverage comparing original vs rewritten over randomized inputs including blanks
-under both blank modes. Rules that can't be made blank-safe are demoted to *suggestions*
+under both blank modes. Rules that can't be made blank-safe are demoted to _suggestions_
 ("equivalent if X is never blank") rather than applied rewrites.
 
 ### 8.3 Formatter

@@ -16,7 +16,9 @@ import { CONTEXTS } from "./contexts.ts";
 export { FUNCTIONS } from "./functions.ts";
 export { CONTEXTS, DEFAULT_CONTEXT_ID } from "./contexts.ts";
 
-const functionsByName: ReadonlyMap<string, FunctionSpec> = new Map(FUNCTIONS.map((f) => [f.name, f]));
+const functionsByName: ReadonlyMap<string, FunctionSpec> = new Map(
+  FUNCTIONS.map((f) => [f.name, f]),
+);
 
 /** Look up a function spec by name, case-insensitively (Salesforce is case-insensitive). */
 export function getFunction(name: string): FunctionSpec | undefined {
@@ -45,10 +47,14 @@ export function functionArity(spec: FunctionSpec): Arity {
   for (const p of spec.params) {
     if (p.variadic) {
       variadic = true;
-      if (!p.optional) {min += 1;}
+      if (!p.optional) {
+        min += 1;
+      }
     } else {
       max += 1;
-      if (!p.optional) {min += 1;}
+      if (!p.optional) {
+        min += 1;
+      }
     }
   }
   return { min, max: variadic ? Number.POSITIVE_INFINITY : max };

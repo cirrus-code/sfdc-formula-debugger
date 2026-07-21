@@ -58,25 +58,35 @@ describe("checker: operators", () => {
 
 describe("checker: context availability", () => {
   it("warns when a change function is used in a formula field", () => {
-    expect(codes("ISCHANGED(Amount)", "formula_field")).toContain("function-not-available");
+    expect(codes("ISCHANGED(Amount)", "formula_field")).toContain(
+      "function-not-available",
+    );
   });
 
   it("allows the same function in a validation rule", () => {
-    expect(codes("ISCHANGED(Amount)", "validation_rule")).not.toContain("function-not-available");
+    expect(codes("ISCHANGED(Amount)", "validation_rule")).not.toContain(
+      "function-not-available",
+    );
   });
 
   it("suppresses availability findings in Tier 2 contexts", () => {
-    expect(codes("ISCHANGED(Amount)", "workflow_field_update")).not.toContain("function-not-available");
+    expect(codes("ISCHANGED(Amount)", "workflow_field_update")).not.toContain(
+      "function-not-available",
+    );
   });
 });
 
 describe("checker: return type", () => {
   it("warns when a validation rule does not return Boolean", () => {
-    expect(codes('"hello"', "validation_rule")).toContain("return-type-mismatch");
+    expect(codes('"hello"', "validation_rule")).toContain(
+      "return-type-mismatch",
+    );
   });
 
   it("accepts a Boolean formula in a validation rule", () => {
-    expect(codes("Amount > 100", "validation_rule")).not.toContain("return-type-mismatch");
+    expect(codes("Amount > 100", "validation_rule")).not.toContain(
+      "return-type-mismatch",
+    );
   });
 
   it("does not require a return type for formula fields", () => {

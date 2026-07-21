@@ -10,7 +10,7 @@ the pass rate is the conformance number.
   `salesforce/formula-engine` test corpus (BSD-3-Clause; see `/NOTICE`). Kept
   verbatim so corpus generation is reproducible.
 - `salesforce-v2.json` — generated golden rows: `(formula, dataType, fields,
-  blankMode, expected)`. **Generated — do not edit by hand.**
+blankMode, expected)`. **Generated — do not edit by hand.**
 
 ## Regenerate
 

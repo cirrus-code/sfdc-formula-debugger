@@ -1,4 +1,10 @@
-import type { ContextId, FunctionSpec, ParamSpec, SfType, TypeRule } from "./types.ts";
+import type {
+  ContextId,
+  FunctionSpec,
+  ParamSpec,
+  SfType,
+  TypeRule,
+} from "./types.ts";
 
 /**
  * Function metadata table (DESIGN §4). Entries are typed data literals; a
@@ -12,14 +18,23 @@ import type { ContextId, FunctionSpec, ParamSpec, SfType, TypeRule } from "./typ
 
 // Salesforce's function reference is a single doc; per-function deep links are
 // not stable, so we point at the canonical A–Z reference rather than fabricate.
-const DOCS = "https://help.salesforce.com/s/articleView?id=sf.customize_functions.htm&type=5";
+const DOCS =
+  "https://help.salesforce.com/s/articleView?id=sf.customize_functions.htm&type=5";
 
 const fixed = (type: SfType): TypeRule => ({ kind: "fixed", type });
 const sameAsArg = (index: number): TypeRule => ({ kind: "sameAsArg", index });
 
 const req = (name: string, type: SfType): ParamSpec => ({ name, type });
-const opt = (name: string, type: SfType): ParamSpec => ({ name, type, optional: true });
-const rest = (name: string, type: SfType): ParamSpec => ({ name, type, variadic: true });
+const opt = (name: string, type: SfType): ParamSpec => ({
+  name,
+  type,
+  optional: true,
+});
+const rest = (name: string, type: SfType): ParamSpec => ({
+  name,
+  type,
+  variadic: true,
+});
 
 // Contexts where org-state / change-tracking functions are allowed. Restricted
 // (not "all") so using them in a formula field produces an availability finding.
@@ -35,12 +50,17 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   // --- Logical ------------------------------------------------------------
   {
     name: "IF",
-    params: [req("logical_test", "Boolean"), req("value_if_true", "Unknown"), req("value_if_false", "Unknown")],
+    params: [
+      req("logical_test", "Boolean"),
+      req("value_if_true", "Unknown"),
+      req("value_if_false", "Unknown"),
+    ],
     returnType: sameAsArg(1),
     contexts: "all",
     simulatable: true,
     docsUrl: DOCS,
-    summary: "Returns one value if a condition is true and another if it is false.",
+    summary:
+      "Returns one value if a condition is true and another if it is false.",
   },
   {
     name: "AND",
@@ -76,7 +96,8 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     contexts: "all",
     simulatable: true,
     docsUrl: DOCS,
-    summary: "Compares an expression to a series of values, returning the matching result or an else value.",
+    summary:
+      "Compares an expression to a series of values, returning the matching result or an else value.",
   },
   {
     name: "ISBLANK",
@@ -95,7 +116,13 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     simulatable: true,
     docsUrl: DOCS,
     summary: "Legacy null check. TRUE if the value is null.",
-    lintNotes: [{ id: "prefer-isblank", message: "Prefer ISBLANK over ISNULL; ISBLANK also treats empty text as blank." }],
+    lintNotes: [
+      {
+        id: "prefer-isblank",
+        message:
+          "Prefer ISBLANK over ISNULL; ISBLANK also treats empty text as blank.",
+      },
+    ],
   },
   {
     name: "ISNUMBER",
@@ -164,7 +191,11 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   },
   {
     name: "MID",
-    params: [req("text", "Text"), req("start_num", "Number"), req("num_chars", "Number")],
+    params: [
+      req("text", "Text"),
+      req("start_num", "Number"),
+      req("num_chars", "Number"),
+    ],
     returnType: fixed("Text"),
     contexts: "all",
     simulatable: true,
@@ -218,7 +249,11 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   },
   {
     name: "FIND",
-    params: [req("search_text", "Text"), req("text", "Text"), opt("start_num", "Number")],
+    params: [
+      req("search_text", "Text"),
+      req("text", "Text"),
+      opt("start_num", "Number"),
+    ],
     returnType: fixed("Number"),
     contexts: "all",
     simulatable: true,
@@ -227,7 +262,11 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   },
   {
     name: "SUBSTITUTE",
-    params: [req("text", "Text"), req("old_text", "Text"), req("new_text", "Text")],
+    params: [
+      req("text", "Text"),
+      req("old_text", "Text"),
+      req("new_text", "Text"),
+    ],
     returnType: fixed("Text"),
     contexts: "all",
     simulatable: true,
@@ -366,7 +405,11 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   },
   {
     name: "DATE",
-    params: [req("year", "Number"), req("month", "Number"), req("day", "Number")],
+    params: [
+      req("year", "Number"),
+      req("month", "Number"),
+      req("day", "Number"),
+    ],
     returnType: fixed("Date"),
     contexts: "all",
     simulatable: true,
@@ -427,7 +470,8 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     contexts: CHANGE_CONTEXTS,
     simulatable: false,
     docsUrl: DOCS,
-    summary: "The previous value of a field. Not available in simulation (org state).",
+    summary:
+      "The previous value of a field. Not available in simulation (org state).",
   },
   {
     name: "ISCHANGED",
@@ -436,7 +480,8 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     contexts: CHANGE_CONTEXTS,
     simulatable: false,
     docsUrl: DOCS,
-    summary: "TRUE if a field changed. Not available in simulation (org state).",
+    summary:
+      "TRUE if a field changed. Not available in simulation (org state).",
   },
   {
     name: "ISNEW",
@@ -445,15 +490,21 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     contexts: CHANGE_CONTEXTS,
     simulatable: false,
     docsUrl: DOCS,
-    summary: "TRUE if the record is being created. Not available in simulation (org state).",
+    summary:
+      "TRUE if the record is being created. Not available in simulation (org state).",
   },
   {
     name: "VLOOKUP",
-    params: [req("field_to_return", "Unknown"), req("field_on_lookup", "Unknown"), req("lookup_value", "Unknown")],
+    params: [
+      req("field_to_return", "Unknown"),
+      req("field_on_lookup", "Unknown"),
+      req("lookup_value", "Unknown"),
+    ],
     returnType: sameAsArg(0),
     contexts: ["validation_rule", "default_value"],
     simulatable: false,
     docsUrl: DOCS,
-    summary: "Looks up a value from another object. Not available in simulation (org state).",
+    summary:
+      "Looks up a value from another object. Not available in simulation (org state).",
   },
 ];

@@ -29,9 +29,13 @@ const ORG_STATE_GLOBALS: readonly GlobalSpec[] = [
   { name: "$System", simulatable: false },
 ];
 
-const COMMON_GLOBALS: readonly GlobalSpec[] = [...SIMULATABLE_GLOBALS, ...ORG_STATE_GLOBALS];
+const COMMON_GLOBALS: readonly GlobalSpec[] = [
+  ...SIMULATABLE_GLOBALS,
+  ...ORG_STATE_GLOBALS,
+];
 
-const TIER2_NOTE = "Function and global availability is unverified for this context.";
+const TIER2_NOTE =
+  "Function and global availability is unverified for this context.";
 
 export const CONTEXTS: readonly FormulaContext[] = [
   // --- Tier 1 -------------------------------------------------------------
@@ -56,7 +60,11 @@ export const CONTEXTS: readonly FormulaContext[] = [
     id: "flow_formula",
     label: "Flow Formula",
     tier: 1,
-    globals: [...COMMON_GLOBALS, { name: "$Flow", simulatable: true }, { name: "$Record", simulatable: true }],
+    globals: [
+      ...COMMON_GLOBALS,
+      { name: "$Flow", simulatable: true },
+      { name: "$Record", simulatable: true },
+    ],
     blankModeToggle: false,
   },
 

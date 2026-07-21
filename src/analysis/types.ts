@@ -25,18 +25,34 @@ export function isDatelike(t: SfType): boolean {
 
 /** Whether a value of type `actual` is acceptable where `expected` is wanted. */
 export function isAssignable(actual: SfType, expected: SfType): boolean {
-  if (actual === "Unknown" || expected === "Unknown") {return true;}
-  if (actual === expected) {return true;}
-  if (NUMERIC.has(actual) && NUMERIC.has(expected)) {return true;}
-  if (TEXTISH.has(actual) && TEXTISH.has(expected)) {return true;}
+  if (actual === "Unknown" || expected === "Unknown") {
+    return true;
+  }
+  if (actual === expected) {
+    return true;
+  }
+  if (NUMERIC.has(actual) && NUMERIC.has(expected)) {
+    return true;
+  }
+  if (TEXTISH.has(actual) && TEXTISH.has(expected)) {
+    return true;
+  }
   return false;
 }
 
 /** Whether two types can be meaningfully compared with `<`, `<=`, `>`, `>=`. */
 export function isComparable(a: SfType, b: SfType): boolean {
-  if (a === "Unknown" || b === "Unknown") {return true;}
-  if (NUMERIC.has(a) && NUMERIC.has(b)) {return true;}
-  if (TEXTISH.has(a) && TEXTISH.has(b)) {return true;}
-  if (DATELIKE.has(a) && DATELIKE.has(b)) {return true;}
+  if (a === "Unknown" || b === "Unknown") {
+    return true;
+  }
+  if (NUMERIC.has(a) && NUMERIC.has(b)) {
+    return true;
+  }
+  if (TEXTISH.has(a) && TEXTISH.has(b)) {
+    return true;
+  }
+  if (DATELIKE.has(a) && DATELIKE.has(b)) {
+    return true;
+  }
   return a === b;
 }

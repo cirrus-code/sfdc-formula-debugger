@@ -1,8 +1,12 @@
 import type { FunctionSpec, ParamSpec } from "../../registry/index.ts";
 
 function formatParam(p: ParamSpec): string {
-  if (p.variadic) {return `${p.name}…`;}
-  if (p.optional) {return `[${p.name}]`;}
+  if (p.variadic) {
+    return `${p.name}…`;
+  }
+  if (p.optional) {
+    return `[${p.name}]`;
+  }
   return p.name;
 }
 

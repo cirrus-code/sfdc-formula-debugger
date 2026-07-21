@@ -17,7 +17,10 @@ describe("field extraction", () => {
   });
 
   it("flags globals", () => {
-    expect(fields("$User.Id")[0]).toMatchObject({ name: "$User.Id", isGlobal: true });
+    expect(fields("$User.Id")[0]).toMatchObject({
+      name: "$User.Id",
+      isGlobal: true,
+    });
   });
 
   it("infers Number from arithmetic", () => {
