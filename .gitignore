@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Nix / direnv
+.direnv/
+
+# Editor / OS
+*.local
+.DS_Store
+*.log
+
+# Test / coverage
+coverage/
