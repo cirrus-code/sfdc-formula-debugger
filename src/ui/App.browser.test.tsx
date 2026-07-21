@@ -59,6 +59,25 @@ test("surfaces positioned diagnostics for a broken formula", async () => {
   await expect.poll(() => screen.container.querySelectorAll(".cm-lintRange").length).toBeGreaterThan(0);
 });
 
+test("re-checks against the selected context", async () => {
+  const screen = await render(<App />);
+  // The sample returns Number; a validation rule must return Boolean.
+  await screen.getByRole("combobox").selectOptions("validation_rule");
+  await expect.element(screen.getByText(/must return Boolean/)).toBeInTheDocument();
+});
+
+test("offers registry-driven autocomplete", async () => {
+  const screen = await render(<App />);
+  await expect.poll(() => screen.container.querySelector(".cm-content")).toBeTruthy();
+
+  await typeFormula(screen.container, "ISB");
+  await userEvent.keyboard("{Control>} {/Control}"); // Ctrl-Space opens completions
+
+  await expect
+    .poll(() => screen.container.ownerDocument.querySelector(".cm-tooltip-autocomplete")?.textContent ?? "")
+    .toContain("ISBLANK");
+});
+
 test("renders without console errors", async () => {
   await render(<App />);
   await expect.poll(() => consoleErrors.length).toBe(0);

@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { parse } from "../syntax/index.ts";
+import { analyze } from "../analysis/index.ts";
+import { CONTEXTS, DEFAULT_CONTEXT_ID, getContext } from "../registry/index.ts";
 import { palette, font, product } from "../theme/theme.ts";
 import { FormulaEditor } from "./editor/FormulaEditor.tsx";
 import { offsetToLineCol } from "./util/position.ts";
@@ -14,8 +16,16 @@ const SEVERITY_COLOR: Record<string, string> = {
 
 export function App() {
   const [source, setSource] = useState(SAMPLE);
-  const result = useMemo(() => parse(source), [source]);
-  const diagnostics = source.trim() === "" ? [] : result.diagnostics;
+  const [contextId, setContextId] = useState(DEFAULT_CONTEXT_ID);
+
+  const { ast, diagnostics } = useMemo(() => {
+    const parsed = parse(source);
+    if (source.trim() === "") {return { ast: parsed.ast, diagnostics: [] as ReturnType<typeof analyze> };}
+    const merged = [...parsed.diagnostics, ...analyze(parsed.ast, contextId)].sort((a, b) => a.span.start - b.span.start);
+    return { ast: parsed.ast, diagnostics: merged };
+  }, [source, contextId]);
+
+  const context = getContext(contextId);
 
   return (
     <main
@@ -45,17 +55,67 @@ export function App() {
           <p style={{ marginTop: "0.4rem", color: palette.textMuted }}>{product.tagline}</p>
         </header>
 
-        <FormulaEditor initialDoc={SAMPLE} onChange={setSource} />
+        <ContextPicker contextId={contextId} onChange={setContextId} />
 
-        <ProblemsPanel source={source} diagnostics={diagnostics} astKind={result.ast.kind} />
+        <FormulaEditor initialDoc={SAMPLE} contextId={contextId} onChange={setSource} />
+
+        {context?.notes ? (
+          <p
+            style={{
+              marginTop: "0.6rem",
+              fontSize: "0.8rem",
+              color: palette.warning,
+              display: "flex",
+              gap: "0.4rem",
+            }}
+          >
+            <span aria-hidden>⚠</span>
+            {context.notes}
+          </p>
+        ) : null}
+
+        <ProblemsPanel source={source} diagnostics={diagnostics} astKind={ast.kind} />
       </div>
     </main>
   );
 }
 
+interface ContextPickerProps {
+  readonly contextId: string;
+  readonly onChange: (id: string) => void;
+}
+
+function ContextPicker({ contextId, onChange }: ContextPickerProps) {
+  return (
+    <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem", fontSize: "0.85rem" }}>
+      <span style={{ color: palette.textMuted }}>Context</span>
+      <select
+        value={contextId}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          background: palette.surface,
+          color: palette.text,
+          border: `1px solid ${palette.border}`,
+          borderRadius: "8px",
+          padding: "0.35rem 0.6rem",
+          fontFamily: font.sans,
+          fontSize: "0.85rem",
+        }}
+      >
+        {CONTEXTS.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.label}
+            {c.tier === 2 ? " (unverified)" : ""}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 interface ProblemsPanelProps {
   readonly source: string;
-  readonly diagnostics: ReturnType<typeof parse>["diagnostics"];
+  readonly diagnostics: ReturnType<typeof analyze>;
   readonly astKind: string;
 }
 
@@ -89,9 +149,7 @@ function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
       </div>
 
       {diagnostics.length === 0 ? (
-        <p style={{ padding: "0.8rem 1rem", color: palette.textMuted, fontSize: "0.9rem" }}>
-          Parses cleanly.
-        </p>
+        <p style={{ padding: "0.8rem 1rem", color: palette.textMuted, fontSize: "0.9rem" }}>Parses cleanly.</p>
       ) : (
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {diagnostics.map((d, i) => {
