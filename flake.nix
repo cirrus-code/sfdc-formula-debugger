@@ -22,7 +22,13 @@
             nodejs_26
             pnpm
             prettier
+            chromium
           ];
+
+          # Browser smoke tests drive Playwright against this Chromium instead of
+          # Playwright's prebuilt browsers, which do not run on NixOS.
+          CHROMIUM_BIN = "${pkgs.chromium}/bin/chromium";
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1";
         };
       };
     };

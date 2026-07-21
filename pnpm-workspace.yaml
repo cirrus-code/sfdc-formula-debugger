@@ -1,2 +1,5 @@
 allowBuilds:
   esbuild: true
+  # msw ships a service worker for network mocking we don't use; its postinstall
+  # only copies mockServiceWorker.js, which we never need.
+  msw: false
