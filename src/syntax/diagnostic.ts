@@ -17,7 +17,15 @@ export type DiagnosticCode =
   | "expected-expression"
   | "expected-closing-paren"
   | "expected-field-name"
-  | "unexpected-token";
+  | "unexpected-token"
+  // Analysis
+  | "unknown-function"
+  | "wrong-arity"
+  | "argument-type-mismatch"
+  | "operator-type-mismatch"
+  | "function-not-available"
+  | "return-type-mismatch"
+  | "nonstandard-operator";
 
 export interface Diagnostic {
   readonly code: DiagnosticCode;

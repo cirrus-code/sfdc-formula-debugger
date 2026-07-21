@@ -7,4 +7,5 @@
  *
  * May depend on: engine/, registry/, syntax/.
  */
-export {};
+export { analyze } from "./checker.ts";
+export * from "./types.ts";

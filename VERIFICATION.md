@@ -22,6 +22,25 @@ Status legend: ❓ unverified · 🔬 verifying · ✅ verified (golden test id)
   recovery, but Salesforce formulas use only `=` / `<>`. Analysis should decide
   whether these are a hard error or a lenient alias; not yet settled.
 
+## Registry data (Phase 2)
+
+Encoded as best-effort config and surfaced only as **warnings** (never errors),
+suppressed entirely for Tier 2 contexts, until org-verified:
+
+- ❓ **Per-function context availability.** `functions.ts` restricts
+  `ISCHANGED`/`ISNEW`/`PRIORVALUE` to change-tracking contexts and `VLOOKUP` to
+  validation rule + default value; every other function is marked `"all"`. The
+  exact availability matrix per context (esp. every Tier 2 context) is unconfirmed.
+- ❓ **Context globals.** The `$User`/`$Setup`/`$Flow`/… lists per context in
+  `contexts.ts` are approximate, as is each global's simulatability.
+- ❓ **Required return types.** Boolean is required for validation rules,
+  workflow rules, and approval criteria — plausible but unverified per context.
+- ❓ **Blank-mode applicability per context.** Only `formula_field` currently
+  enables the toggle; whether other contexts honor "treat blanks as zeroes" is open.
+- ❓ **Source character limits.** `charLimit: 3900` on formula/validation is the
+  formula-definition length, not the compiled size (which cannot be computed
+  client-side; the linter must say so).
+
 ## Semantics (from CLAUDE.md NEEDS-VERIFICATION list)
 
 - ❓ Case sensitivity of text `=` / `<>` comparisons (per context, if it differs).
