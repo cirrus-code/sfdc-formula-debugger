@@ -1,0 +1,66 @@
+name: CI
+
+# Fast, JVM-free CI (CONFORMANCE.md WS5): typecheck, lint, unit + conformance
+# tests against the committed corpus, browser smoke tests, and the production
+# build. The conformance pass rate is the marketing number — this workflow
+# protects it via the locked baseline in src/engine/conformance.test.ts.
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: nix develop --command pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: nix develop --command pnpm run typecheck
+
+      - name: Lint
+        run: nix develop --command pnpm run lint
+
+      - name: Unit + conformance tests
+        env:
+          CONF_DUMP: conformance.json
+        run: nix develop --command pnpm run test
+
+      - name: Report conformance number
+        if: always()
+        run: |
+          nix develop --command node -e '
+            const fs = require("fs");
+            if (!fs.existsSync("conformance.json")) process.exit(0);
+            const d = JSON.parse(fs.readFileSync("conformance.json", "utf8"));
+            const pct = (d.conformance * 100).toFixed(1);
+            const comparable = d.tally.pass + d.tally.fail;
+            const line = `## Conformance: ${pct}% (${d.tally.pass}/${comparable} comparable)\n\n` +
+              `pass ${d.tally.pass} · fail ${d.tally.fail} · quarantine ${d.tally.quarantine} · unsupported ${d.tally.unsupported}\n`;
+            console.log(line);
+            if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, line);
+          '
+
+      - name: Browser smoke tests
+        run: nix develop --command pnpm run test:browser
+
+      - name: Production build
+        run: nix develop --command pnpm run build

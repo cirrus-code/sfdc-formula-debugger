@@ -15,3 +15,5 @@ dist-ssr/
 
 # Test / coverage
 coverage/
+# Ephemeral conformance dump (CONF_DUMP) written by the conformance test in CI.
+conformance.json

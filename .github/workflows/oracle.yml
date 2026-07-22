@@ -1,0 +1,30 @@
+name: Oracle harness
+
+# The JVM conformance oracle (CONFORMANCE.md WS3) is offline infrastructure, NOT
+# part of the app build or the fast CI loop. This scheduled/manual job builds
+# Salesforce's formula-engine and the harness and runs the example probes — a
+# canary that the oracle still builds, so corpus regeneration stays possible.
+# It never gates app CI and the product never depends on a JVM.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1" # weekly, Monday 06:00 UTC
+
+jobs:
+  build-oracle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-formula-engine-0.9.13
+
+      - name: Build formula-engine + harness, run smoke probes
+        run: nix develop .#oracle --command bash oracle/ci-smoke.sh
