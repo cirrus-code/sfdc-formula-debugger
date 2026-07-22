@@ -40,13 +40,29 @@ export interface EvalEnv {
  */
 export function evaluateFormula(ast: Expr, env: EvalEnv): EvalResult {
   try {
-    return evaluate(ast, env);
+    const r = evaluate(ast, env);
+    // Materialize the final Number to Salesforce's 32-place display scale.
+    return isError(r) ? r : materialize(r);
   } catch (e) {
     if (e instanceof UnsupportedError) {
       throw e;
     }
     return error("#Error!");
   }
+}
+
+// Salesforce carries 39 significant figures through chained `/` and `*` (see
+// value.ts) and rounds HALF_UP to this many decimal places only when a Number is
+// "materialized": the final result and each value handed to a function or
+// comparison. Rounding after every operation instead (our old behavior) loses the
+// guard digits, so e.g. FLOOR((1/9)*9) came out 0 rather than 1. Oracle-verified.
+const MAX_SCALE = 32;
+
+function materialize(v: SfValue): SfValue {
+  if (v.blank || !isNumericType(v)) {
+    return v;
+  }
+  return { ...v, data: v.data.toDecimalPlaces(MAX_SCALE) };
 }
 
 function evaluate(node: Expr, env: EvalEnv): EvalResult {
@@ -120,8 +136,15 @@ function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
 
   switch (node.op) {
     case "&":
-      return text(concatString(l) + concatString(r));
+      // Materialize numeric operands so a concatenated Number shows 32 places.
+      return text(concatString(materialize(l)) + concatString(materialize(r)));
     case "+":
+      // Salesforce '+' concatenates when both operands are text — but, unlike
+      // '&', a blank operand propagates to null rather than acting as "".
+      if (isTextType(l) && isTextType(r)) {
+        return l.blank || r.blank ? blank("Text") : text(asText(l) + asText(r));
+      }
+      return arithmetic(node.op, l, r, env);
     case "-":
     case "*":
     case "/":
@@ -149,15 +172,6 @@ function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
   }
 }
 
-// Salesforce caps arithmetic results at 32 decimal places, rounding per operation
-// (round-half-up), verified against its open-source engine: 1/3 →
-// 0.333…(32 places), (1/3)*(1/3) → 0.111…(32 places). See CONFORMANCE.md.
-const MAX_SCALE = 32;
-
-function scaled(d: Decimal): SfValue {
-  return num(d.toDecimalPlaces(MAX_SCALE));
-}
-
 function arithmetic(
   op: "+" | "-" | "*" | "/" | "^",
   l: SfValue,
@@ -173,24 +187,26 @@ function arithmetic(
   }
   const a = toDecimal(l, env);
   const b = toDecimal(r, env);
+  // Results carry decimal.js's 39-sig-fig precision (value.ts); they are rounded
+  // to 32 places only at materialization, never per operation.
   switch (op) {
     case "+":
-      return scaled(a.plus(b));
+      return num(a.plus(b));
     case "-":
-      return scaled(a.minus(b));
+      return num(a.minus(b));
     case "*":
-      return scaled(a.times(b));
+      return num(a.times(b));
     case "/":
       if (b.isZero()) {
         return error("#Error! (division by zero)");
       }
-      return scaled(a.div(b));
+      return num(a.div(b));
     case "^":
       // Salesforce's `^` rejects non-integer exponents (use SQRT for roots).
       if (!b.isInteger()) {
         return error("#Error! (^ requires an integer exponent)");
       }
-      return scaled(a.pow(b));
+      return num(a.pow(b));
     default:
       return assertNever(op);
   }
@@ -212,7 +228,8 @@ function tryEqual(l: SfValue, r: SfValue): boolean | null {
     return null;
   }
   if (isNumericType(l) && isNumericType(r)) {
-    return asDecimal(l).equals(asDecimal(r));
+    // Compare at the 32-place materialized scale (so (1/9)*9 equals 1).
+    return asDecimal(materialize(l)).equals(asDecimal(materialize(r)));
   }
   if (l.type === "Boolean" && r.type === "Boolean") {
     return l.data === r.data;
@@ -255,7 +272,8 @@ function compare(
   if (isTextType(l) && isTextType(r)) {
     cmp = strcmp(asText(l), asText(r));
   } else {
-    cmp = toDecimal(l, env).comparedTo(toDecimal(r, env));
+    // Order at the 32-place materialized scale, consistent with equality.
+    cmp = toDecimal(materialize(l), env).comparedTo(toDecimal(materialize(r), env));
   }
   switch (op) {
     case "<":
@@ -308,7 +326,9 @@ function evalCall(node: FunctionCall, env: EvalEnv): EvalResult {
     if (isError(v)) {
       return v;
     }
-    args.push(v);
+    // A Number handed to a function is materialized to 32 places, so e.g.
+    // FLOOR((1/9)*9) sees 1, not 0.999…. Oracle-verified.
+    args.push(materialize(v));
   }
 
   // A blank argument makes most functions blank (null propagates) — in both

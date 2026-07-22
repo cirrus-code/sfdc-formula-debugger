@@ -64,6 +64,42 @@ describe("engine: decimal arithmetic (rule 2)", () => {
   });
 });
 
+describe("engine: 39-sig-fig math, materialized to 32 places (oracle-verified)", () => {
+  it("keeps guard digits through chained / and * so FLOOR((1/9)*9) = 1", () => {
+    // Salesforce carries 39 sig-figs internally and rounds to 32 places only at
+    // materialization, so (1/9)*9 rounds up to 1 rather than 0.999….
+    expect(n("(1 / 9) * 9")).toBe("1");
+    expect(n("FLOOR((1 / 9) * 9)")).toBe("1");
+    expect(n("FLOOR((5 / 9) * 9)")).toBe("5");
+  });
+
+  it("materializes a bare division to 32 decimal places", () => {
+    expect(n("1 / 3")).toBe(`0.${"3".repeat(32)}`);
+  });
+});
+
+describe("engine: '+' concatenates text (oracle-verified)", () => {
+  it("adds numbers but concatenates text operands", () => {
+    expect(n("2 + 3")).toBe("5");
+    expect(
+      s("a + b", {
+        fields: {
+          a: { type: "Text", blank: false, data: "aaaa" },
+          b: { type: "Text", blank: false, data: "bbbb" },
+        },
+      }),
+    ).toBe("aaaabbbb");
+  });
+
+  it("propagates a blank text operand to null (unlike '&')", () => {
+    const r = ev("a + b", {
+      fields: { a: { type: "Text", blank: false, data: "x" }, b: blank("Text") },
+    });
+    expect(isError(r)).toBe(false);
+    expect((r as SfValue).blank).toBe(true);
+  });
+});
+
 describe("engine: division by zero", () => {
   it("produces a simulated #Error, not a crash or null", () => {
     const r = ev("1 / 0");

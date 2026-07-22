@@ -15,10 +15,10 @@ import { runRow, type RowStatus } from "./conformance.ts";
 // corpus-driven semantics pass (FLOOR/CEILING toward-zero, zero-mode numeric
 // coercion, three-valued blank comparison, blank propagation, DATE bounds)
 // lifted it to 0.97, then a function port (TRUNC, MFLOOR/MCEILING, SUBSTR,
-// INITCAP, REVERSE, ASCII, CHR, IFERROR) moved ~740 rows out of "unsupported"
-// into the comparable set. The remaining gap is the division-scale precision
-// nuance tracked in VERIFICATION.md.
-const BASELINE = 0.96;
+// INITCAP, REVERSE, ASCII, CHR, IFERROR) moved ~740 rows into the comparable
+// set, then the field-valued oracle revealed the true numeric model — 39-sig-fig
+// math materialized to 32 places, plus '+' concatenates text — lifting it to 0.99.
+const BASELINE = 0.98;
 
 const rows: CorpusRow[] = JSON.parse(
   readFileSync("corpus/salesforce-v2.json", "utf8"),

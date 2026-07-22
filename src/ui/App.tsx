@@ -9,11 +9,10 @@ import { offsetToLineCol } from "./util/position.ts";
 // The simulator is the only route to the evaluator (and its decimal.js
 // dependency), so it is code-split out of the first paint — the editor, parser,
 // and diagnostics load without it. It appears once the user types a formula.
-const SimulatePanel = lazy(() =>
-  import("./simulate/SimulatePanel.tsx").then((m) => ({
-    default: m.SimulatePanel,
-  })),
-);
+const SimulatePanel = lazy(async () => {
+  const m = await import("./simulate/SimulatePanel.tsx");
+  return { default: m.SimulatePanel };
+});
 
 const SAMPLE = "IF(ISBLANK(Amount), 0, Amount * 1.1)";
 

@@ -119,18 +119,32 @@ hover, but refuse to simulate per rule 1):
 - ⛔ **`IN`** — the oracle's semantics are not reproducible from the corpus
   (`IN("Left", "Left")` → `false`); refuses rather than guess (rule 9).
 
+## Numeric model — resolved via the field-valued oracle (WS3 extension)
+
+The field-valued harness (`oracle/`, `MapFormulaContext`) evaluated bare
+intermediates against the real engine and settled the numeric-scale question:
+
+- ✅ **39-sig-fig internal math, materialized to 32 decimal places.** Salesforce's
+  `/` and `*` compute at 39 significant figures (`MathContext(39, HALF_UP)`) and
+  round HALF_UP to 32 _decimal places_ only at materialization — the final result
+  and each value handed to a function or comparison — **not** after every op.
+  Verified raw: `(1/9)*9 → 1.000…`, `FLOOR((1/9)*9) → 1`, `1/3 → 0.333…(32)`. Our
+  engine now mirrors this (`value.ts` precision 39; `evaluator.ts` `materialize`),
+  which flipped the whole `FLOOR/CEILING/TRUNC((x/y)*y)` cluster to pass.
+- ✅ **`+` concatenates text operands** (`"aaaa" + "bbbb"` → `"aaaabbbb"`), and a
+  blank text operand propagates to null (unlike `&`, which treats blank as "").
+
 ## Conformance backlog (remaining gap to 100%)
 
-`src/engine/conformance.test.ts` sits at ~97% over the comparable subset. Remaining
-clusters, still needing rule confirmation before a fix lands:
+`src/engine/conformance.test.ts` sits at ~99% over the comparable subset. The
+remaining ~56 failures are diverse long-tail edge cases, each needing its own
+verification before a fix:
 
-- 🔬 **Division-scale precision** — the dominant remaining cluster (~84 rows).
-  `FLOOR((x/y)*y)` returns `x` in Salesforce, but our 32-place division yields
-  `0.999…(32 nines)` → FLOOR `0`. No fixed truncation scale reproduces this; only
-  a round-half-up of the _intermediate_ product does, which would risk the
-  verified 32-place division cases. Resolving it needs the JVM oracle to report
-  the bare `(x/y)*y` intermediate value (the field-valued harness extension) — do
-  not guess (rule 9).
+- 🔬 **Date arithmetic** — `date + number` (should yield a date/null), `TEXT()` of
+  a blank date (→ null), and Java datetime rendering (quarantined).
+- 🔬 **`$System.originDateTime` and other context globals** in simulation.
+- 🔬 **Specific blank interactions** — a few `CONTAINS`/`SUBSTITUTE` rows where the
+  blank-propagation vs blank-absorb call differs from the oracle.
 - 🔬 **`DATE()` upper year bound** — `10000` errors and four-digit years pass;
   whether the exact ceiling is `4000` or `9999` is unconfirmed. `MAX_YEAR = 9999`
   is the widest bound consistent with the corpus.
