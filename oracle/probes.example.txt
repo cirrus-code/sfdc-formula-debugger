@@ -1,3 +1,12 @@
+# Lines starting with '#' and blank lines are ignored.
+#
+# Two line shapes (tab-separated):
+#   legacy:       TYPE <TAB> FORMULA                       (blank fields, zero-mode)
+#   field-valued: TYPE <TAB> BLANKMODE <TAB> FORMULA <TAB> FIELDS
+# BLANKMODE is 'zero' or 'blank'. FIELDS = name:TYPE=value pairs joined by ';'
+# (name:TYPE:SCALE=value to set scale; empty value = blank field).
+
+# --- legacy: constant expressions with blank fields ---
 DOUBLE	1/3
 DOUBLE	1000000/3
 DOUBLE	(1/3)*(1/3)
@@ -8,3 +17,11 @@ DOUBLE	MOD(10, 0)
 BOOLEAN	"a"="A"
 TEXT	LEFT("", 3)
 TEXT	RIGHT("abc", 0)
+
+# --- field-valued: typed inputs + blank-handling mode ---
+DOUBLE	zero	customnumber1__c / customnumber2__c	customnumber1__c:DOUBLE=1;customnumber2__c:DOUBLE=9
+# blank field + 5: zero-mode treats blank as 0 (=> 5), blank-mode propagates blank (=> null)
+DOUBLE	zero	customnumber1__c + 5	customnumber1__c:DOUBLE=
+DOUBLE	blank	customnumber1__c + 5	customnumber1__c:DOUBLE=
+TEXT	zero	customtext__c & "!"	customtext__c:TEXT=hi
+BOOLEAN	zero	ISBLANK(customtext__c)	customtext__c:TEXT=
