@@ -130,12 +130,25 @@ capture the case as a permanent regression row; (b) **OSS ≠ product** →
 org-verify; (c) **intentional divergence** → allowlist. Runs as a periodic job;
 every discrepancy becomes a corpus row.
 
-### WS5 — CI conformance number
+### WS5 — CI conformance number ✅ _(`.github/workflows/`)_
 
-Fast CI runs our TS engine against the committed corpus; pass rate = the
-**conformance number** (marketing copy — protect it). No JVM. A separate
-_scheduled_ workflow regenerates/expands the corpus via WS3/WS4 and opens a PR on
-drift.
+Fast CI (`ci.yml`) runs our TS engine against the committed corpus on every
+push/PR — typecheck, lint, unit + conformance tests, browser smoke tests, build —
+and surfaces the pass rate (the **conformance number**, marketing copy) to the
+job summary. No JVM. A separate _scheduled_ workflow (`oracle.yml`) builds the
+JVM oracle as a canary; corpus regeneration/expansion via WS3/WS4 with a drift PR
+is the remaining automation.
+
+## Status snapshot
+
+Conformance is **~96.5%** over the comparable subset (`src/engine/conformance.test.ts`,
+baseline locked at 0.96). Path so far: WS3 oracle rules 0.74 → 0.86; a
+corpus-driven semantics pass (FLOOR/CEILING toward-zero, zero-mode numeric
+coercion, three-valued blank comparison, blank propagation, DATE bounds) → 0.97;
+a function port (TRUNC, MFLOOR/MCEILING, SUBSTR, INITCAP, REVERSE, ASCII, CHR,
+IFERROR) moved ~740 rows out of "unsupported" into the comparable set. The
+dominant remaining gap is a Number division-scale precision nuance
+(`FLOOR((x/y)*y)`), pending a field-valued oracle probe (VERIFICATION.md).
 
 ## Licensing
 
