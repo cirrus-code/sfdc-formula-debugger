@@ -8,5 +8,21 @@ export default defineConfig({
     target: "es2022",
     // The bundle is a first-impression marketing surface; surface size regressions loudly.
     chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        // Split rarely-changing vendor code into its own long-cache chunk,
+        // separate from app code and the lazy-loaded simulator/decimal.js chunk.
+        manualChunks: {
+          react: ["react", "react-dom", "react/jsx-runtime"],
+          codemirror: [
+            "@codemirror/state",
+            "@codemirror/view",
+            "@codemirror/commands",
+            "@codemirror/lint",
+            "@codemirror/autocomplete",
+          ],
+        },
+      },
+    },
   },
 });

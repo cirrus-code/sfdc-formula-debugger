@@ -1,11 +1,19 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { parse } from "../syntax/index.ts";
 import { analyze } from "../analysis/index.ts";
 import { CONTEXTS, DEFAULT_CONTEXT_ID, getContext } from "../registry/index.ts";
 import { palette, font, product } from "../theme/theme.ts";
 import { FormulaEditor } from "./editor/FormulaEditor.tsx";
-import { SimulatePanel } from "./simulate/SimulatePanel.tsx";
 import { offsetToLineCol } from "./util/position.ts";
+
+// The simulator is the only route to the evaluator (and its decimal.js
+// dependency), so it is code-split out of the first paint — the editor, parser,
+// and diagnostics load without it. It appears once the user types a formula.
+const SimulatePanel = lazy(() =>
+  import("./simulate/SimulatePanel.tsx").then((m) => ({
+    default: m.SimulatePanel,
+  })),
+);
 
 const SAMPLE = "IF(ISBLANK(Amount), 0, Amount * 1.1)";
 
@@ -89,10 +97,12 @@ export function App() {
         ) : null}
 
         {source.trim() === "" ? null : (
-          <SimulatePanel
-            ast={ast}
-            blankToggle={context?.blankModeToggle ?? false}
-          />
+          <Suspense fallback={null}>
+            <SimulatePanel
+              ast={ast}
+              blankToggle={context?.blankModeToggle ?? false}
+            />
+          </Suspense>
         )}
 
         <ProblemsPanel
