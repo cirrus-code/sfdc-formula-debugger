@@ -61,8 +61,16 @@ function evaluate(node: Expr, env: EvalEnv): EvalResult {
       return blank("Unknown");
     case "ErrorNode":
       return error("#Error! (cannot evaluate invalid formula)");
-    case "FieldRef":
-      return env.fields.get(node.path.join(".")) ?? blank("Unknown");
+    case "FieldRef": {
+      const v = env.fields.get(node.path.join(".")) ?? blank("Unknown");
+      // "Treat blank fields as zeroes" mode: an empty Number/Currency/Percent
+      // field reads as a real 0 everywhere it is used — arithmetic, ISNULL,
+      // NULLVALUE — not as blank. Verified against the oracle corpus.
+      if (env.blankMode === "zero" && v.blank && isNumericType(v)) {
+        return { ...v, blank: false, data: new Decimal(0) };
+      }
+      return v;
+    }
     case "Paren":
       return evaluate(node.expr, env);
     case "UnaryOp": {
@@ -94,7 +102,9 @@ function toDecimal(v: SfValue, env: EvalEnv): Decimal {
   return asDecimal(v);
 }
 
-function isNumericType(v: SfValue): boolean {
+function isNumericType(
+  v: SfValue,
+): v is Extract<SfValue, { data: Decimal }> {
   return v.type === "Number" || v.type === "Currency" || v.type === "Percent";
 }
 
@@ -118,11 +128,17 @@ function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
     case "^":
       return arithmetic(node.op, l, r, env);
     case "=":
-    case "==":
-      return bool(valuesEqual(l, r));
+    case "==": {
+      const eq = tryEqual(l, r);
+      return eq === null ? blank("Boolean") : bool(eq);
+    }
     case "<>":
-    case "!=":
-      return bool(!valuesEqual(l, r));
+    case "!=": {
+      const eq = tryEqual(l, r);
+      // A null equality (blank numeric operand) propagates: `<>` is not simply
+      // the negation of `=` here — both are unknown, hence false in context.
+      return eq === null ? blank("Boolean") : bool(!eq);
+    }
     case "<":
     case "<=":
     case ">":
@@ -180,20 +196,26 @@ function arithmetic(
   }
 }
 
-function valuesEqual(l: SfValue, r: SfValue): boolean {
+/**
+ * Three-valued equality under Salesforce blank semantics. Returns `null` when
+ * the result is unknown (a blank numeric operand), which the caller renders as a
+ * blank Boolean — false in a boolean context. Text comparison coerces blank to
+ * the empty string, so `blankText = "" ` is true.
+ */
+function tryEqual(l: SfValue, r: SfValue): boolean | null {
+  // Text equality is case-sensitive (oracle-verified) and treats a blank field
+  // as the empty string.
+  if (isTextType(l) && isTextType(r)) {
+    return concatString(l) === concatString(r);
+  }
   if (l.blank || r.blank) {
-    return l.blank && r.blank;
+    return null;
   }
   if (isNumericType(l) && isNumericType(r)) {
     return asDecimal(l).equals(asDecimal(r));
   }
   if (l.type === "Boolean" && r.type === "Boolean") {
     return l.data === r.data;
-  }
-  // Text equality is currently case-sensitive; case-sensitivity of `=`/`<>` is a
-  // NEEDS-VERIFICATION item (VERIFICATION.md) to be settled by the oracle corpus.
-  if (isTextType(l) && isTextType(r)) {
-    return asText(l) === asText(r);
   }
   return false;
 }
@@ -223,8 +245,14 @@ function compare(
   r: SfValue,
   env: EvalEnv,
 ): EvalResult {
+  // An ordering comparison against a blank operand is false (blank mode). In zero
+  // mode blank numerics already read as 0 upstream, so this only fires for values
+  // that remain blank. Verified against the oracle corpus.
+  if (l.blank || r.blank) {
+    return bool(false);
+  }
   let cmp: number;
-  if (isTextType(l) && isTextType(r) && !l.blank && !r.blank) {
+  if (isTextType(l) && isTextType(r)) {
     cmp = strcmp(asText(l), asText(r));
   } else {
     cmp = toDecimal(l, env).comparedTo(toDecimal(r, env));
@@ -242,6 +270,22 @@ function compare(
       return assertNever(op);
   }
 }
+
+// Functions that must observe blank inputs rather than propagate them to null.
+const BLANK_AWARE = new Set([
+  "ISBLANK",
+  "ISNULL",
+  "ISNUMBER",
+  "ISPICKVAL",
+  "NULLVALUE",
+  "BLANKVALUE",
+  "LEN",
+  "CONCATENATE",
+  "TEXT",
+  // UPPER/LOWER absorb a blank to "" (unlike TRIM, which propagates to null).
+  "UPPER",
+  "LOWER",
+]);
 
 function evalCall(node: FunctionCall, env: EvalEnv): EvalResult {
   const spec = getFunction(node.callee);
@@ -264,6 +308,15 @@ function evalCall(node: FunctionCall, env: EvalEnv): EvalResult {
       return v;
     }
     args.push(v);
+  }
+
+  // A blank argument makes most functions blank (null propagates) — in both
+  // blank modes, since "treat blanks as zeroes" is a numeric-only, read-time
+  // coercion (see FieldRef) that stops numerics from ever reaching here blank.
+  // The exceptions inspect or absorb blankness themselves (ISBLANK, NULLVALUE,
+  // LEN → 0, concatenation and UPPER/LOWER → "").
+  if (!BLANK_AWARE.has(spec.name) && args.some((a) => a.blank)) {
+    return blank("Unknown");
   }
 
   const impl = BUILTINS[spec.name];

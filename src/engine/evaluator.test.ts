@@ -168,6 +168,86 @@ describe("engine: dates", () => {
   });
 });
 
+describe("engine: FLOOR/CEILING round relative to zero (oracle-verified)", () => {
+  it("FLOOR truncates toward zero, CEILING rounds away from zero", () => {
+    expect(n("FLOOR(-0.4)")).toBe("0");
+    expect(n("FLOOR(-1.4)")).toBe("-1");
+    expect(n("CEILING(-0.4)")).toBe("-1");
+    expect(n("CEILING(-1.4)")).toBe("-2");
+    // Positives are unchanged.
+    expect(n("FLOOR(20.8)")).toBe("20");
+    expect(n("CEILING(20.2)")).toBe("21");
+  });
+
+  it("SQRT treats a signed -0 (from FLOOR) as 0, not an error", () => {
+    expect(n("SQRT(FLOOR(-0.4))")).toBe("0");
+  });
+});
+
+describe("engine: zero-mode reads blank numerics as real 0 (oracle-verified)", () => {
+  const fields = { Amount: blank("Number"), Sub: { ...blank("Currency") } };
+  it("ISNULL of a blank number is false in zero mode", () => {
+    expect(b("ISNULL(Amount)", { fields, blankMode: "zero" })).toBe(false);
+    expect(b("ISNULL(Amount)", { fields, blankMode: "blank" })).toBe(true);
+  });
+
+  it("NULLVALUE returns the (zeroed) field, not the substitute, in zero mode", () => {
+    expect(n("NULLVALUE(Amount, 10)", { fields, blankMode: "zero" })).toBe("0");
+    expect(n("NULLVALUE(Amount, 10)", { fields, blankMode: "blank" })).toBe(
+      "10",
+    );
+  });
+});
+
+describe("engine: three-valued comparison under blank semantics (oracle-verified)", () => {
+  const blankText = { t: blank("Text"), u: blank("Number") };
+  it("ordering against a blank operand is false", () => {
+    expect(b("u < 5", { fields: blankText, blankMode: "blank" })).toBe(false);
+    expect(b("u >= 5", { fields: blankText, blankMode: "blank" })).toBe(false);
+  });
+
+  it("equality coerces a blank text field to the empty string", () => {
+    expect(b('t = ""', { fields: blankText, blankMode: "blank" })).toBe(true);
+    expect(b('t <> ""', { fields: blankText, blankMode: "blank" })).toBe(false);
+  });
+
+  it("a blank numeric makes both = and <> false (null propagates, not negates)", () => {
+    // IF sees the null comparison as false and takes the else branch.
+    expect(
+      s('IF(u <> 5, "T", "F")', { fields: blankText, blankMode: "blank" }),
+    ).toBe("F");
+  });
+});
+
+describe("engine: blank propagation through functions (oracle-verified)", () => {
+  it("propagates a blank arg to null in both modes, except blank-aware fns", () => {
+    for (const mode of ["zero", "blank"] as const) {
+      const r = ev("SUBSTITUTE(t, o, x)", {
+        fields: { t: blank("Text"), o: blank("Text"), x: blank("Text") },
+        blankMode: mode,
+      });
+      expect(isError(r)).toBe(false);
+      expect((r as SfValue).blank).toBe(true);
+    }
+  });
+
+  it("UPPER/LOWER absorb a blank to empty text (blank-aware)", () => {
+    expect(s("UPPER(t)", { fields: { t: blank("Text") } })).toBe("");
+    expect(n("LEN(t)", { fields: { t: blank("Text") } })).toBe("0");
+  });
+});
+
+describe("engine: DATE bounds and truncation (oracle-verified)", () => {
+  it("rejects an out-of-range year", () => {
+    expect(isError(ev("DATE(10000, 1, 1)"))).toBe(true);
+  });
+
+  it("truncates fractional month/day toward zero", () => {
+    expect(n("MONTH(DATE(2009, 3.5, 2))")).toBe("3");
+    expect(n("DAY(DATE(2009, 12, 31.9))")).toBe("31");
+  });
+});
+
 describe("engine: simulation boundary (rule 1)", () => {
   it("refuses non-simulatable functions with UnsupportedError", () => {
     expect(() => ev("PRIORVALUE(Amount)")).toThrow(UnsupportedError);

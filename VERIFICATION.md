@@ -69,16 +69,47 @@ Confirmed against Salesforce's own engine and encoded; conformance rose 74% → 
 - ✅ **`LEFT`/`RIGHT`/`MID` return blank, not empty string, for an empty result.**
 - ✅ **Text `=` / `<>` are case-sensitive** (`"a" = "A"` → false).
 
+## Verified via corpus-driven semantics pass (86% → 97%)
+
+Confirmed against the oracle corpus (`corpus/salesforce-v2.json`) and locked with
+golden tests in `evaluator.test.ts`:
+
+- ✅ **FLOOR truncates toward zero; CEILING rounds away from zero.**
+  `FLOOR(-1.4)` = `-1`, `CEILING(-1.4)` = `-2`, `FLOOR(-0.4)` = `0`.
+- ✅ **"Treat blanks as zeroes" is a numeric-only, read-time coercion.** In zero
+  mode an empty Number/Currency/Percent field reads as a real `0` everywhere —
+  arithmetic, `ISNULL`/`ISBLANK`, `NULLVALUE` all see `0`, not blank.
+- ✅ **Blank propagation is fundamental (both modes).** A blank argument makes a
+  function null, except blank-aware fns (`ISBLANK`, `ISNULL`, `ISNUMBER`,
+  `ISPICKVAL`, `NULLVALUE`, `BLANKVALUE`, `LEN`→0, `CONCATENATE`/`TEXT`/`UPPER`/
+  `LOWER`→"").
+- ✅ **Three-valued comparison.** Ordering (`< <= > >=`) against any blank operand
+  is `false`; equality coerces a blank _text_ field to `""` (`blankText = ""` is
+  true) but treats a blank _numeric_ as null so `=` and `<>` are both false
+  (`<>` is not the negation of `=` here).
+- ✅ **`DATE()` truncates fractional month/day toward zero** (`DATE(2009, 3.5, 2)`
+  → March 2) and **errors outside a supported year range** (`DATE(10000, …)` →
+  error).
+
 ## Conformance backlog (remaining gap to 100%)
 
-`src/engine/conformance.test.ts` sits at ~86% over the comparable subset. Remaining
+`src/engine/conformance.test.ts` sits at ~97% over the comparable subset. Remaining
 clusters, still needing rule confirmation before a fix lands:
 
-- 🔬 **Date/datetime result comparison** is quarantined (Java rendering) and date
-  arithmetic edge cases remain.
-- 🔬 **FLOOR / CEILING combined with ROUND / division** — residual scale nuances.
-- 🔬 **Integer `POWER` value precision** — SF computes at limited precision, not
-  exact-then-rounded, so last digits differ; matching needs their algorithm.
+- 🔬 **Division-scale precision** — the dominant remaining cluster (~84 rows).
+  `FLOOR((x/y)*y)` returns `x` in Salesforce, but our 32-place division yields
+  `0.999…(32 nines)` → FLOOR `0`. No fixed truncation scale reproduces this; only
+  a round-half-up of the _intermediate_ product does, which would risk the
+  verified 32-place division cases. Resolving it needs the JVM oracle to report
+  the bare `(x/y)*y` intermediate value (the field-valued harness extension) — do
+  not guess (rule 9).
+- 🔬 **`DATE()` upper year bound** — `10000` errors and four-digit years pass;
+  whether the exact ceiling is `4000` or `9999` is unconfirmed. `MAX_YEAR = 9999`
+  is the widest bound consistent with the corpus.
+- 🔬 **Locale-aware `UPPER`/`LOWER`** — the optional locale second arg (e.g.
+  Turkish dotless-ı) is ignored; a handful of Unicode-casing rows fail.
+- 🔬 **Date/datetime result rendering** is quarantined (Java `toString` format),
+  not compared.
 
 ## Semantics (from CLAUDE.md NEEDS-VERIFICATION list)
 

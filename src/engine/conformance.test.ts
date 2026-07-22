@@ -11,9 +11,12 @@ import { runRow, type RowStatus } from "./conformance.ts";
  */
 
 // Locked baseline: raise as the evaluator improves, never lower silently. Rules
-// verified via the WS3 JVM oracle (oracle/) lifted this from 0.74 → 0.86; the
-// remaining gap (date rendering, FLOOR/CEIL+ROUND nuances) is in VERIFICATION.md.
-const BASELINE = 0.85;
+// verified via the WS3 JVM oracle (oracle/) lifted this 0.74 → 0.86, then a
+// corpus-driven semantics pass (FLOOR/CEILING toward-zero, zero-mode numeric
+// coercion, three-valued blank comparison, blank propagation, DATE bounds)
+// lifted it to 0.97. The remaining gap is a division-scale precision nuance
+// tracked in VERIFICATION.md.
+const BASELINE = 0.96;
 
 const rows: CorpusRow[] = JSON.parse(
   readFileSync("corpus/salesforce-v2.json", "utf8"),

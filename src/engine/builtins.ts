@@ -106,8 +106,17 @@ function daysInMonth(y: number, m: number): number {
   ]!;
 }
 
+// Salesforce rejects DATE() outside a supported year range: DATE(10000, …) is a
+// runtime error while four-digit years evaluate. The exact upper bound (4000 vs
+// 9999) is a NEEDS-VERIFICATION item; 9999 is the widest bound consistent with
+// the corpus (VERIFICATION.md).
+const MIN_YEAR = 1;
+const MAX_YEAR = 9999;
+
 function isValidDate(p: DateParts): boolean {
   return (
+    p.year >= MIN_YEAR &&
+    p.year <= MAX_YEAR &&
     p.month >= 1 &&
     p.month <= 12 &&
     p.day >= 1 &&
@@ -179,8 +188,11 @@ export const BUILTINS: Record<string, Builtin> = {
   // Math
   ABS: ([a]) => num(dnum(a!).abs()),
   ROUND: ([a, digits]) => num(roundTo(dnum(a!), toInt(digits!))),
-  FLOOR: ([a]) => num(dnum(a!).floor()),
-  CEILING: ([a]) => num(dnum(a!).ceil()),
+  // Salesforce FLOOR/CEILING round relative to zero, not ±∞: FLOOR truncates
+  // toward zero (FLOOR(-1.4) = -1), CEILING rounds away from zero
+  // (CEILING(-1.4) = -2). Verified against the oracle corpus.
+  FLOOR: ([a]) => num(dnum(a!).toDecimalPlaces(0, Decimal.ROUND_DOWN)),
+  CEILING: ([a]) => num(dnum(a!).toDecimalPlaces(0, Decimal.ROUND_UP)),
   MOD: ([a, b]) => {
     const d = dnum(b!);
     // Salesforce MOD(x, 0) is a runtime error (not x), verified against the oracle.
@@ -189,7 +201,8 @@ export const BUILTINS: Record<string, Builtin> = {
   SQRT: ([a]) => {
     const d = dnum(a!);
     // Salesforce computes SQRT at double precision (SQRT(2) = 1.4142135623730951).
-    return d.isNegative()
+    // `lessThan(0)` (not isNegative) so a signed -0 from FLOOR reads as 0, not an error.
+    return d.lessThan(0)
       ? error("#Error! (SQRT of negative)")
       : num(new Decimal(Math.sqrt(d.toNumber())));
   },
@@ -282,8 +295,10 @@ export const SPECIAL_FORMS: Record<string, SpecialForm> = {
 
 // --- Small helpers -------------------------------------------------------
 
+/** Integer coercion for functions like DATE/LEFT/MID: Salesforce truncates
+ * fractional arguments toward zero (DATE(2009, 3.5, 2) → March 2). */
 function toInt(v: SfValue): number {
-  return dnum(v).toNumber();
+  return Math.trunc(dnum(v).toNumber());
 }
 
 /** Salesforce text functions return blank, not empty string, for an empty result. */
