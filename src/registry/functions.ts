@@ -46,7 +46,43 @@ const CHANGE_CONTEXTS: readonly ContextId[] = [
   "approval_step",
 ];
 
+// Transcendental math: real Salesforce functions, but NOT simulatable — they
+// compute as non-correctly-rounded doubles (Java StrictMath) whose last ULP a
+// client cannot reproduce, so per rule 1 they refuse to simulate rather than
+// return a subtly-wrong value. They still parse, highlight, lint, and hover.
+const TRANSCENDENTAL: readonly FunctionSpec[] = (
+  [
+    ["LN", "Natural logarithm (base e) of a number."],
+    ["LOG", "Base-10 logarithm of a number."],
+    ["EXP", "e raised to the power of a number."],
+    ["SIN", "Sine of an angle in radians."],
+    ["COS", "Cosine of an angle in radians."],
+    ["TAN", "Tangent of an angle in radians."],
+    ["ASIN", "Arcsine of a number, in radians."],
+    ["ACOS", "Arccosine of a number, in radians."],
+    ["ATAN", "Arctangent of a number, in radians."],
+  ] as const
+).map(([name, summary]) => ({
+  name,
+  params: [req("number", "Number")],
+  returnType: fixed("Number"),
+  contexts: "all" as const,
+  simulatable: false,
+  docsUrl: DOCS,
+  summary,
+}));
+
 export const FUNCTIONS: readonly FunctionSpec[] = [
+  ...TRANSCENDENTAL,
+  {
+    name: "ATAN2",
+    params: [req("y", "Number"), req("x", "Number")],
+    returnType: fixed("Number"),
+    contexts: "all",
+    simulatable: false,
+    docsUrl: DOCS,
+    summary: "Angle in radians between the positive x-axis and the point (x, y).",
+  },
   // --- Logical ------------------------------------------------------------
   {
     name: "IF",
@@ -300,6 +336,76 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     docsUrl: DOCS,
     summary: "Joins several text values into one.",
   },
+  {
+    name: "SUBSTR",
+    params: [
+      req("text", "Text"),
+      req("start_num", "Number"),
+      opt("num_chars", "Number"),
+    ],
+    returnType: fixed("Text"),
+    contexts: "all",
+    simulatable: true,
+    docsUrl: DOCS,
+    summary: "Substring from a 1-based start position, optionally limited in length.",
+  },
+  {
+    name: "INITCAP",
+    params: [req("text", "Text")],
+    returnType: fixed("Text"),
+    contexts: "all",
+    simulatable: true,
+    docsUrl: DOCS,
+    summary: "Capitalizes the first letter of each word; lowercases the rest.",
+  },
+  {
+    name: "REVERSE",
+    params: [req("text", "Text")],
+    returnType: fixed("Text"),
+    contexts: "all",
+    simulatable: true,
+    docsUrl: DOCS,
+    summary: "Reverses the characters of a text value.",
+  },
+  {
+    name: "ASCII",
+    params: [req("text", "Text")],
+    returnType: fixed("Number"),
+    contexts: "all",
+    simulatable: true,
+    docsUrl: DOCS,
+    summary: "Numeric code point of the first character of a text value.",
+  },
+  {
+    name: "CHR",
+    params: [req("number", "Number")],
+    returnType: fixed("Text"),
+    contexts: "all",
+    simulatable: true,
+    docsUrl: DOCS,
+    summary: "Character for a numeric code point.",
+  },
+  {
+    name: "IN",
+    params: [req("value", "Unknown"), rest("compare", "Unknown")],
+    returnType: fixed("Boolean"),
+    contexts: "all",
+    // Not simulated: the oracle's IN semantics are not reproducible from the
+    // corpus (e.g. IN("Left", "Left") → false), so per rule 9 it refuses rather
+    // than guess (VERIFICATION.md).
+    simulatable: false,
+    docsUrl: DOCS,
+    summary: "TRUE if the first value equals any of the remaining values.",
+  },
+  {
+    name: "IFERROR",
+    params: [req("expression", "Unknown"), req("fallback", "Unknown")],
+    returnType: sameAsArg(1),
+    contexts: "all",
+    simulatable: true,
+    docsUrl: DOCS,
+    summary: "Returns a fallback value if the expression evaluates to an error.",
+  },
 
   // --- Math ---------------------------------------------------------------
   {
@@ -383,6 +489,38 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     docsUrl: DOCS,
     summary: "Raises a number to a power.",
   },
+  {
+    name: "TRUNC",
+    params: [req("number", "Number"), opt("num_digits", "Number")],
+    returnType: fixed("Number"),
+    contexts: "all",
+    simulatable: true,
+    docsUrl: DOCS,
+    summary: "Truncates a number to a number of digits (toward zero).",
+  },
+  {
+    name: "MFLOOR",
+    params: [req("number", "Number")],
+    returnType: fixed("Number"),
+    contexts: "all",
+    simulatable: true,
+    docsUrl: DOCS,
+    summary: "Rounds a number down toward negative infinity (mathematical floor).",
+  },
+  {
+    name: "MCEILING",
+    params: [req("number", "Number")],
+    returnType: fixed("Number"),
+    contexts: "all",
+    simulatable: true,
+    docsUrl: DOCS,
+    summary: "Rounds a number up toward positive infinity (mathematical ceiling).",
+  },
+  // Transcendentals (LN/LOG/EXP/SIN/COS/TAN/ASIN/ACOS/ATAN/ATAN2) are
+  // intentionally NOT simulated: Salesforce computes them as non-correctly-rounded
+  // doubles (Java StrictMath) that differ from JS Math in the last ULP, so a
+  // faithful value cannot be reproduced client-side. Per rule 1 they refuse to
+  // simulate rather than ship a subtly-wrong answer (VERIFICATION.md).
 
   // --- Date & time --------------------------------------------------------
   {

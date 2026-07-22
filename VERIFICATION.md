@@ -91,6 +91,34 @@ golden tests in `evaluator.test.ts`:
   → March 2) and **errors outside a supported year range** (`DATE(10000, …)` →
   error).
 
+## Function port (unsupported → simulated)
+
+Ported and corpus-verified (golden tests in `evaluator.test.ts`):
+
+- ✅ **`TRUNC(n, [digits])`** truncates toward zero (negative digits round left of
+  the point).
+- ✅ **`MFLOOR`/`MCEILING`** are the _mathematical_ floor/ceiling (toward ∓∞) —
+  distinct from Salesforce's toward-zero `FLOOR`/`CEILING`.
+- ✅ **`SUBSTR(text, start, [len])`** is 1-based; `start ≤ 1` reads from the
+  beginning, a negative `start` counts from the end, an out-of-range `start` is
+  blank.
+- ✅ **`INITCAP`** title-cases each Unicode word (first letter up, rest down);
+  blank-aware (→ "").
+- ✅ **`REVERSE`** (propagates blank → null), **`ASCII`**, **`CHR`**.
+- ✅ **`IFERROR(expr, fallback)`** returns the fallback on a simulated `#Error`,
+  but lets an unsupported-function refusal propagate (rule 1).
+
+Deliberately **not simulated** (registered so they still parse/highlight/lint/
+hover, but refuse to simulate per rule 1):
+
+- ⛔ **Transcendentals** `LN LOG EXP SIN COS TAN ASIN ACOS ATAN ATAN2` — Salesforce
+  computes these as non-correctly-rounded doubles (Java `StrictMath`) whose last
+  ULP differs from JS `Math`; a faithful value is not reproducible client-side, so
+  simulation refuses rather than ship a subtly-wrong answer. (`SQRT` is fine: IEEE
+  mandates correctly-rounded square root.)
+- ⛔ **`IN`** — the oracle's semantics are not reproducible from the corpus
+  (`IN("Left", "Left")` → `false`); refuses rather than guess (rule 9).
+
 ## Conformance backlog (remaining gap to 100%)
 
 `src/engine/conformance.test.ts` sits at ~97% over the comparable subset. Remaining

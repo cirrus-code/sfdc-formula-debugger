@@ -248,10 +248,47 @@ describe("engine: DATE bounds and truncation (oracle-verified)", () => {
   });
 });
 
+describe("engine: ported functions (corpus-verified)", () => {
+  it("TRUNC truncates toward zero; MFLOOR/MCEILING are mathematical floor/ceil", () => {
+    expect(n("TRUNC(1.99, 1)")).toBe("1.9");
+    expect(n("TRUNC(-1.99)")).toBe("-1");
+    // MFLOOR/MCEILING round toward ∓∞, unlike SF's toward-zero FLOOR/CEILING.
+    expect(n("MFLOOR(-1.4)")).toBe("-2");
+    expect(n("MCEILING(-1.4)")).toBe("-1");
+  });
+
+  it("SUBSTR is 1-based; start ≤ 1 reads from the start; negative counts from end", () => {
+    expect(s('SUBSTR("123456", 2, 3)')).toBe("234");
+    expect(s('SUBSTR("123456", 0)')).toBe("123456");
+    expect(s('SUBSTR("123456", -1)')).toBe("6");
+    // An out-of-range start is blank.
+    expect((ev('SUBSTR("123456", -9)') as SfValue).blank).toBe(true);
+  });
+
+  it("INITCAP title-cases Unicode words; REVERSE/ASCII/CHR", () => {
+    expect(s("INITCAP(t)", { fields: { t: { type: "Text", blank: false, data: "ångstrom" } } })).toBe("Ångstrom");
+    expect(s('REVERSE("abc")')).toBe("cba");
+    expect(n('ASCII("A")')).toBe("65");
+    expect(s("CHR(65)")).toBe("A");
+  });
+
+  it("IFERROR falls back only on a simulated #Error, not on an unsupported refusal", () => {
+    expect(n("IFERROR(1 / 0, 42)")).toBe("42");
+    expect(n("IFERROR(7, 42)")).toBe("7");
+    expect(() => ev("IFERROR(PRIORVALUE(Amount), 0)")).toThrow(UnsupportedError);
+  });
+});
+
 describe("engine: simulation boundary (rule 1)", () => {
   it("refuses non-simulatable functions with UnsupportedError", () => {
     expect(() => ev("PRIORVALUE(Amount)")).toThrow(UnsupportedError);
     expect(() => ev("ISCHANGED(Amount)")).toThrow(UnsupportedError);
+  });
+
+  it("refuses transcendentals and IN rather than shipping a subtly-wrong value", () => {
+    expect(() => ev("LN(2)")).toThrow(UnsupportedError);
+    expect(() => ev("EXP(1)")).toThrow(UnsupportedError);
+    expect(() => ev("IN(x, y)")).toThrow(UnsupportedError);
   });
 
   it("names the unsupported function", () => {

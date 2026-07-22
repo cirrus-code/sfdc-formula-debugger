@@ -282,9 +282,10 @@ const BLANK_AWARE = new Set([
   "LEN",
   "CONCATENATE",
   "TEXT",
-  // UPPER/LOWER absorb a blank to "" (unlike TRIM, which propagates to null).
+  // UPPER/LOWER/INITCAP absorb a blank to "" (unlike TRIM, which propagates).
   "UPPER",
   "LOWER",
+  "INITCAP",
 ]);
 
 function evalCall(node: FunctionCall, env: EvalEnv): EvalResult {

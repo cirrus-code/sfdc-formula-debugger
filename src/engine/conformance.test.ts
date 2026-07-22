@@ -14,8 +14,10 @@ import { runRow, type RowStatus } from "./conformance.ts";
 // verified via the WS3 JVM oracle (oracle/) lifted this 0.74 → 0.86, then a
 // corpus-driven semantics pass (FLOOR/CEILING toward-zero, zero-mode numeric
 // coercion, three-valued blank comparison, blank propagation, DATE bounds)
-// lifted it to 0.97. The remaining gap is a division-scale precision nuance
-// tracked in VERIFICATION.md.
+// lifted it to 0.97, then a function port (TRUNC, MFLOOR/MCEILING, SUBSTR,
+// INITCAP, REVERSE, ASCII, CHR, IFERROR) moved ~740 rows out of "unsupported"
+// into the comparable set. The remaining gap is the division-scale precision
+// nuance tracked in VERIFICATION.md.
 const BASELINE = 0.96;
 
 const rows: CorpusRow[] = JSON.parse(

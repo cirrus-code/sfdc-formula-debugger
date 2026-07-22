@@ -177,6 +177,28 @@ export const BUILTINS: Record<string, Builtin> = {
     return text(o === "" ? dstr(a!) : dstr(a!).split(o).join(dstr(newT!)));
   },
   CONCATENATE: (args) => text(args.map(concatString).join("")),
+  SUBSTR: ([a, start, len]) => {
+    const s = dstr(a!);
+    // start ≤ 1 (including 0) reads from the beginning; a negative start counts
+    // from the end; an out-of-range start yields blank.
+    const from = substrStart(toInt(start!), s.length);
+    if (from < 0 || from >= s.length) {
+      return blank("Text");
+    }
+    return textOrBlank(
+      len === undefined ? s.slice(from) : s.slice(from, from + toInt(len)),
+    );
+  },
+  INITCAP: ([a]) => text(dstr(a!).replace(/[\p{L}\p{N}]+/gu, initcapWord)),
+  REVERSE: ([a]) => textOrBlank([...dstr(a!)].reverse().join("")),
+  ASCII: ([a]) => {
+    const s = dstr(a!);
+    return s === "" ? blank("Number") : num(s.charCodeAt(0));
+  },
+  CHR: ([a]) => {
+    const code = toInt(a!);
+    return code > 0 ? text(String.fromCodePoint(code)) : blank("Text");
+  },
   TEXT: ([a]) => text(concatString(a!)),
   VALUE: ([a]) => {
     const s = dstr(a!).trim();
@@ -209,6 +231,12 @@ export const BUILTINS: Record<string, Builtin> = {
   MAX: (args) => num(Decimal.max(...args.map(dnum))),
   MIN: (args) => num(Decimal.min(...args.map(dnum))),
   POWER: ([a, b]) => num(dnum(a!).pow(dnum(b!))),
+  TRUNC: ([a, digits]) =>
+    num(truncTo(dnum(a!), digits ? toInt(digits) : 0)),
+  // MFLOOR/MCEILING are the mathematical floor/ceiling (toward ∓∞), unlike
+  // FLOOR/CEILING which round relative to zero. Verified against the corpus.
+  MFLOOR: ([a]) => num(dnum(a!).floor()),
+  MCEILING: ([a]) => num(dnum(a!).ceil()),
 
   // Date & time
   TODAY: (_args, env) =>
@@ -270,6 +298,15 @@ export const SPECIAL_FORMS: Record<string, SpecialForm> = {
     }
     return bool(false);
   },
+  IFERROR: (args, env, evaluate) => {
+    if (args.length < 2) {
+      return error("#Error! (IFERROR needs 2 arguments)");
+    }
+    const v = evaluate(args[0]!, env);
+    // A thrown UnsupportedError propagates (honest refusal); only a simulated
+    // #Error falls back.
+    return isError(v) ? evaluate(args[1]!, env) : v;
+  },
   CASE: (args, env, evaluate) => {
     if (args.length < 1) {
       return error("#Error! (CASE needs arguments)");
@@ -313,6 +350,28 @@ function roundTo(d: Decimal, digits: number): Decimal {
   }
   const factor = new Decimal(10).pow(-digits);
   return d.div(factor).toDecimalPlaces(0).times(factor);
+}
+
+/** TRUNC: truncate toward zero at `digits` places (negative = left of the point). */
+function truncTo(d: Decimal, digits: number): Decimal {
+  if (digits >= 0) {
+    return d.toDecimalPlaces(digits, Decimal.ROUND_DOWN);
+  }
+  const factor = new Decimal(10).pow(-digits);
+  return d.div(factor).toDecimalPlaces(0, Decimal.ROUND_DOWN).times(factor);
+}
+
+/** SUBSTR 0-based offset: 1-based positive, 0/1 → start, negative from the end. */
+function substrStart(n: number, length: number): number {
+  if (n > 0) {
+    return n - 1;
+  }
+  return n === 0 ? 0 : length + n;
+}
+
+/** INITCAP word transform: first letter upper, remainder lower. */
+function initcapWord(w: string): string {
+  return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
 }
 
 function isParsableNumber(s: string): boolean {
