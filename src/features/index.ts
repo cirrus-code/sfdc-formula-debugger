@@ -8,3 +8,4 @@
  * May depend on: analysis/, engine/, registry/, syntax/.
  */
 export { extractFields, type ExtractedField } from "./field-extraction.ts";
+export { format, formatExpr, type FormatOptions } from "./formatter.ts";

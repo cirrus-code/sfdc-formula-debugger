@@ -32,7 +32,7 @@ export interface ParseResult {
  * `&` (concat) shares the additive level with `+`/`-`, so `"x" & 1 + 2` parses
  * as `("x" & 1) + 2`, not `"x" & (1 + 2)`.
  */
-const BINARY_PRECEDENCE: Record<BinaryOperator, number> = {
+export const BINARY_PRECEDENCE: Record<BinaryOperator, number> = {
   "*": 7,
   "/": 7,
   "^": 6,
