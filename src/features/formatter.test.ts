@@ -77,6 +77,8 @@ function errors(source: string): number {
   return parse(source).diagnostics.filter((d) => d.severity === "error").length;
 }
 
+const f = (s: string): string => format(s);
+
 describe("formatter: rule-6 properties over generated ASTs", () => {
   it("prints valid, reparsable source; is idempotent and reparse-equal", () => {
     fc.assert(
@@ -97,8 +99,6 @@ describe("formatter: rule-6 properties over generated ASTs", () => {
 });
 
 describe("formatter: canonical output", () => {
-  const f = (s: string) => format(s);
-
   it("normalizes operator and comma spacing", () => {
     expect(f("1+2*3")).toBe("1 + 2 * 3");
     expect(f("IF(ISBLANK(Amount),0,Amount)")).toBe(
@@ -132,10 +132,64 @@ describe("formatter: canonical output", () => {
     expect(f("1 + ")).toBe("1 + ");
   });
 
-  it("never destroys comments (preserved untouched until the comment pass)", () => {
-    const withComment = "IF( /* keep me */ x, 1, 2)";
-    expect(f(withComment)).toContain("/* keep me */");
-    // Nothing is lost — the whole source is preserved for now.
-    expect(f(withComment)).toBe(withComment);
+  it("attaches comments in position (leading, before comma/paren, operator, end)", () => {
+    expect(f("IF( /* c */ x, 1, 2)")).toBe("IF(/* c */ x, 1, 2)");
+    expect(f("IF(a /* c */, b, c)")).toBe("IF(a /* c */, b, c)");
+    expect(f("IF(a, b /* c */)")).toBe("IF(a, b /* c */)");
+    expect(f("a /* c */ + b")).toBe("a /* c */ + b");
+    expect(f("/* head */ ABS(x)")).toBe("/* head */ ABS(x)");
+    expect(f("1 + 2 /* tail */")).toBe("1 + 2 /* tail */");
+  });
+});
+
+const comments = (s: string): string[] => s.match(/\/\*[\s\S]*?\*\//g) ?? [];
+
+describe("formatter: comment preservation (rule 5)", () => {
+  const cases = [
+    "IF( /*a*/ x, 1, 2)",
+    "IF(a /*a*/, b, c)",
+    "IF(a, b /*a*/, c)",
+    "IF(a, b, c /*a*/)",
+    "/*a*/ x + /*b*/ y",
+    "x /*a*/ + y /*b*/",
+    "ABS( /*a*/ x /*b*/ )",
+    "(a /*a*/ + b) * c",
+    "1 + 2 /*end*/",
+    "/*lead*/ 1",
+  ];
+
+  it("preserves every comment, is idempotent, and keeps structure", () => {
+    for (const src of cases) {
+      const once = f(src);
+      // No comment is dropped.
+      expect(comments(once).sort()).toEqual(comments(src).sort());
+      // Idempotent.
+      expect(f(once)).toBe(once);
+      // Structure (ignoring trivia) is unchanged.
+      expect(astEqual(parse(once).ast, parse(src).ast)).toBe(true);
+    }
+  });
+
+  it("is idempotent and lossless with a comment injected before any token", () => {
+    fc.assert(
+      fc.property(astArb, fc.nat(), (g, seed) => {
+        const base = formatExpr(g);
+        const toks = parse(base).tokens.filter((t) => t.kind !== "eof");
+        if (toks.length === 0) {
+          return;
+        }
+        const at = toks[seed % toks.length]!.span.start;
+        const withComment = `${base.slice(0, at)}/*c*/${base.slice(at)}`;
+        // Skip inputs the injection happened to make invalid.
+        if (errors(withComment) > 0) {
+          return;
+        }
+        const once = f(withComment);
+        expect(comments(once)).toEqual(["/*c*/"]);
+        expect(f(once)).toBe(once);
+        expect(astEqual(parse(once).ast, parse(withComment).ast)).toBe(true);
+      }),
+      { numRuns: 400 },
+    );
   });
 });

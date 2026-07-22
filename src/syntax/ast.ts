@@ -30,9 +30,10 @@ export type BinaryOperator =
 export type UnaryOperator = "-" | "+";
 
 /**
- * Comments attached to a node for the formatter (rule 5). Populated by the
- * formatter phase; the parser leaves it undefined. The shape is fixed now so
- * the AST type is stable for downstream layers.
+ * Comments attached to a node for the formatter (rule 5). The formatter computes
+ * attachment in a side table (keeping the AST immutable), so this optional slot
+ * is unused today; its shape is fixed so the type stays stable if a future pass
+ * wants to carry comments on the node itself.
  */
 export interface NodeComments {
   readonly leading: readonly Trivia[];

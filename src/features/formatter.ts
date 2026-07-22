@@ -2,24 +2,28 @@ import {
   assertNever,
   BINARY_PRECEDENCE,
   parse,
+  spanLength,
   type Expr,
   type Token,
+  type Trivia,
 } from "../syntax/index.ts";
 
 /**
  * Formatter (DESIGN §8.3): a pretty-printer over the AST. Canonical operator
- * spacing, precedence-driven parentheses, explicit `Paren` nodes preserved, and
- * function calls that don't fit the width broken one-argument-per-line.
+ * spacing, precedence-driven parentheses, explicit `Paren` nodes preserved,
+ * function calls broken one-argument-per-line past the width, and comments
+ * (rule 5) reattached in position.
  *
  * Because `format = parse + print` and printing only ever changes trivia
- * (whitespace/line breaks) — never node structure — the two guarantees in
- * CLAUDE.md rule 6 hold by construction:
+ * (whitespace/line breaks), never node structure, the two rule-6 guarantees hold
+ * by construction:
  *   - reparse-equality: `parse(format(x))` is structurally equal to `parse(x)`;
  *   - idempotence: `format(format(x)) === format(x)`, which follows from
  *     reparse-equality plus a deterministic printer.
  *
- * Comment preservation (rule 5) is layered on in a later pass; the printer here
- * is the structural core.
+ * Comment placement is a fixed point too: the lexer anchors each comment to the
+ * following token, so emitting it just before that token's position re-anchors
+ * it identically on reparse (see `attachComments`).
  */
 export interface FormatOptions {
   /** Spaces per indent level. */
@@ -43,31 +47,148 @@ export function format(source: string, options: FormatOptions = {}): string {
   ) {
     return source;
   }
-  // Comment preservation (rule 5) lands in a dedicated pass; until then a
-  // comment-bearing formula is returned untouched rather than have its comments
-  // dropped — the structural printer here does not yet re-emit them.
-  if (hasComment(tokens)) {
-    return source;
-  }
-  return formatExpr(ast, options);
+  const comments = attachComments(ast, tokens);
+  return render(ast, { ...DEFAULTS, ...options }, comments);
 }
 
-function hasComment(tokens: readonly Token[]): boolean {
-  return tokens.some((t) =>
-    t.leadingTrivia.some((tr) => tr.kind === "comment"),
-  );
-}
-
-/** Format an AST node directly (used by the simplifier to render rewrites). */
+/**
+ * Format an AST node directly (used by the simplifier to render rewrites).
+ * Synthetic ASTs carry no comments, so none are emitted.
+ */
 export function formatExpr(node: Expr, options: FormatOptions = {}): string {
-  const opts = { ...DEFAULTS, ...options };
-  return pretty(node, 0, opts);
+  return render(node, { ...DEFAULTS, ...options }, EMPTY_COMMENTS);
 }
 
 interface Opts {
   readonly indentWidth: number;
   readonly maxWidth: number;
 }
+
+interface CommentSlots {
+  readonly leading: Trivia[];
+  readonly trailing: Trivia[];
+}
+type CommentMap = ReadonlyMap<Expr, CommentSlots>;
+const EMPTY_COMMENTS: CommentMap = new Map();
+
+function render(node: Expr, opts: Opts, comments: CommentMap): string {
+  return pretty(node, 0, opts, comments);
+}
+
+// --- comment attachment --------------------------------------------------
+
+/**
+ * Assign each block comment to an AST node. A comment whose anchor token
+ * (the token it is leading trivia of) *starts* a node becomes that node's
+ * leading comment; otherwise it becomes a trailing comment of the node that ends
+ * immediately before it. Both re-anchor to the same token on reparse, so the
+ * placement is stable under repeated formatting.
+ */
+function attachComments(root: Expr, tokens: readonly Token[]): CommentMap {
+  const nodes: Expr[] = [];
+  collect(root, nodes);
+
+  // Deepest node beginning at each source offset (smaller span == deeper).
+  const byStart = new Map<number, Expr>();
+  for (const n of nodes) {
+    const existing = byStart.get(n.span.start);
+    if (!existing || spanLength(n.span) <= spanLength(existing.span)) {
+      byStart.set(n.span.start, n);
+    }
+  }
+
+  const map = new Map<Expr, CommentSlots>();
+  const slotsFor = (n: Expr): CommentSlots => {
+    let s = map.get(n);
+    if (!s) {
+      s = { leading: [], trailing: [] };
+      map.set(n, s);
+    }
+    return s;
+  };
+
+  for (const token of tokens) {
+    for (const tr of token.leadingTrivia) {
+      if (tr.kind !== "comment") {
+        continue;
+      }
+      const starts = byStart.get(token.span.start);
+      if (starts) {
+        slotsFor(starts).leading.push(tr);
+        continue;
+      }
+      const preceding = precedingNode(nodes, tr.span.start);
+      if (preceding) {
+        slotsFor(preceding).trailing.push(tr);
+        continue;
+      }
+      // A comment sitting inside a node but before its first child token (e.g.
+      // between a function name and its `(`): keep it as a leading comment of the
+      // enclosing node rather than lose it.
+      slotsFor(innermostContaining(nodes, tr.span.start) ?? root).leading.push(
+        tr,
+      );
+    }
+  }
+  return map;
+}
+
+function collect(node: Expr, out: Expr[]): void {
+  out.push(node);
+  switch (node.kind) {
+    case "FunctionCall":
+      node.args.forEach((a) => collect(a, out));
+      return;
+    case "BinaryOp":
+      collect(node.left, out);
+      collect(node.right, out);
+      return;
+    case "UnaryOp":
+      collect(node.operand, out);
+      return;
+    case "Paren":
+      collect(node.expr, out);
+      return;
+    default:
+      return;
+  }
+}
+
+/** Node ending closest before `offset` (deepest on ties) — the comment's left neighbour. */
+function precedingNode(nodes: readonly Expr[], offset: number): Expr | null {
+  let best: Expr | null = null;
+  for (const n of nodes) {
+    if (n.span.end > offset) {
+      continue;
+    }
+    if (
+      !best ||
+      n.span.end > best.span.end ||
+      (n.span.end === best.span.end && n.span.start > best.span.start)
+    ) {
+      best = n;
+    }
+  }
+  return best;
+}
+
+/** Smallest node whose span contains `offset`. */
+function innermostContaining(
+  nodes: readonly Expr[],
+  offset: number,
+): Expr | null {
+  let best: Expr | null = null;
+  for (const n of nodes) {
+    if (n.span.start <= offset && offset < n.span.end) {
+      if (!best || spanLength(n.span) < spanLength(best.span)) {
+        best = n;
+      }
+    }
+  }
+  return best;
+}
+
+// --- printing ------------------------------------------------------------
 
 // Unary operators bind tighter than every binary operator (Formula.g4); leaves,
 // calls, and parenthesized groups are atomic and never need wrapping.
@@ -89,8 +210,26 @@ function indent(level: number, opts: Opts): string {
   return " ".repeat(level * opts.indentWidth);
 }
 
-/** Single-line canonical rendering — the measurement used for break decisions. */
-function flat(node: Expr): string {
+function leadingStr(node: Expr, comments: CommentMap): string {
+  const s = comments.get(node);
+  return s ? s.leading.map((c) => `${c.text} `).join("") : "";
+}
+
+function trailingStr(node: Expr, comments: CommentMap): string {
+  const s = comments.get(node);
+  return s ? s.trailing.map((c) => ` ${c.text}`).join("") : "";
+}
+
+/** Single-line rendering with comments — the measurement used for break decisions. */
+function flat(node: Expr, comments: CommentMap): string {
+  return (
+    leadingStr(node, comments) +
+    flatCore(node, comments) +
+    trailingStr(node, comments)
+  );
+}
+
+function flatCore(node: Expr, comments: CommentMap): string {
   switch (node.kind) {
     case "NumberLit":
       return node.raw;
@@ -103,13 +242,13 @@ function flat(node: Expr): string {
     case "FieldRef":
       return node.path.join(".");
     case "FunctionCall":
-      return `${node.callee}(${node.args.map(flat).join(", ")})`;
+      return `${node.callee}(${node.args.map((a) => flat(a, comments)).join(", ")})`;
     case "BinaryOp":
-      return `${flatOperand(node.left, node, "left")} ${node.op} ${flatOperand(node.right, node, "right")}`;
+      return `${flatOperand(node.left, node, "left", comments)} ${node.op} ${flatOperand(node.right, node, "right", comments)}`;
     case "UnaryOp":
-      return `${node.op}${flatOperand(node.operand, node, "left")}`;
+      return `${node.op}${flatOperand(node.operand, node, "left", comments)}`;
     case "Paren":
-      return `(${flat(node.expr)})`;
+      return `(${flat(node.expr, comments)})`;
     case "ErrorNode":
       return "";
     default:
@@ -117,17 +256,21 @@ function flat(node: Expr): string {
   }
 }
 
-function flatOperand(child: Expr, parent: Expr, side: "left" | "right"): string {
-  const inner = flat(child);
+function flatOperand(
+  child: Expr,
+  parent: Expr,
+  side: "left" | "right",
+  comments: CommentMap,
+): string {
+  const inner = flat(child, comments);
   return needsParens(child, parent, side) ? `(${inner})` : inner;
 }
 
 /**
  * A child needs parentheses when its precedence is lower than the parent's, or
- * equal but on the associativity-losing side (all operators are left-associative,
- * so an equal-precedence right operand must be wrapped). This only ever fires for
- * synthetic ASTs — a parsed tree already carries explicit `Paren` nodes — so it
- * never adds parens the source didn't have.
+ * equal but on the associativity-losing side. All operators are left-associative,
+ * so an equal-precedence right operand must be wrapped. This only ever fires for
+ * synthetic ASTs — a parsed tree already carries explicit `Paren` nodes.
  */
 function needsParens(
   child: Expr,
@@ -140,17 +283,33 @@ function needsParens(
   if (childPrec < parentPrec) {
     return true;
   }
-  // Every Salesforce binary operator is left-associative (Formula.g4), so an
-  // equal-precedence right operand loses to the parent and must be wrapped.
   return (
     childPrec === parentPrec && side === "right" && parent.kind === "BinaryOp"
   );
 }
 
-function pretty(node: Expr, level: number, opts: Opts): string {
+function pretty(
+  node: Expr,
+  level: number,
+  opts: Opts,
+  comments: CommentMap,
+): string {
+  return (
+    leadingStr(node, comments) +
+    prettyCore(node, level, opts, comments) +
+    trailingStr(node, comments)
+  );
+}
+
+function prettyCore(
+  node: Expr,
+  level: number,
+  opts: Opts,
+  comments: CommentMap,
+): string {
   switch (node.kind) {
     case "FunctionCall": {
-      const oneLine = flat(node);
+      const oneLine = flatCore(node, comments);
       if (
         node.args.length === 0 ||
         level * opts.indentWidth + oneLine.length <= opts.maxWidth
@@ -159,18 +318,18 @@ function pretty(node: Expr, level: number, opts: Opts): string {
       }
       const inner = indent(level + 1, opts);
       const body = node.args
-        .map((arg) => inner + pretty(arg, level + 1, opts))
+        .map((arg) => inner + pretty(arg, level + 1, opts, comments))
         .join(",\n");
       return `${node.callee}(\n${body}\n${indent(level, opts)})`;
     }
     case "BinaryOp":
-      return `${prettyOperand(node.left, node, "left", level, opts)} ${node.op} ${prettyOperand(node.right, node, "right", level, opts)}`;
+      return `${prettyOperand(node.left, node, "left", level, opts, comments)} ${node.op} ${prettyOperand(node.right, node, "right", level, opts, comments)}`;
     case "UnaryOp":
-      return `${node.op}${prettyOperand(node.operand, node, "left", level, opts)}`;
+      return `${node.op}${prettyOperand(node.operand, node, "left", level, opts, comments)}`;
     case "Paren":
-      return `(${pretty(node.expr, level, opts)})`;
+      return `(${pretty(node.expr, level, opts, comments)})`;
     default:
-      return flat(node);
+      return flatCore(node, comments);
   }
 }
 
@@ -180,7 +339,8 @@ function prettyOperand(
   side: "left" | "right",
   level: number,
   opts: Opts,
+  comments: CommentMap,
 ): string {
-  const inner = pretty(child, level, opts);
+  const inner = pretty(child, level, opts, comments);
   return needsParens(child, parent, side) ? `(${inner})` : inner;
 }
