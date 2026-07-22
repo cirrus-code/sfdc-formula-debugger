@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import { EditorState } from "@codemirror/state";
 import { EditorView, keymap, placeholder } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { lintGutter } from "@codemirror/lint";
 import { completionKeymap } from "@codemirror/autocomplete";
+import { format } from "../../features/index.ts";
 import { sfHighlight } from "./highlight.ts";
 import { sfLinter } from "./lint.ts";
 import { sfEditorTheme } from "./editorTheme.ts";
@@ -11,10 +12,32 @@ import { sfCompletion } from "./completion.ts";
 import { sfHover } from "./hover.ts";
 import { contextField, setContext } from "./contextField.ts";
 
+/** Imperative handle so the parent can trigger a format from a toolbar button. */
+export interface EditorHandle {
+  format(): void;
+}
+
 interface FormulaEditorProps {
   readonly initialDoc: string;
   readonly contextId: string;
   readonly onChange: (doc: string) => void;
+  readonly handleRef?: Ref<EditorHandle>;
+}
+
+/**
+ * Reformat the document in place. Formatting invalid or comment-bearing input is
+ * a no-op (the formatter returns it unchanged), so this never destroys work.
+ */
+function formatView(view: EditorView): boolean {
+  const current = view.state.doc.toString();
+  const formatted = format(current);
+  if (formatted === current) {
+    return false;
+  }
+  view.dispatch({
+    changes: { from: 0, to: current.length, insert: formatted },
+  });
+  return true;
 }
 
 /**
@@ -28,6 +51,7 @@ export function FormulaEditor({
   initialDoc,
   contextId,
   onChange,
+  handleRef,
 }: FormulaEditorProps) {
   const host = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
@@ -35,6 +59,14 @@ export function FormulaEditor({
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
+
+  useImperativeHandle(handleRef, () => ({
+    format() {
+      if (viewRef.current) {
+        formatView(viewRef.current);
+      }
+    },
+  }));
 
   useEffect(() => {
     if (!host.current) {
@@ -48,7 +80,12 @@ export function FormulaEditor({
         extensions: [
           contextField,
           history(),
-          keymap.of([...completionKeymap, ...defaultKeymap, ...historyKeymap]),
+          keymap.of([
+            { key: "Shift-Alt-f", run: formatView },
+            ...completionKeymap,
+            ...defaultKeymap,
+            ...historyKeymap,
+          ]),
           placeholder("Type a Salesforce formula…"),
           sfHighlight,
           sfCompletion,

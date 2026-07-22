@@ -1,9 +1,9 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import { parse } from "../syntax/index.ts";
 import { analyze } from "../analysis/index.ts";
 import { CONTEXTS, DEFAULT_CONTEXT_ID, getContext } from "../registry/index.ts";
 import { palette, font, product } from "../theme/theme.ts";
-import { FormulaEditor } from "./editor/FormulaEditor.tsx";
+import { FormulaEditor, type EditorHandle } from "./editor/FormulaEditor.tsx";
 import { offsetToLineCol } from "./util/position.ts";
 
 // The simulator is the only route to the evaluator (and its decimal.js
@@ -25,6 +25,7 @@ const SEVERITY_COLOR: Record<string, string> = {
 export function App() {
   const [source, setSource] = useState(SAMPLE);
   const [contextId, setContextId] = useState(DEFAULT_CONTEXT_ID);
+  const editorRef = useRef<EditorHandle>(null);
 
   const { ast, diagnostics } = useMemo(() => {
     const parsed = parse(source);
@@ -72,12 +73,40 @@ export function App() {
           </p>
         </header>
 
-        <ContextPicker contextId={contextId} onChange={setContextId} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "0.6rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <ContextPicker contextId={contextId} onChange={setContextId} />
+          <button
+            type="button"
+            onClick={() => editorRef.current?.format()}
+            title="Format (Shift+Alt+F)"
+            style={{
+              background: palette.surface,
+              color: palette.text,
+              border: `1px solid ${palette.border}`,
+              borderRadius: "8px",
+              padding: "0.35rem 0.75rem",
+              fontFamily: font.sans,
+              fontSize: "0.82rem",
+              cursor: "pointer",
+            }}
+          >
+            Format
+          </button>
+        </div>
 
         <FormulaEditor
           initialDoc={SAMPLE}
           contextId={contextId}
           onChange={setSource}
+          handleRef={editorRef}
         />
 
         {context?.notes ? (

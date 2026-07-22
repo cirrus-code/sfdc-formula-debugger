@@ -121,6 +121,21 @@ test("simulates the formula live from field inputs", async () => {
   await expect.element(screen.getByText("110")).toBeInTheDocument();
 });
 
+test("reformats the editor when Format is clicked", async () => {
+  const screen = await render(<App />);
+  await expect
+    .poll(() => screen.container.querySelector(".cm-content"))
+    .toBeTruthy();
+
+  await typeFormula(screen.container, "IF(a,1,2)");
+  await userEvent.click(screen.getByRole("button", { name: "Format" }));
+
+  // Canonical spacing after commas is applied in place.
+  await expect
+    .poll(() => screen.container.querySelector(".cm-content")?.textContent ?? "")
+    .toContain("IF(a, 1, 2)");
+});
+
 test("renders without console errors", async () => {
   await render(<App />);
   await expect.poll(() => consoleErrors.length).toBe(0);
