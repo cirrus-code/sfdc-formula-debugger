@@ -1,7 +1,10 @@
 import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import { parse } from "../syntax/index.ts";
 import { analyze } from "../analysis/index.ts";
-import { lint } from "../features/index.ts";
+// Deep import: the features barrel re-exports the simplifier, whose engine
+// dependency (decimal.js sets global config at module load) must stay in the
+// lazy chunks, not the first paint.
+import { lint } from "../features/linter.ts";
 import { CONTEXTS, DEFAULT_CONTEXT_ID, getContext } from "../registry/index.ts";
 import { palette, font, product } from "../theme/theme.ts";
 import { FormulaEditor, type EditorHandle } from "./editor/FormulaEditor.tsx";
@@ -13,6 +16,13 @@ import { offsetToLineCol } from "./util/position.ts";
 const SimulatePanel = lazy(async () => {
   const m = await import("./simulate/SimulatePanel.tsx");
   return { default: m.SimulatePanel };
+});
+
+// The simplifier folds constants through the evaluator, so it shares the
+// engine/decimal.js chunk with the simulator and stays off the first paint.
+const SimplifyPanel = lazy(async () => {
+  const m = await import("./simplify/SimplifyPanel.tsx");
+  return { default: m.SimplifyPanel };
 });
 
 const SAMPLE = "IF(ISBLANK(Amount), 0, Amount * 1.1)";
@@ -131,6 +141,10 @@ export function App() {
             <SimulatePanel
               ast={ast}
               blankToggle={context?.blankModeToggle ?? false}
+            />
+            <SimplifyPanel
+              source={source}
+              onApply={(text) => editorRef.current?.setText(text)}
             />
           </Suspense>
         )}

@@ -4,7 +4,8 @@ import { EditorView, keymap, placeholder } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { lintGutter } from "@codemirror/lint";
 import { completionKeymap } from "@codemirror/autocomplete";
-import { format } from "../../features/index.ts";
+// Deep import — keeps the engine-dependent simplifier out of the eager bundle.
+import { format } from "../../features/formatter.ts";
 import { sfHighlight } from "./highlight.ts";
 import { sfLinter } from "./lint.ts";
 import { sfEditorTheme } from "./editorTheme.ts";
@@ -12,9 +13,11 @@ import { sfCompletion } from "./completion.ts";
 import { sfHover } from "./hover.ts";
 import { contextField, setContext } from "./contextField.ts";
 
-/** Imperative handle so the parent can trigger a format from a toolbar button. */
+/** Imperative handle so the parent can trigger a format from a toolbar button
+ * or replace the document (the simplifier's Apply). */
 export interface EditorHandle {
   format(): void;
+  setText(text: string): void;
 }
 
 interface FormulaEditorProps {
@@ -64,6 +67,14 @@ export function FormulaEditor({
     format() {
       if (viewRef.current) {
         formatView(viewRef.current);
+      }
+    },
+    setText(text: string) {
+      const view = viewRef.current;
+      if (view && view.state.doc.toString() !== text) {
+        view.dispatch({
+          changes: { from: 0, to: view.state.doc.length, insert: text },
+        });
       }
     },
   }));

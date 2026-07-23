@@ -10,3 +10,10 @@
 export { extractFields, type ExtractedField } from "./field-extraction.ts";
 export { format, formatExpr, type FormatOptions } from "./formatter.ts";
 export { diagnose, lint } from "./linter.ts";
+export {
+  simplify,
+  simplifySource,
+  type SimplifyResult,
+  type SimplifyStep,
+  type SimplifySuggestion,
+} from "./simplifier.ts";

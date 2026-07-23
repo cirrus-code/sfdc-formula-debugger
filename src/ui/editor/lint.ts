@@ -1,5 +1,6 @@
 import { linter, type Diagnostic as CmDiagnostic } from "@codemirror/lint";
-import { diagnose } from "../../features/index.ts";
+// Deep import — keeps the engine-dependent simplifier out of the eager bundle.
+import { diagnose } from "../../features/linter.ts";
 import { contextField, setContext } from "./contextField.ts";
 
 /**

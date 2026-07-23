@@ -150,6 +150,25 @@ test("reformats the editor when Format is clicked", async () => {
     .toContain("IF(a, 1, 2)");
 });
 
+test("simplifies with a step log and applies the result to the editor", async () => {
+  const screen = await render(<App />);
+  await expect
+    .poll(() => screen.container.querySelector(".cm-content"))
+    .toBeTruthy();
+
+  await typeFormula(screen.container, "NOT(NOT(ISBLANK(Amount)))");
+
+  // The step log names the rewrite rule.
+  await expect
+    .element(screen.getByText("Double negation cancels"))
+    .toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+  await expect
+    .poll(() => screen.container.querySelector(".cm-content")?.textContent ?? "")
+    .toBe("ISBLANK(Amount)");
+});
+
 test("renders without console errors", async () => {
   await render(<App />);
   await expect.poll(() => consoleErrors.length).toBe(0);

@@ -269,10 +269,11 @@ function flatOperand(
 /**
  * A child needs parentheses when its precedence is lower than the parent's, or
  * equal but on the associativity-losing side. All operators are left-associative,
- * so an equal-precedence right operand must be wrapped. This only ever fires for
- * synthetic ASTs — a parsed tree already carries explicit `Paren` nodes.
+ * so an equal-precedence right operand must be wrapped. Fires for synthetic ASTs
+ * (a parsed tree carries explicit `Paren` nodes); the simplifier also consults it
+ * to decide which explicit parens are redundant.
  */
-function needsParens(
+export function needsParens(
   child: Expr,
   parent: Expr,
   side: "left" | "right",
