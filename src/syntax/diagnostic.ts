@@ -25,11 +25,19 @@ export type DiagnosticCode =
   | "operator-type-mismatch"
   | "function-not-available"
   | "return-type-mismatch"
-  | "nonstandard-operator";
+  | "nonstandard-operator"
+  // Linter (features/linter.ts)
+  | "hardcoded-id"
+  | "deep-if-nesting"
+  | "prefer-ispickval"
+  | "discouraged-function"
+  | "char-limit";
 
 export interface Diagnostic {
   readonly code: DiagnosticCode;
   readonly severity: Severity;
   readonly span: Span;
   readonly message: string;
+  /** Optional "learn more" link, rendered by the Problems panel. */
+  readonly docsUrl?: string | undefined;
 }

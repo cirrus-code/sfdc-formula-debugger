@@ -1,10 +1,10 @@
 import { linter, type Diagnostic as CmDiagnostic } from "@codemirror/lint";
-import { diagnose } from "../../analysis/index.ts";
+import { diagnose } from "../../features/index.ts";
 import { contextField, setContext } from "./contextField.ts";
 
 /**
- * Full diagnostic pipeline (syntax + semantic) surfaced as CodeMirror lint
- * ranges, scoped to the active formula context. Empty/whitespace-only input is
+ * Full diagnostic pipeline (syntax + semantic + lint) surfaced as CodeMirror
+ * lint ranges, scoped to the active formula context. Empty/whitespace-only input is
  * treated as "nothing to report" so the editor doesn't nag before the user has
  * typed anything.
  */

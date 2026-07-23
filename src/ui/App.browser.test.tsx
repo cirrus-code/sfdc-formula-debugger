@@ -121,6 +121,20 @@ test("simulates the formula live from field inputs", async () => {
   await expect.element(screen.getByText("110")).toBeInTheDocument();
 });
 
+test("surfaces lint findings in the Problems panel", async () => {
+  const screen = await render(<App />);
+  await expect
+    .poll(() => screen.container.querySelector(".cm-content"))
+    .toBeTruthy();
+
+  await typeFormula(screen.container, 'TEXT(StageName) = "Won"');
+
+  // The features-layer linter feeds the same panel as syntax/type diagnostics.
+  await expect
+    .element(screen.getByText(/ISPICKVAL\(StageName, "Won"\)/))
+    .toBeInTheDocument();
+});
+
 test("reformats the editor when Format is clicked", async () => {
   const screen = await render(<App />);
   await expect

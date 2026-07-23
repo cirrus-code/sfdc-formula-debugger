@@ -9,3 +9,4 @@
  */
 export { extractFields, type ExtractedField } from "./field-extraction.ts";
 export { format, formatExpr, type FormatOptions } from "./formatter.ts";
+export { diagnose, lint } from "./linter.ts";

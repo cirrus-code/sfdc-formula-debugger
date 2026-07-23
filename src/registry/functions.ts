@@ -184,6 +184,13 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     returnType: sameAsArg(0),
     contexts: "all",
     simulatable: true,
+    lintNotes: [
+      {
+        id: "prefer-blankvalue",
+        message:
+          "Prefer BLANKVALUE over NULLVALUE; text fields are never null, only blank, so NULLVALUE misses them.",
+      },
+    ],
     docsUrl: DOCS,
     summary: "Returns a substitute value when the expression is null.",
   },

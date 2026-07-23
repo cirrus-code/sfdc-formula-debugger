@@ -1,6 +1,7 @@
 import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import { parse } from "../syntax/index.ts";
 import { analyze } from "../analysis/index.ts";
+import { lint } from "../features/index.ts";
 import { CONTEXTS, DEFAULT_CONTEXT_ID, getContext } from "../registry/index.ts";
 import { palette, font, product } from "../theme/theme.ts";
 import { FormulaEditor, type EditorHandle } from "./editor/FormulaEditor.tsx";
@@ -35,6 +36,7 @@ export function App() {
     const merged = [
       ...parsed.diagnostics,
       ...analyze(parsed.ast, contextId),
+      ...lint(parsed.ast, source, contextId),
     ].sort((a, b) => a.span.start - b.span.start);
     return { ast: parsed.ast, diagnostics: merged };
   }, [source, contextId]);
@@ -275,6 +277,21 @@ function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
                   >
                     {d.code}
                   </span>
+                  {d.docsUrl ? (
+                    <a
+                      href={d.docsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        color: palette.accent,
+                        fontFamily: font.mono,
+                        fontSize: "0.72rem",
+                        marginLeft: "0.5rem",
+                      }}
+                    >
+                      docs ↗
+                    </a>
+                  ) : null}
                 </span>
               </li>
             );
