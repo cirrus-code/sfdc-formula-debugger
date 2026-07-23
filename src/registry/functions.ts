@@ -81,7 +81,8 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     contexts: "all",
     simulatable: false,
     docsUrl: DOCS,
-    summary: "Angle in radians between the positive x-axis and the point (x, y).",
+    summary:
+      "Angle in radians between the positive x-axis and the point (x, y).",
   },
   // --- Logical ------------------------------------------------------------
   {
@@ -354,7 +355,8 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     contexts: "all",
     simulatable: true,
     docsUrl: DOCS,
-    summary: "Substring from a 1-based start position, optionally limited in length.",
+    summary:
+      "Substring from a 1-based start position, optionally limited in length.",
   },
   {
     name: "INITCAP",
@@ -411,7 +413,8 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     contexts: "all",
     simulatable: true,
     docsUrl: DOCS,
-    summary: "Returns a fallback value if the expression evaluates to an error.",
+    summary:
+      "Returns a fallback value if the expression evaluates to an error.",
   },
 
   // --- Math ---------------------------------------------------------------
@@ -512,7 +515,8 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     contexts: "all",
     simulatable: true,
     docsUrl: DOCS,
-    summary: "Rounds a number down toward negative infinity (mathematical floor).",
+    summary:
+      "Rounds a number down toward negative infinity (mathematical floor).",
   },
   {
     name: "MCEILING",
@@ -521,7 +525,8 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     contexts: "all",
     simulatable: true,
     docsUrl: DOCS,
-    summary: "Rounds a number up toward positive infinity (mathematical ceiling).",
+    summary:
+      "Rounds a number up toward positive infinity (mathematical ceiling).",
   },
   // Transcendentals (LN/LOG/EXP/SIN/COS/TAN/ASIN/ACOS/ATAN/ATAN2) are
   // intentionally NOT simulated: Salesforce computes them as non-correctly-rounded

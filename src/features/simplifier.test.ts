@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
-import {
-  span,
-  type BinaryOperator,
-  type Expr,
-} from "../syntax/index.ts";
+import { span, type BinaryOperator, type Expr } from "../syntax/index.ts";
 import { formatExpr } from "./formatter.ts";
 import {
   Decimal,
@@ -32,7 +28,7 @@ describe("simplifier: applied rewrites", () => {
     expect(out("1 + 2")).toBe("3");
     expect(out("NOT(1 = 1)")).toBe("FALSE");
     expect(out('LEN("hello")')).toBe("5");
-    expect(out('IF(2 > 1, Amount, 0)')).toBe("Amount");
+    expect(out("IF(2 > 1, Amount, 0)")).toBe("Amount");
     expect(out("0 - 1")).toBe("-1");
   });
 
@@ -181,7 +177,11 @@ const ref = (name: string): Expr => ({
   span: S,
 });
 const numLit = (raw: string): Expr => ({ kind: "NumberLit", raw, span: S });
-const boolLit = (value: boolean): Expr => ({ kind: "BooleanLit", value, span: S });
+const boolLit = (value: boolean): Expr => ({
+  kind: "BooleanLit",
+  value,
+  span: S,
+});
 const call = (callee: string, ...args: Expr[]): Expr => ({
   kind: "FunctionCall",
   callee,

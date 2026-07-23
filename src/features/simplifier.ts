@@ -142,7 +142,11 @@ function deepStrip(node: Expr): Expr {
     case "FunctionCall":
       return { ...node, args: node.args.map(deepStrip) };
     case "BinaryOp":
-      return { ...node, left: deepStrip(node.left), right: deepStrip(node.right) };
+      return {
+        ...node,
+        left: deepStrip(node.left),
+        right: deepStrip(node.right),
+      };
     case "UnaryOp":
       return { ...node, operand: deepStrip(node.operand) };
     default:
@@ -173,7 +177,10 @@ function nonBlankBoolean(node: Expr): boolean {
       return nonBlankBoolean(node.expr);
     case "BinaryOp":
       return (
-        node.op === "<" || node.op === "<=" || node.op === ">" || node.op === ">="
+        node.op === "<" ||
+        node.op === "<=" ||
+        node.op === ">" ||
+        node.op === ">="
       );
     case "FunctionCall": {
       const name = node.callee.toUpperCase();
@@ -211,7 +218,10 @@ function booleanTyped(node: Expr): boolean {
       return booleanTyped(node.expr);
     case "BinaryOp":
       return (
-        node.op === "=" || node.op === "<>" || node.op === "==" || node.op === "!="
+        node.op === "=" ||
+        node.op === "<>" ||
+        node.op === "==" ||
+        node.op === "!="
       );
     case "FunctionCall": {
       const name = node.callee.toUpperCase();
@@ -273,7 +283,10 @@ function cleanParens(
   }
   switch (node.kind) {
     case "FunctionCall":
-      return { ...node, args: node.args.map((a) => cleanParens(a, node, "left")) };
+      return {
+        ...node,
+        args: node.args.map((a) => cleanParens(a, node, "left")),
+      };
     case "BinaryOp":
       return {
         ...node,
@@ -361,7 +374,12 @@ function applyRules(node: Expr): Omit<Rewrite, "detail"> | null {
 
 // --- rules ---------------------------------------------------------------
 
-const LITERAL_KINDS = new Set(["NumberLit", "StringLit", "BooleanLit", "NullLit"]);
+const LITERAL_KINDS = new Set([
+  "NumberLit",
+  "StringLit",
+  "BooleanLit",
+  "NullLit",
+]);
 
 /**
  * Fold a field-free, null-free subtree by running the real evaluator on it.
@@ -399,7 +417,11 @@ function foldConstant(node: Expr): Omit<Rewrite, "detail"> | null {
 
 /** No fields (env-dependent) and no NULL literals (blank-mode-dependent). */
 function isFoldable(node: Expr): boolean {
-  if (node.kind === "FieldRef" || node.kind === "NullLit" || node.kind === "ErrorNode") {
+  if (
+    node.kind === "FieldRef" ||
+    node.kind === "NullLit" ||
+    node.kind === "ErrorNode"
+  ) {
     return false;
   }
   return childrenOf(node).every(isFoldable);
@@ -433,7 +455,12 @@ function toLiteral(value: SfValue, span: Span): Expr | null {
   if (value.type === "Text") {
     // Only strings the lexer round-trips verbatim; skip quotes/escapes.
     if (/^[^"\\\r\n]*$/.test(value.data)) {
-      return { kind: "StringLit", value: value.data, raw: `"${value.data}"`, span };
+      return {
+        kind: "StringLit",
+        value: value.data,
+        raw: `"${value.data}"`,
+        span,
+      };
     }
   }
   return null;
@@ -851,7 +878,7 @@ function suggestCaseChain(
     return;
   }
   // Mark the else-spine's nested IFs so they don't suggest their sub-chains.
-  for (let link = node; isCall(link, "IF") && link.args.length === 3; ) {
+  for (let link = node; isCall(link, "IF") && link.args.length === 3;) {
     consumed.add(link);
     const next = stripParens(link.args[2]!);
     if (!isCall(next, "IF")) {

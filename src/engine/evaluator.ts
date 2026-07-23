@@ -118,9 +118,7 @@ function toDecimal(v: SfValue, env: EvalEnv): Decimal {
   return asDecimal(v);
 }
 
-function isNumericType(
-  v: SfValue,
-): v is Extract<SfValue, { data: Decimal }> {
+function isNumericType(v: SfValue): v is Extract<SfValue, { data: Decimal }> {
   return v.type === "Number" || v.type === "Currency" || v.type === "Percent";
 }
 
@@ -273,7 +271,9 @@ function compare(
     cmp = strcmp(asText(l), asText(r));
   } else {
     // Order at the 32-place materialized scale, consistent with equality.
-    cmp = toDecimal(materialize(l), env).comparedTo(toDecimal(materialize(r), env));
+    cmp = toDecimal(materialize(l), env).comparedTo(
+      toDecimal(materialize(r), env),
+    );
   }
   switch (op) {
     case "<":

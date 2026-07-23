@@ -93,7 +93,10 @@ describe("engine: '+' concatenates text (oracle-verified)", () => {
 
   it("propagates a blank text operand to null (unlike '&')", () => {
     const r = ev("a + b", {
-      fields: { a: { type: "Text", blank: false, data: "x" }, b: blank("Text") },
+      fields: {
+        a: { type: "Text", blank: false, data: "x" },
+        b: blank("Text"),
+      },
     });
     expect(isError(r)).toBe(false);
     expect((r as SfValue).blank).toBe(true);
@@ -302,7 +305,11 @@ describe("engine: ported functions (corpus-verified)", () => {
   });
 
   it("INITCAP title-cases Unicode words; REVERSE/ASCII/CHR", () => {
-    expect(s("INITCAP(t)", { fields: { t: { type: "Text", blank: false, data: "ångstrom" } } })).toBe("Ångstrom");
+    expect(
+      s("INITCAP(t)", {
+        fields: { t: { type: "Text", blank: false, data: "ångstrom" } },
+      }),
+    ).toBe("Ångstrom");
     expect(s('REVERSE("abc")')).toBe("cba");
     expect(n('ASCII("A")')).toBe("65");
     expect(s("CHR(65)")).toBe("A");
@@ -311,7 +318,9 @@ describe("engine: ported functions (corpus-verified)", () => {
   it("IFERROR falls back only on a simulated #Error, not on an unsupported refusal", () => {
     expect(n("IFERROR(1 / 0, 42)")).toBe("42");
     expect(n("IFERROR(7, 42)")).toBe("7");
-    expect(() => ev("IFERROR(PRIORVALUE(Amount), 0)")).toThrow(UnsupportedError);
+    expect(() => ev("IFERROR(PRIORVALUE(Amount), 0)")).toThrow(
+      UnsupportedError,
+    );
   });
 });
 

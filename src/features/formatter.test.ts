@@ -14,19 +14,35 @@ const S = span(0, 0);
 // A generator of well-formed ASTs (including synthetic paren-free structures the
 // simplifier will produce), used to stress the printer's rule-6 guarantees.
 const OPS: readonly BinaryOperator[] = [
-  "+", "-", "*", "/", "&", "^", "=", "<>", "<", "<=", ">", ">=",
+  "+",
+  "-",
+  "*",
+  "/",
+  "&",
+  "^",
+  "=",
+  "<>",
+  "<",
+  "<=",
+  ">",
+  ">=",
 ];
 
 const leaf = fc.oneof(
-  fc.constantFrom("0", "1", "2.5", "10").map(
-    (raw): Expr => ({ kind: "NumberLit", raw, span: S }),
-  ),
+  fc
+    .constantFrom("0", "1", "2.5", "10")
+    .map((raw): Expr => ({ kind: "NumberLit", raw, span: S })),
   fc.constant<Expr>({ kind: "StringLit", value: "s", raw: '"s"', span: S }),
   fc.boolean().map((value): Expr => ({ kind: "BooleanLit", value, span: S })),
   fc.constant<Expr>({ kind: "NullLit", span: S }),
   fc
     .constantFrom(["x"], ["y"], ["Account", "Name"])
-    .map((path): Expr => ({ kind: "FieldRef", path, isGlobal: false, span: S })),
+    .map((path): Expr => ({
+      kind: "FieldRef",
+      path,
+      isGlobal: false,
+      span: S,
+    })),
 );
 
 const astArb: fc.Arbitrary<Expr> = fc.letrec<{ node: Expr }>((tie) => ({
@@ -38,37 +54,35 @@ const astArb: fc.Arbitrary<Expr> = fc.letrec<{ node: Expr }>((tie) => ({
         callee: fc.constantFrom("IF", "ABS", "AND", "CONTAINS"),
         args: fc.array(tie("node"), { maxLength: 3 }),
       })
-      .map(
-        ({ callee, args }): Expr => ({
-          kind: "FunctionCall",
-          callee,
-          calleeSpan: S,
-          args,
-          span: S,
-        }),
-      ),
-    fc
-      .record({ op: fc.constantFrom(...OPS), left: tie("node"), right: tie("node") })
-      .map(
-        ({ op, left, right }): Expr => ({
-          kind: "BinaryOp",
-          op,
-          opSpan: S,
-          left,
-          right,
-          span: S,
-        }),
-      ),
-    // Only unary "-" — the parser does not synthesize a UnaryOp for a bare "+".
-    tie("node").map(
-      (operand): Expr => ({
-        kind: "UnaryOp",
-        op: "-",
-        opSpan: S,
-        operand,
+      .map(({ callee, args }): Expr => ({
+        kind: "FunctionCall",
+        callee,
+        calleeSpan: S,
+        args,
         span: S,
-      }),
-    ),
+      })),
+    fc
+      .record({
+        op: fc.constantFrom(...OPS),
+        left: tie("node"),
+        right: tie("node"),
+      })
+      .map(({ op, left, right }): Expr => ({
+        kind: "BinaryOp",
+        op,
+        opSpan: S,
+        left,
+        right,
+        span: S,
+      })),
+    // Only unary "-" — the parser does not synthesize a UnaryOp for a bare "+".
+    tie("node").map((operand): Expr => ({
+      kind: "UnaryOp",
+      op: "-",
+      opSpan: S,
+      operand,
+      span: S,
+    })),
     tie("node").map((expr): Expr => ({ kind: "Paren", expr, span: S })),
   ),
 })).node;

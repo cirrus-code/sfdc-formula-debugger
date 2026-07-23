@@ -231,8 +231,7 @@ export const BUILTINS: Record<string, Builtin> = {
   MAX: (args) => num(Decimal.max(...args.map(dnum))),
   MIN: (args) => num(Decimal.min(...args.map(dnum))),
   POWER: ([a, b]) => num(dnum(a!).pow(dnum(b!))),
-  TRUNC: ([a, digits]) =>
-    num(truncTo(dnum(a!), digits ? toInt(digits) : 0)),
+  TRUNC: ([a, digits]) => num(truncTo(dnum(a!), digits ? toInt(digits) : 0)),
   // MFLOOR/MCEILING are the mathematical floor/ceiling (toward ∓∞), unlike
   // FLOOR/CEILING which round relative to zero. Verified against the corpus.
   MFLOOR: ([a]) => num(dnum(a!).floor()),

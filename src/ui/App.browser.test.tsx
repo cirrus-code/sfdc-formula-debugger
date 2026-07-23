@@ -146,7 +146,9 @@ test("reformats the editor when Format is clicked", async () => {
 
   // Canonical spacing after commas is applied in place.
   await expect
-    .poll(() => screen.container.querySelector(".cm-content")?.textContent ?? "")
+    .poll(
+      () => screen.container.querySelector(".cm-content")?.textContent ?? "",
+    )
     .toContain("IF(a, 1, 2)");
 });
 
@@ -165,7 +167,9 @@ test("simplifies with a step log and applies the result to the editor", async ()
 
   await userEvent.click(screen.getByRole("button", { name: "Apply" }));
   await expect
-    .poll(() => screen.container.querySelector(".cm-content")?.textContent ?? "")
+    .poll(
+      () => screen.container.querySelector(".cm-content")?.textContent ?? "",
+    )
     .toBe("ISBLANK(Amount)");
 });
 

@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { parse, type DiagnosticCode } from "../syntax/index.ts";
 import { diagnose, lint } from "./linter.ts";
 
-function lintCodes(source: string, contextId = "formula_field"): DiagnosticCode[] {
+function lintCodes(
+  source: string,
+  contextId = "formula_field",
+): DiagnosticCode[] {
   const { ast } = parse(source);
   return lint(ast, source, contextId).map((d) => d.code);
 }
@@ -130,7 +133,8 @@ describe("diagnose: full pipeline", () => {
   });
 
   it("reports nothing on the clean sample formula", () => {
-    expect(diagnose("IF(ISBLANK(Amount), 0, Amount * 1.1)", "formula_field"))
-      .toEqual([]);
+    expect(
+      diagnose("IF(ISBLANK(Amount), 0, Amount * 1.1)", "formula_field"),
+    ).toEqual([]);
   });
 });
