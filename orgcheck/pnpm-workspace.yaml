@@ -1,0 +1,8 @@
+# Standalone workspace root: keeps the heavyweight sf CLI out of the app's
+# dependency tree (the shipped product never touches org tooling).
+allowBuilds:
+  '@salesforce/cli': true
+  # Transitive deps whose postinstalls we don't need: protobufjs only runs a
+  # codegen fallback; yarn only installs its own shims.
+  protobufjs: false
+  yarn: false

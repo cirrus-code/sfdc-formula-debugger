@@ -8,6 +8,14 @@ unsupported — it never guesses.
 
 Status legend: ❓ unverified · 🔬 verifying · ✅ verified (golden test id)
 
+**Org verification pass (`orgcheck/`):** every remaining ❓/🔬 below that a
+formula field can decide now has a probe in `orgcheck/probes/*.json` — see
+`orgcheck/README.md` for the run workflow (real dev org via the sf CLI; deploy
+rejections themselves are verdicts). After a run, upgrade entries here citing
+the probe id, and `corpus/org-verified.json` carries the org-tier rows.
+Per-context questions (availability matrices, div-by-zero per context) are the
+pass's wave 2.
+
 ## Syntax / parsing
 
 Operator precedence is now transcribed from the Salesforce open-source grammar

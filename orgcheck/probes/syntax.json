@@ -1,0 +1,132 @@
+{
+  "$comment": "Syntax/precedence probes — each settles a 🔬/❓ item in VERIFICATION.md or a CONFORMANCE.md WS1 backlog row. Save rejection is itself a verdict (collected from deploy componentFailures).",
+  "probes": [
+    {
+      "id": "pow_vs_muldiv",
+      "question": "VERIFICATION: do * / bind tighter than ^ at runtime, as Formula.g4 nesting claims?",
+      "formula": "2 * 3 ^ 2",
+      "returns": "Number",
+      "interpret": {
+        "36": "* / tighter than ^ — grammar reflects the product",
+        "18": "^ tighter (math convention) — grammar does NOT reflect the product"
+      }
+    },
+    {
+      "id": "pow_assoc",
+      "question": "VERIFICATION: is ^ left-associative, as Formula.g4 claims?",
+      "formula": "2 ^ 3 ^ 2",
+      "returns": "Number",
+      "interpret": {
+        "64": "left-associative — grammar reflects the product",
+        "512": "right-associative — grammar does NOT reflect the product"
+      }
+    },
+    {
+      "id": "unary_vs_pow",
+      "question": "CONFORMANCE WS1: unary minus binds tighter than ^ (grammar-backed).",
+      "formula": "- 2 ^ 2",
+      "returns": "Number",
+      "interpret": {
+        "4": "unary tighter than ^ (grammar confirmed)",
+        "-4": "^ tighter than unary"
+      }
+    },
+    {
+      "id": "amp_additive_level",
+      "question": "CONFORMANCE WS1 #1: does & share the additive level with + (left-assoc)? Discriminated via blank semantics: + propagates blank text to null, & absorbs it.",
+      "formula": "\"a\" + t_blank__c & \"c\"",
+      "returns": "Text",
+      "fields": { "t_blank__c": { "type": "Text", "value": null } },
+      "interpret": {
+        "c": "& at additive level, left-assoc: (\"a\"+blank)&\"c\" — grammar confirmed",
+        "ac": "& binds below additive: \"a\"+(blank&\"c\")"
+      }
+    },
+    {
+      "id": "andand_op",
+      "question": "VERIFICATION: does the product accept && (OSS grammar INFIX_AND) in formula fields?",
+      "formula": "IF(true && false, 1, 2)",
+      "returns": "Number",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "2": "product accepts && — lex it",
+        "SAVE_ERROR": "product rejects && — OSS-only; keep our lexer as-is"
+      }
+    },
+    {
+      "id": "oror_op",
+      "question": "VERIFICATION: does the product accept || (OSS grammar INFIX_OR)?",
+      "formula": "IF(false || true, 1, 2)",
+      "returns": "Number",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "1": "product accepts || — lex it",
+        "SAVE_ERROR": "product rejects || — OSS-only"
+      }
+    },
+    {
+      "id": "eqeq_op",
+      "question": "VERIFICATION: is == a first-class equality operator in the product (docs only list = / <>)?",
+      "formula": "IF(1 == 1, 1, 2)",
+      "returns": "Number",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "1": "product accepts == — keep parsing; reconsider nonstandard-operator warning wording",
+        "SAVE_ERROR": "product rejects == — our warning should become an error"
+      }
+    },
+    {
+      "id": "noteq_op",
+      "question": "VERIFICATION: is != accepted (paired with the == question)?",
+      "formula": "IF(1 != 2, 1, 2)",
+      "returns": "Number",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "1": "product accepts !=",
+        "SAVE_ERROR": "product rejects !="
+      }
+    },
+    {
+      "id": "ident_colon",
+      "question": "VERIFICATION: LexerRules.g4 lists ':' among identifier chars — does the product lexer treat foo:bar as one identifier (unknown-field error) or a syntax error?",
+      "formula": "foo:bar + 1",
+      "returns": "Number",
+      "expectSaveError": true,
+      "note": "The verdict is the error MESSAGE kind: field-not-found ⇒ ':' is an identifier char; syntax error ⇒ it is not."
+    },
+    {
+      "id": "ident_hash",
+      "question": "VERIFICATION: same as ident_colon for '#'.",
+      "formula": "foo#bar + 1",
+      "returns": "Number",
+      "expectSaveError": true,
+      "note": "Field-not-found ⇒ '#' is an identifier char; syntax error ⇒ it is not."
+    },
+    {
+      "id": "null_prefix_ident",
+      "question": "CLAUDE.md: identifiers with keyword-like prefixes (Null_Check__c) must parse — confirm the product parses them (the formulon bug is formulon-only).",
+      "formula": "IF(Null_Check__c, 1, 2)",
+      "returns": "Number",
+      "fields": { "Null_Check__c": { "type": "Boolean", "value": "true" } },
+      "interpret": { "1": "product parses NULL-prefixed identifiers fine" }
+    },
+    {
+      "id": "comment_basic",
+      "question": "Sanity: /* */ comments are legal in product formulas (we preserve them; formulon rejects them).",
+      "formula": "1 + /* mid-expression comment */ 2",
+      "returns": "Number",
+      "interpret": { "3": "comments legal mid-expression" }
+    },
+    {
+      "id": "comment_nested",
+      "question": "Do comments nest? Non-nesting lexers end the comment at the first */ leaving a valid formula; nesting lexers see an unterminated comment.",
+      "formula": "1 /* a /* b */ + 2",
+      "returns": "Number",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "3": "comments do NOT nest (first */ closes)",
+        "SAVE_ERROR": "comments nest (outer unterminated) — or */ sequencing rejected outright; read the message"
+      }
+    }
+  ]
+}

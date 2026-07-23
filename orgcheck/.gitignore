@@ -1,0 +1,6 @@
+node_modules/
+# Generated sfdx source (regenerate with `pnpm generate`); results/ is committed.
+sfdx/force-app/
+sfdx/.sf/
+plan.json
+data.apex

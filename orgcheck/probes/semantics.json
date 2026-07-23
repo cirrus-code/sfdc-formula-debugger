@@ -1,0 +1,257 @@
+{
+  "$comment": "Semantics probes. corpusRefs re-verify entire oracle corpus tests (every row, both blank modes) against the real product — chosen because they are the current conformance failures or 🔬 items. probes are hand-written cases for NEEDS-VERIFICATION items with no corpus coverage.",
+  "corpusRefs": [
+    {
+      "name": "testAddDate",
+      "question": "🔬 date + number: fraction truncation, blank date propagation, year range."
+    },
+    {
+      "name": "testTextFunctionWithCustomDate",
+      "question": "🔬 TEXT(blank date) → null (oracle) vs \"\"; plus date TEXT format."
+    },
+    {
+      "name": "testAddConcatSimple",
+      "question": "✅-recheck: + concatenates text; blank text operand behavior (oracle: single blank absorbs, both blank → null — surprising vs 'blank propagates')."
+    },
+    {
+      "name": "testFindOnText",
+      "question": "🔬 FIND with blank search/haystack: oracle says 0, we return blank."
+    },
+    {
+      "name": "testIfTextCompareGreaterThan",
+      "question": "❓ text ordering comparisons (> on text): collation, case, blank."
+    },
+    {
+      "name": "testIfTextCompareLessEqual",
+      "question": "❓ text ordering comparisons (<= on text)."
+    },
+    {
+      "name": "testIfContainsFunc",
+      "question": "🔬 CONTAINS with blank args inside IF: blank-propagation vs absorb."
+    },
+    {
+      "name": "testSimpleSubstitute",
+      "question": "🔬 SUBSTITUTE with blank args: oracle keeps original, we blank out."
+    },
+    {
+      "name": "testSubstr3",
+      "question": "SUBSTR: does the product even have it (OSS-only?); blank length arg → null.",
+      "expectSaveError": "maybe"
+    },
+    {
+      "name": "testChr",
+      "question": "CHR: product availability; control/space char results (oracle rows look like XML-trim artifacts).",
+      "expectSaveError": "maybe"
+    },
+    {
+      "name": "testNVLWithTextArea",
+      "question": "🔬 NULLVALUE over a TextArea field: oracle says null even with fallback — TextArea semantics differ from Text?",
+      "fieldTypeOverrides": { "customtextarea1__c": "TextArea" }
+    },
+    {
+      "name": "testISNULLWithTextArea",
+      "question": "🔬 ISNULL over a TextArea field: oracle says a blank TextArea is null where we say not.",
+      "fieldTypeOverrides": { "customtextarea1__c": "TextArea" }
+    },
+    {
+      "name": "testUpperLocale",
+      "question": "🔬 two-arg UPPER(text, locale): product availability + Turkish İ/ı casing.",
+      "expectSaveError": "maybe"
+    },
+    {
+      "name": "testLowerLocale",
+      "question": "🔬 two-arg LOWER(text, locale): product availability + Turkish casing.",
+      "expectSaveError": "maybe"
+    },
+    {
+      "name": "testExponentiationOperator",
+      "question": "🔬 ^ result scale: oracle materializes ^ at ~20 significant digits, not 32 decimal places — what does the product do?"
+    },
+    {
+      "name": "testBigDivideWithFunc",
+      "question": "🔬 VALUE(TEXT(blank)) under blank mode: null (oracle) vs #Error (ours)."
+    },
+    {
+      "name": "testSubUnary",
+      "question": "🔬 unary minus of a blank number in blank mode: null (oracle) vs 0 (ours)."
+    },
+    {
+      "name": "testOriginDateTime",
+      "question": "🔬 $System.originDateTime: does the product expose it, and is it 1900-01-01 GMT?",
+      "expectSaveError": "maybe"
+    }
+  ],
+  "probes": [
+    {
+      "id": "blank_mode_canary",
+      "question": "End-to-end canary: formulaTreatBlanksAs=BlankAsZero must flip this from 2 to 1 — validates the harness's blank-mode plumbing itself.",
+      "formula": "IF(customnumber1__c < 5, 1, 2)",
+      "returns": "Number",
+      "blankMode": "both",
+      "fields": { "customnumber1__c": { "type": "Number", "value": null } },
+      "interpret": {
+        "1": "zero mode: blank read as 0, 0 < 5",
+        "2": "blank mode: ordering vs blank is false"
+      }
+    },
+    {
+      "id": "addmonths_jan31_feb",
+      "question": "❓ ADDMONTHS month-end: Jan 31 + 1 month in a non-leap year.",
+      "formula": "ADDMONTHS(DATE(2025, 1, 31), 1)",
+      "returns": "Date",
+      "interpret": { "2025-02-28": "clamps to month end" }
+    },
+    {
+      "id": "addmonths_jan31_feb_leap",
+      "question": "❓ ADDMONTHS month-end: Jan 31 + 1 month in a leap year.",
+      "formula": "ADDMONTHS(DATE(2024, 1, 31), 1)",
+      "returns": "Date",
+      "interpret": { "2024-02-29": "clamps to leap-year month end" }
+    },
+    {
+      "id": "addmonths_jan30_feb",
+      "question": "❓ ADDMONTHS: Jan 30 (not month end) + 1 — clamp only, or last-day rule?",
+      "formula": "ADDMONTHS(DATE(2025, 1, 30), 1)",
+      "returns": "Date",
+      "interpret": {
+        "2025-02-28": "clamped (overflow), independent of last-day rule"
+      }
+    },
+    {
+      "id": "addmonths_feb28_mar",
+      "question": "❓ ADDMONTHS last-day rule: Feb 28 (month end) + 1 → Mar 31 (docs' 'last day stays last day') or Mar 28 (plain calendar add)?",
+      "formula": "ADDMONTHS(DATE(2025, 2, 28), 1)",
+      "returns": "Date",
+      "interpret": {
+        "2025-03-31": "end-of-month-preserving rule (as documented)",
+        "2025-03-28": "plain calendar month add"
+      }
+    },
+    {
+      "id": "date_year_4000",
+      "question": "🔬 DATE() upper year bound: 4000 in range?",
+      "formula": "DATE(4000, 12, 31)",
+      "returns": "Date",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "date_year_4001",
+      "question": "🔬 DATE() upper year bound: does 4001 error (bound = 4000) or work (bound = 9999)?",
+      "formula": "DATE(4001, 1, 1)",
+      "returns": "Date",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "date_year_9999",
+      "question": "🔬 DATE() upper year bound: 9999.",
+      "formula": "DATE(9999, 12, 31)",
+      "returns": "Date",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "divzero_number",
+      "question": "❓ div-by-zero surfacing in the formula-field context: what does the API read back for 1/0?",
+      "formula": "1 / 0",
+      "returns": "Number",
+      "expectSaveError": "maybe",
+      "note": "UI shows #Error!; record what SOQL returns (null? error?) — this is the per-context surfacing question."
+    },
+    {
+      "id": "divzero_text",
+      "question": "❓ div-by-zero inside TEXT(): does the error propagate through the text conversion?",
+      "formula": "TEXT(1 / 0)",
+      "returns": "Text",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "mod_zero",
+      "question": "✅-recheck MOD(x, 0) is a runtime error (oracle-verified) in the product formula-field context.",
+      "formula": "MOD(3, 0)",
+      "returns": "Number",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "iferror_divzero",
+      "question": "IFERROR catches the div-by-zero #Error in the product.",
+      "formula": "IFERROR(1 / 0, 42)",
+      "returns": "Number",
+      "interpret": { "42": "IFERROR catches division errors" }
+    },
+    {
+      "id": "case_eq_formula_field",
+      "question": "❓ case sensitivity of text = in the formula-field context (oracle: sensitive).",
+      "formula": "IF(\"a\" = \"A\", 1, 2)",
+      "returns": "Number",
+      "interpret": {
+        "2": "case-sensitive (matches oracle)",
+        "1": "case-insensitive in this context"
+      }
+    },
+    {
+      "id": "text_third",
+      "question": "❓ numeric TEXT() rendering at the precision boundary: 32 places like the oracle?",
+      "formula": "TEXT(1 / 3)",
+      "returns": "Text"
+    },
+    {
+      "id": "text_trailing_zeros",
+      "question": "❓ TEXT() of an exact decimal: are trailing zeros kept?",
+      "formula": "TEXT(2.50)",
+      "returns": "Text"
+    },
+    {
+      "id": "text_percent_field",
+      "question": "❓ TEXT(percent field): raw 0.99 or display 99?",
+      "formula": "TEXT(custompercent__c)",
+      "returns": "Text",
+      "fields": { "custompercent__c": { "type": "Percent", "value": "99" } }
+    },
+    {
+      "id": "text_currency_field",
+      "question": "❓ TEXT(currency field): symbol? scale?",
+      "formula": "TEXT(customcurrency__c)",
+      "returns": "Text",
+      "fields": {
+        "customcurrency__c": { "type": "Currency", "value": "19.99" }
+      }
+    },
+    {
+      "id": "text_picklist",
+      "question": "❓ TEXT(picklist) → API name of the value.",
+      "formula": "TEXT(custompick__c)",
+      "returns": "Text",
+      "fields": { "custompick__c": { "type": "Picklist", "value": "Alpha" } }
+    },
+    {
+      "id": "text_time",
+      "question": "❓ TEXT(time) output format (ms precision?).",
+      "formula": "TEXT(TIMEVALUE(\"17:30:45.125\"))",
+      "returns": "Text",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "text_datetime_format",
+      "question": "❓ TEXT(datetime) output format (GMT, trailing Z?).",
+      "formula": "TEXT(customdatetime1__c)",
+      "returns": "Text",
+      "fields": {
+        "customdatetime1__c": {
+          "type": "Datetime",
+          "value": "2026:03:08:09:30:00"
+        }
+      }
+    },
+    {
+      "id": "datetime_plus_hour",
+      "question": "❓ DST-adjacent datetime math: +1/24 across the US spring-forward instant (2026-03-08 09:30Z = 01:30 PST) — datetime math must be UTC-based, unaffected by org TZ.",
+      "formula": "customdatetime1__c + 1 / 24",
+      "returns": "Datetime",
+      "fields": {
+        "customdatetime1__c": {
+          "type": "Datetime",
+          "value": "2026:03:08:09:30:00"
+        }
+      }
+    }
+  ]
+}

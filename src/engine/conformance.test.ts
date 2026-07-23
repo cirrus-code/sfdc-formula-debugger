@@ -31,17 +31,19 @@ describe("conformance: Salesforce formula-engine corpus", () => {
     quarantine: 0,
     unsupported: 0,
   };
-  const failures: string[] = [];
+  const failures: Array<CorpusRow & { got: string }> = [];
 
   for (const row of rows) {
     const outcome = runRow(row);
     tally[outcome.status] += 1;
-    if (outcome.status === "fail" && failures.length < 25) {
-      failures.push(
-        `${row.name} [${row.blankMode}] ${row.formula} => expected ${row.expected}, got ${outcome.got}`,
-      );
+    if (outcome.status === "fail") {
+      failures.push({ ...row, got: outcome.got ?? "" });
     }
   }
+  const failureLines = failures.map(
+    (f) =>
+      `${f.name} [${f.blankMode}] ${f.formula} => expected ${f.expected}, got ${f.got}`,
+  );
 
   const comparable = tally.pass + tally.fail;
   const conformance = comparable ? tally.pass / comparable : 0;
@@ -57,8 +59,8 @@ describe("conformance: Salesforce formula-engine corpus", () => {
     console.log(
       `\nConformance: ${(conformance * 100).toFixed(1)}% (${tally.pass}/${comparable} comparable)\n` +
         `  pass ${tally.pass} · fail ${tally.fail} · quarantine ${tally.quarantine} · unsupported ${tally.unsupported} · total ${rows.length}\n` +
-        (failures.length
-          ? `  sample failures:\n   - ${failures.slice(0, 10).join("\n   - ")}\n`
+        (failureLines.length
+          ? `  sample failures:\n   - ${failureLines.slice(0, 10).join("\n   - ")}\n`
           : ""),
     );
     expect(rows.length).toBeGreaterThan(1000);
