@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import type { Expr } from "../../syntax/index.ts";
 import { extractFields } from "../../features/index.ts";
+import type { PermalinkField } from "../../features/permalink.ts";
 import {
   evaluateFormula,
   UnsupportedError,
@@ -20,12 +21,46 @@ interface FieldInput {
 interface SimulatePanelProps {
   readonly ast: Expr;
   readonly blankToggle: boolean;
+  /** Decoded permalink state to seed the form with (untrusted; sanitized here). */
+  readonly initialSim?:
+    | {
+        readonly fields: Readonly<Record<string, PermalinkField>>;
+        readonly blankMode: BlankMode;
+      }
+    | undefined;
+  /** Builds the permalink for the current state and returns its URL. */
+  readonly onShare?: (
+    fields: Record<string, PermalinkField>,
+    blankMode: BlankMode,
+  ) => string;
 }
 
-export function SimulatePanel({ ast, blankToggle }: SimulatePanelProps) {
+/** Keep only permalink fields whose type is one the simulator offers. */
+function seedInputs(
+  fields: Readonly<Record<string, PermalinkField>> | undefined,
+): Record<string, FieldInput> {
+  const out: Record<string, FieldInput> = {};
+  for (const [name, f] of Object.entries(fields ?? {})) {
+    if ((FIELD_TYPES as readonly string[]).includes(f.type)) {
+      out[name] = { type: f.type as SfType, value: f.value, blank: f.blank };
+    }
+  }
+  return out;
+}
+
+export function SimulatePanel({
+  ast,
+  blankToggle,
+  initialSim,
+  onShare,
+}: SimulatePanelProps) {
   const fields = useMemo(() => extractFields(ast), [ast]);
-  const [inputs, setInputs] = useState<Record<string, FieldInput>>({});
-  const [blankMode, setBlankMode] = useState<BlankMode>("zero");
+  const [inputs, setInputs] = useState<Record<string, FieldInput>>(() =>
+    seedInputs(initialSim?.fields),
+  );
+  const [blankMode, setBlankMode] = useState<BlankMode>(
+    initialSim?.blankMode ?? "zero",
+  );
   // Capture the clock once so TODAY()/NOW() are stable across re-renders.
   const [now] = useState(() => ({ epochMillis: Date.now() }));
 
@@ -167,8 +202,57 @@ export function SimulatePanel({ ast, blankToggle }: SimulatePanelProps) {
         </div>
       )}
 
-      <ResultBar outcome={outcome} />
+      <ResultBar outcome={outcome}>
+        {onShare ? (
+          <ShareButton onShare={() => onShare({ ...inputs }, blankMode)} />
+        ) : null}
+      </ResultBar>
     </section>
+  );
+}
+
+/**
+ * "Copy link" (DESIGN §8.5) — placed next to the result, the shareable moment.
+ * The parent encodes and updates the hash; this button only copies the URL and
+ * gives feedback. Clipboard access can be denied; the link is still in the
+ * address bar then.
+ */
+function ShareButton({ onShare }: { onShare: () => string }) {
+  const [label, setLabel] = useState("Copy link");
+
+  const share = async (): Promise<void> => {
+    const url = onShare();
+    try {
+      await navigator.clipboard.writeText(url);
+      setLabel("Copied!");
+    } catch {
+      setLabel("Link is in the URL bar");
+    }
+    setTimeout(() => setLabel("Copy link"), 2000);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        void share();
+      }}
+      title="Copy a link that restores this formula, inputs, and result"
+      style={{
+        marginLeft: "auto",
+        background: palette.surface,
+        color: palette.accent,
+        border: `1px solid ${palette.border}`,
+        borderRadius: "8px",
+        padding: "0.25rem 0.7rem",
+        fontFamily: font.sans,
+        fontSize: "0.8rem",
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -254,8 +338,10 @@ function resultColor(outcome: {
 
 function ResultBar({
   outcome,
+  children,
 }: {
   outcome: { result?: string; unsupported?: string };
+  children?: ReactNode;
 }) {
   const label = resultLabel(outcome);
   const color = resultColor(outcome);
@@ -266,7 +352,7 @@ function ResultBar({
         borderTop: `1px solid ${palette.border}`,
         padding: "0.7rem 1rem",
         display: "flex",
-        alignItems: "baseline",
+        alignItems: "center",
         gap: "0.6rem",
       }}
     >
@@ -283,6 +369,7 @@ function ResultBar({
       <span style={{ fontFamily: font.mono, fontSize: "1rem", color }}>
         {label || "—"}
       </span>
+      {children}
     </div>
   );
 }

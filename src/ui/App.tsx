@@ -1,10 +1,16 @@
 import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import { parse } from "../syntax/index.ts";
 import { analyze } from "../analysis/index.ts";
-// Deep import: the features barrel re-exports the simplifier, whose engine
+// Deep imports: the features barrel re-exports the simplifier, whose engine
 // dependency (decimal.js sets global config at module load) must stay in the
 // lazy chunks, not the first paint.
 import { lint } from "../features/linter.ts";
+import {
+  decodePermalink,
+  encodePermalink,
+  type PermalinkField,
+} from "../features/permalink.ts";
+import type { BlankMode } from "../engine/value.ts";
 import { CONTEXTS, DEFAULT_CONTEXT_ID, getContext } from "../registry/index.ts";
 import { palette, font, product } from "../theme/theme.ts";
 import { FormulaEditor, type EditorHandle } from "./editor/FormulaEditor.tsx";
@@ -34,9 +40,30 @@ const SEVERITY_COLOR: Record<string, string> = {
 };
 
 export function App() {
-  const [source, setSource] = useState(SAMPLE);
-  const [contextId, setContextId] = useState(DEFAULT_CONTEXT_ID);
+  // Restore shared state from the URL hash, synchronously, so the editor
+  // mounts with the restored formula instead of flashing the sample.
+  const [restored] = useState(() => decodePermalink(window.location.hash));
+  const initialDoc = restored?.formula ?? SAMPLE;
+
+  const [source, setSource] = useState(initialDoc);
+  const [contextId, setContextId] = useState(
+    restored && getContext(restored.context)
+      ? restored.context
+      : DEFAULT_CONTEXT_ID,
+  );
   const editorRef = useRef<EditorHandle>(null);
+
+  // The only place formula text leaves the editor (CLAUDE.md rule 10):
+  // explicit user action, into the URL hash, nowhere else.
+  const share = (
+    fields: Record<string, PermalinkField>,
+    blankMode: BlankMode,
+  ): string => {
+    const hash = encodePermalink({ context: contextId, formula: source, fields, blankMode });
+    const url = `${window.location.origin}${window.location.pathname}#${hash}`;
+    window.history.replaceState(null, "", `#${hash}`);
+    return url;
+  };
 
   const { ast, diagnostics } = useMemo(() => {
     const parsed = parse(source);
@@ -115,7 +142,7 @@ export function App() {
         </div>
 
         <FormulaEditor
-          initialDoc={SAMPLE}
+          initialDoc={initialDoc}
           contextId={contextId}
           onChange={setSource}
           handleRef={editorRef}
@@ -141,6 +168,12 @@ export function App() {
             <SimulatePanel
               ast={ast}
               blankToggle={context?.blankModeToggle ?? false}
+              initialSim={
+                restored
+                  ? { fields: restored.fields, blankMode: restored.blankMode }
+                  : undefined
+              }
+              onShare={share}
             />
             <SimplifyPanel
               source={source}

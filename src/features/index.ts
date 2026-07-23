@@ -17,3 +17,9 @@ export {
   type SimplifyStep,
   type SimplifySuggestion,
 } from "./simplifier.ts";
+export {
+  decodePermalink,
+  encodePermalink,
+  type PermalinkField,
+  type PermalinkState,
+} from "./permalink.ts";

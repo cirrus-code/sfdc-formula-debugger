@@ -14,6 +14,12 @@ let consoleErrors: string[] = [];
 let restore: (() => void) | undefined;
 
 beforeEach(() => {
+  // A permalink hash left over from a previous test would seed the app.
+  window.history.replaceState(
+    null,
+    "",
+    window.location.pathname + window.location.search,
+  );
   consoleErrors = [];
   const spy = vi
     .spyOn(console, "error")
@@ -171,6 +177,38 @@ test("simplifies with a step log and applies the result to the editor", async ()
       () => screen.container.querySelector(".cm-content")?.textContent ?? "",
     )
     .toBe("ISBLANK(Amount)");
+});
+
+test("copies a permalink and restores formula, inputs, and result from it", async () => {
+  const first = await render(<App />);
+  await expect
+    .poll(() => first.container.querySelector(".cm-content"))
+    .toBeTruthy();
+
+  await typeFormula(first.container, "Amount * 2");
+  await expect
+    .poll(() => first.container.querySelector('input[placeholder="value"]'))
+    .toBeTruthy();
+  const valueInput = first.container.querySelector<HTMLInputElement>(
+    'input[placeholder="value"]',
+  )!;
+  await userEvent.fill(valueInput, "5");
+  await expect.element(first.getByText("10")).toBeInTheDocument();
+
+  // Copy link writes the state into the URL hash (and only then — rule 10).
+  expect(window.location.hash).toBe("");
+  await userEvent.click(first.getByRole("button", { name: /Copy link/ }));
+  await expect.poll(() => window.location.hash.length).toBeGreaterThan(1);
+
+  // A fresh app instance restores the whole session from the hash.
+  first.unmount();
+  const second = await render(<App />);
+  await expect
+    .poll(
+      () => second.container.querySelector(".cm-content")?.textContent ?? "",
+    )
+    .toBe("Amount * 2");
+  await expect.element(second.getByText("10")).toBeInTheDocument();
 });
 
 test("renders without console errors", async () => {
