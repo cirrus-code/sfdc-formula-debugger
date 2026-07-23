@@ -5,7 +5,7 @@ import { signature } from "./signature.ts";
 
 function tooltipDom(spec: FunctionSpec): HTMLElement {
   const root = document.createElement("div");
-  root.style.cssText = `max-width:320px;padding:8px 10px;font-family:${font.sans};font-size:13px;line-height:1.5;`;
+  root.style.cssText = `max-width:320px;padding:8px 10px;font-family:${font.mono};font-size:12.5px;line-height:1.55;`;
 
   const sig = document.createElement("div");
   sig.textContent = signature(spec);

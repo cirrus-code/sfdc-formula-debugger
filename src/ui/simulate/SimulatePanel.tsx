@@ -9,7 +9,8 @@ import {
   type SfValue,
 } from "../../engine/index.ts";
 import type { SfType } from "../../registry/index.ts";
-import { palette, font } from "../../theme/theme.ts";
+import { palette, syntax, font } from "../../theme/theme.ts";
+import { Panel } from "../Panel.tsx";
 import { buildFieldValue, FIELD_TYPES, renderResult } from "./fieldValue.ts";
 
 interface FieldInput {
@@ -105,38 +106,38 @@ export function SimulatePanel({
   }, [ast, fields, inputs, blankMode, now]);
 
   return (
-    <section style={panelStyle}>
-      <div style={headerStyle}>
-        <span style={{ fontWeight: 600 }}>Simulate</span>
-        {blankToggle ? (
+    <Panel
+      label="Simulate"
+      right={
+        blankToggle ? (
           <label
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "0.4rem",
+              gap: "0.45rem",
               color: palette.textMuted,
-              fontSize: "0.78rem",
+              fontSize: "0.75rem",
             }}
           >
             Blank fields as
             <select
+              className="select"
               value={blankMode}
               onChange={(e) => setBlankMode(e.target.value as BlankMode)}
-              style={selectStyle}
             >
               <option value="zero">zeroes</option>
               <option value="blank">blanks</option>
             </select>
           </label>
-        ) : null}
-      </div>
-
+        ) : undefined
+      }
+    >
       {fields.length === 0 ? (
         <p
           style={{
             padding: "0.7rem 1rem",
             color: palette.textMuted,
-            fontSize: "0.85rem",
+            fontSize: "0.82rem",
           }}
         >
           No fields referenced.
@@ -146,25 +147,24 @@ export function SimulatePanel({
           {fields.map((f) => {
             const input = getInput(f.name, f.inferredType);
             return (
-              <div key={f.name} style={rowStyle}>
+              <div key={f.name} className="row-hover" style={rowStyle}>
                 <code
                   style={{
-                    fontFamily: font.mono,
                     fontSize: "0.82rem",
-                    color: palette.accent,
+                    color: syntax.field,
                     minWidth: "9rem",
                   }}
                 >
                   {f.name}
                 </code>
                 <select
+                  className="select"
                   value={input.type}
                   onChange={(e) =>
                     update(f.name, f.inferredType, {
                       type: e.target.value as SfType,
                     })
                   }
-                  style={selectStyle}
                 >
                   {FIELD_TYPES.map((t) => (
                     <option key={t} value={t}>
@@ -182,7 +182,7 @@ export function SimulatePanel({
                     alignItems: "center",
                     gap: "0.3rem",
                     color: palette.textMuted,
-                    fontSize: "0.75rem",
+                    fontSize: "0.72rem",
                   }}
                 >
                   <input
@@ -207,12 +207,13 @@ export function SimulatePanel({
           <ShareButton onShare={() => onShare({ ...inputs }, blankMode)} />
         ) : null}
       </ResultBar>
-    </section>
+    </Panel>
   );
 }
 
 /**
- * "Copy link" (DESIGN §8.5) — placed next to the result, the shareable moment.
+ * "Copy link" (DESIGN §8.5) — placed next to the result, the shareable moment,
+ * and styled as the page's single filled button: this is the growth mechanism.
  * The parent encodes and updates the hash; this button only copies the URL and
  * gives feedback. Clipboard access can be denied; the link is still in the
  * address bar then.
@@ -234,22 +235,12 @@ function ShareButton({ onShare }: { onShare: () => string }) {
   return (
     <button
       type="button"
+      className="btn btn--primary"
       onClick={() => {
         void share();
       }}
       title="Copy a link that restores this formula, inputs, and result"
-      style={{
-        marginLeft: "auto",
-        background: palette.surface,
-        color: palette.accent,
-        border: `1px solid ${palette.border}`,
-        borderRadius: "8px",
-        padding: "0.25rem 0.7rem",
-        fontFamily: font.sans,
-        fontSize: "0.8rem",
-        cursor: "pointer",
-        whiteSpace: "nowrap",
-      }}
+      style={{ marginLeft: "auto" }}
     >
       {label}
     </button>
@@ -323,19 +314,6 @@ function resultLabel(outcome: {
   return outcome.result ?? "";
 }
 
-function resultColor(outcome: {
-  result?: string;
-  unsupported?: string;
-}): string {
-  if (outcome.unsupported) {
-    return palette.textMuted;
-  }
-  if (outcome.result === "#Error!") {
-    return palette.danger;
-  }
-  return palette.text;
-}
-
 function ResultBar({
   outcome,
   children,
@@ -344,7 +322,15 @@ function ResultBar({
   children?: ReactNode;
 }) {
   const label = resultLabel(outcome);
-  const color = resultColor(outcome);
+  let led = "led--ok";
+  let color: string = palette.text;
+  if (outcome.unsupported) {
+    led = "led--warn";
+    color = palette.textMuted;
+  } else if (outcome.result === "#Error!") {
+    led = "led--err";
+    color = palette.danger;
+  }
 
   return (
     <div
@@ -353,20 +339,23 @@ function ResultBar({
         padding: "0.7rem 1rem",
         display: "flex",
         alignItems: "center",
-        gap: "0.6rem",
+        gap: "0.65rem",
       }}
     >
+      <span className="microcopy">Result</span>
+      <span className={`led ${led}`} aria-hidden />
+      {/* Keyed so a changed result re-triggers the readout-in flash. */}
       <span
+        key={label}
+        className="readout"
         style={{
-          color: palette.textMuted,
-          fontSize: "0.75rem",
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
+          fontFamily: font.mono,
+          fontSize: "1rem",
+          fontWeight: 600,
+          color,
+          overflowWrap: "anywhere",
         }}
       >
-        Result
-      </span>
-      <span style={{ fontFamily: font.mono, fontSize: "1rem", color }}>
         {label || "—"}
       </span>
       {children}
@@ -374,48 +363,22 @@ function ResultBar({
   );
 }
 
-const panelStyle = {
-  marginTop: "1.25rem",
-  border: `1px solid ${palette.border}`,
-  borderRadius: "10px",
-  background: palette.surface,
-  overflow: "hidden",
-} as const;
-
-const headerStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "0.6rem 1rem",
-  borderBottom: `1px solid ${palette.border}`,
-  fontSize: "0.85rem",
-} as const;
-
 const rowStyle = {
   display: "flex",
   alignItems: "center",
   gap: "0.6rem",
-  padding: "0.35rem 1rem",
+  padding: "0.4rem 1rem",
   flexWrap: "wrap",
-} as const;
-
-const selectStyle = {
-  background: palette.bg,
-  color: palette.text,
-  border: `1px solid ${palette.border}`,
-  borderRadius: "6px",
-  padding: "0.25rem 0.4rem",
-  fontSize: "0.8rem",
 } as const;
 
 const inputStyle = {
   flex: 1,
   minWidth: "6rem",
-  background: palette.bg,
+  background: palette.well,
   color: palette.text,
   border: `1px solid ${palette.border}`,
-  borderRadius: "6px",
-  padding: "0.3rem 0.5rem",
+  borderRadius: "8px",
+  padding: "0.3rem 0.55rem",
   fontFamily: font.mono,
   fontSize: "0.82rem",
 } as const;

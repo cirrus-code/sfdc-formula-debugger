@@ -35,14 +35,12 @@ const leaf = fc.oneof(
   fc.constant<Expr>({ kind: "StringLit", value: "s", raw: '"s"', span: S }),
   fc.boolean().map((value): Expr => ({ kind: "BooleanLit", value, span: S })),
   fc.constant<Expr>({ kind: "NullLit", span: S }),
-  fc
-    .constantFrom(["x"], ["y"], ["Account", "Name"])
-    .map((path): Expr => ({
-      kind: "FieldRef",
-      path,
-      isGlobal: false,
-      span: S,
-    })),
+  fc.constantFrom(["x"], ["y"], ["Account", "Name"]).map((path): Expr => ({
+    kind: "FieldRef",
+    path,
+    isGlobal: false,
+    span: S,
+  })),
 );
 
 const astArb: fc.Arbitrary<Expr> = fc.letrec<{ node: Expr }>((tie) => ({

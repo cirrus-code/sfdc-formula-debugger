@@ -12,8 +12,9 @@ import {
 } from "../features/permalink.ts";
 import type { BlankMode } from "../engine/value.ts";
 import { CONTEXTS, DEFAULT_CONTEXT_ID, getContext } from "../registry/index.ts";
-import { palette, font, product } from "../theme/theme.ts";
+import { applyThemeVars, palette, product } from "../theme/theme.ts";
 import { FormulaEditor, type EditorHandle } from "./editor/FormulaEditor.tsx";
+import { Panel } from "./Panel.tsx";
 import { offsetToLineCol } from "./util/position.ts";
 
 // The simulator is the only route to the evaluator (and its decimal.js
@@ -39,7 +40,28 @@ const SEVERITY_COLOR: Record<string, string> = {
   info: palette.accent,
 };
 
+/** Nameplate treatment: last word of the product name set in italic accent. */
+function Nameplate({ name }: { name: string }) {
+  const words = name.split(" ");
+  const last = words[words.length - 1];
+  const head = words.slice(0, -1).join(" ");
+  return (
+    <h1>
+      {head ? `${head} ` : ""}
+      <em>{last}</em>
+    </h1>
+  );
+}
+
 export function App() {
+  // The stylesheet resolves colors through --sfa-* vars; populate them from
+  // the theme module before the first paint (idempotent, also covers tests
+  // that mount <App/> without going through main.tsx).
+  useState(() => {
+    applyThemeVars();
+    return null;
+  });
+
   // Restore shared state from the URL hash, synchronously, so the editor
   // mounts with the restored formula instead of flashing the sample.
   const [restored] = useState(() => decodePermalink(window.location.hash));
@@ -59,7 +81,12 @@ export function App() {
     fields: Record<string, PermalinkField>,
     blankMode: BlankMode,
   ): string => {
-    const hash = encodePermalink({ context: contextId, formula: source, fields, blankMode });
+    const hash = encodePermalink({
+      context: contextId,
+      formula: source,
+      fields,
+      blankMode,
+    });
     const url = `${window.location.origin}${window.location.pathname}#${hash}`;
     window.history.replaceState(null, "", `#${hash}`);
     return url;
@@ -81,88 +108,83 @@ export function App() {
   const context = getContext(contextId);
 
   return (
-    <main
-      style={{
-        minHeight: "100%",
-        background: `radial-gradient(1200px 600px at 50% -20%, ${palette.surface}, ${palette.bg})`,
-        color: palette.text,
-        fontFamily: font.sans,
-        padding: "2rem 1.5rem",
-      }}
-    >
-      <div style={{ maxWidth: "60rem", margin: "0 auto" }}>
-        <header style={{ marginBottom: "1.5rem" }}>
-          <p
-            style={{
-              fontFamily: font.mono,
-              fontSize: "0.75rem",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: palette.accent,
-              marginBottom: "0.4rem",
-            }}
-          >
-            Client-side · No backend
-          </p>
-          <h1 style={{ fontSize: "1.8rem", fontWeight: 700, lineHeight: 1.1 }}>
-            {product.name}
-          </h1>
-          <p style={{ marginTop: "0.4rem", color: palette.textMuted }}>
-            {product.tagline}
-          </p>
-        </header>
-
-        <div
+    <main className="shell">
+      <header
+        className="nameplate rise rise-1"
+        style={{ marginBottom: "2rem" }}
+      >
+        <p
+          className="microcopy"
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            gap: "0.6rem",
-            flexWrap: "wrap",
+            gap: "0.55rem",
+            marginBottom: "1rem",
           }}
         >
-          <ContextPicker contextId={contextId} onChange={setContextId} />
-          <button
-            type="button"
-            onClick={() => editorRef.current?.format()}
-            title="Format (Shift+Alt+F)"
-            style={{
-              background: palette.surface,
-              color: palette.text,
-              border: `1px solid ${palette.border}`,
-              borderRadius: "8px",
-              padding: "0.35rem 0.75rem",
-              fontFamily: font.sans,
-              fontSize: "0.82rem",
-              cursor: "pointer",
-            }}
-          >
-            Format
-          </button>
-        </div>
+          <span className="led led--ok" aria-hidden />
+          {product.badge}
+        </p>
+        <Nameplate name={product.name} />
+        <p
+          style={{
+            marginTop: "0.75rem",
+            color: palette.textMuted,
+            fontSize: "0.88rem",
+            maxWidth: "36rem",
+          }}
+        >
+          {product.tagline}
+        </p>
+      </header>
 
+      <div
+        className="rise rise-2"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "0.6rem",
+          flexWrap: "wrap",
+          marginBottom: "0.85rem",
+        }}
+      >
+        <ContextPicker contextId={contextId} onChange={setContextId} />
+        <button
+          type="button"
+          className="btn"
+          onClick={() => editorRef.current?.format()}
+          title="Format (Shift+Alt+F)"
+        >
+          Format
+        </button>
+      </div>
+
+      <div className="reticle rise rise-2">
         <FormulaEditor
           initialDoc={initialDoc}
           contextId={contextId}
           onChange={setSource}
           handleRef={editorRef}
         />
+      </div>
 
-        {context?.notes ? (
-          <p
-            style={{
-              marginTop: "0.6rem",
-              fontSize: "0.8rem",
-              color: palette.warning,
-              display: "flex",
-              gap: "0.4rem",
-            }}
-          >
-            <span aria-hidden>⚠</span>
-            {context.notes}
-          </p>
-        ) : null}
+      {context?.notes ? (
+        <p
+          style={{
+            marginTop: "0.7rem",
+            fontSize: "0.78rem",
+            color: palette.warning,
+            display: "flex",
+            gap: "0.45rem",
+          }}
+        >
+          <span aria-hidden>⚠</span>
+          {context.notes}
+        </p>
+      ) : null}
 
+      <div className="rise rise-3">
         {source.trim() === "" ? null : (
           <Suspense fallback={null}>
             <SimulatePanel
@@ -188,6 +210,29 @@ export function App() {
           astKind={ast.kind}
         />
       </div>
+
+      <footer
+        className="rise rise-4"
+        style={{
+          marginTop: "2.75rem",
+          paddingTop: "1.1rem",
+          borderTop: `1px solid ${palette.border}`,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          gap: "1rem",
+          flexWrap: "wrap",
+          fontSize: "0.72rem",
+          color: palette.textMuted,
+        }}
+      >
+        <span>{product.footer}</span>
+        {product.platformUrl ? (
+          <a href={product.platformUrl}>
+            {new URL(product.platformUrl).host} ↗
+          </a>
+        ) : null}
+      </footer>
     </main>
   );
 }
@@ -204,23 +249,18 @@ function ContextPicker({ contextId, onChange }: ContextPickerProps) {
         display: "flex",
         alignItems: "center",
         gap: "0.6rem",
-        marginBottom: "0.75rem",
-        fontSize: "0.85rem",
+        minWidth: 0,
+        maxWidth: "100%",
       }}
     >
-      <span style={{ color: palette.textMuted }}>Context</span>
+      <span className="microcopy">Context</span>
+      {/* min-width: 0 lets the select shrink below its widest option on
+          narrow viewports instead of forcing horizontal page scroll. */}
       <select
+        className="select"
+        style={{ minWidth: 0 }}
         value={contextId}
         onChange={(e) => onChange(e.target.value)}
-        style={{
-          background: palette.surface,
-          color: palette.text,
-          border: `1px solid ${palette.border}`,
-          borderRadius: "8px",
-          padding: "0.35rem 0.6rem",
-          fontFamily: font.sans,
-          fontSize: "0.85rem",
-        }}
       >
         {CONTEXTS.map((c) => (
           <option key={c.id} value={c.id}>
@@ -241,31 +281,13 @@ interface ProblemsPanelProps {
 
 function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
   return (
-    <section
-      style={{
-        marginTop: "1.25rem",
-        border: `1px solid ${palette.border}`,
-        borderRadius: "10px",
-        background: palette.surface,
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0.6rem 1rem",
-          borderBottom: `1px solid ${palette.border}`,
-          fontSize: "0.85rem",
-        }}
-      >
-        <span style={{ fontWeight: 600 }}>Problems</span>
+    <Panel
+      label="Problems"
+      right={
         <span
           style={{
             color: palette.textMuted,
-            fontFamily: font.mono,
-            fontSize: "0.75rem",
+            fontSize: "0.72rem",
           }}
         >
           {diagnostics.length === 0
@@ -274,54 +296,65 @@ function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
           {" · "}
           {astKind}
         </span>
-      </div>
-
+      }
+    >
       {diagnostics.length === 0 ? (
         <p
           style={{
             padding: "0.8rem 1rem",
             color: palette.textMuted,
-            fontSize: "0.9rem",
+            fontSize: "0.85rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
           }}
         >
-          Parses cleanly.
+          <span aria-hidden style={{ color: palette.accent }}>
+            ✓
+          </span>
+          <span>Parses cleanly.</span>
         </p>
       ) : (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        <ul style={{ listStyle: "none" }}>
           {diagnostics.map((d, i) => {
             const { line, col } = offsetToLineCol(source, d.span.start);
             return (
               <li
                 key={i}
+                className="row-hover"
                 style={{
                   display: "flex",
-                  gap: "0.75rem",
+                  alignItems: "baseline",
+                  gap: "0.7rem",
                   padding: "0.5rem 1rem",
                   borderTop: i === 0 ? "none" : `1px solid ${palette.border}`,
-                  fontSize: "0.88rem",
+                  fontSize: "0.84rem",
                 }}
               >
                 <span
+                  aria-hidden
                   style={{
-                    color: SEVERITY_COLOR[d.severity] ?? palette.text,
-                    fontFamily: font.mono,
-                    fontSize: "0.75rem",
+                    alignSelf: "center",
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    flex: "none",
+                    background: SEVERITY_COLOR[d.severity] ?? palette.text,
+                  }}
+                />
+                <span
+                  style={{
+                    color: palette.textMuted,
+                    fontSize: "0.72rem",
                     whiteSpace: "nowrap",
-                    paddingTop: "0.1rem",
+                    minWidth: "2.4rem",
                   }}
                 >
                   {line}:{col}
                 </span>
-                <span>
+                <span style={{ flex: 1 }}>
                   {d.message}
-                  <span
-                    style={{
-                      color: palette.textMuted,
-                      fontFamily: font.mono,
-                      fontSize: "0.72rem",
-                      marginLeft: "0.5rem",
-                    }}
-                  >
+                  <span className="chip" style={{ marginLeft: "0.5rem" }}>
                     {d.code}
                   </span>
                   {d.docsUrl ? (
@@ -329,12 +362,7 @@ function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
                       href={d.docsUrl}
                       target="_blank"
                       rel="noreferrer"
-                      style={{
-                        color: palette.accent,
-                        fontFamily: font.mono,
-                        fontSize: "0.72rem",
-                        marginLeft: "0.5rem",
-                      }}
+                      style={{ fontSize: "0.72rem", marginLeft: "0.5rem" }}
                     >
                       docs ↗
                     </a>
@@ -345,6 +373,6 @@ function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
           })}
         </ul>
       )}
-    </section>
+    </Panel>
   );
 }

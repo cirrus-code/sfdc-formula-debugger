@@ -8,7 +8,7 @@ import {
 
 const STATE: PermalinkState = {
   context: "formula_field",
-  formula: 'IF(ISBLANK(Amount), 0, Amount * 1.1) /* keep */',
+  formula: "IF(ISBLANK(Amount), 0, Amount * 1.1) /* keep */",
   fields: {
     Amount: { type: "Currency", value: "100", blank: false },
     "Account.Name": { type: "Text", value: "", blank: true },

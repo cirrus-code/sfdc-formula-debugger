@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { simplifySource } from "../../features/simplifier.ts";
-import { font, palette } from "../../theme/theme.ts";
+import { palette } from "../../theme/theme.ts";
+import { Panel } from "../Panel.tsx";
 
 interface SimplifyPanelProps {
   readonly source: string;
@@ -24,29 +25,13 @@ export function SimplifyPanel({ source, onApply }: SimplifyPanelProps) {
   const hasComments = source.includes("/*");
 
   return (
-    <section
-      style={{
-        marginTop: "1.25rem",
-        border: `1px solid ${palette.border}`,
-        borderRadius: "10px",
-        background: palette.surface,
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0.6rem 1rem",
-          borderBottom: `1px solid ${palette.border}`,
-          fontSize: "0.85rem",
-        }}
-      >
-        <span style={{ fontWeight: 600 }}>Simplify</span>
-        {result.changed ? (
+    <Panel
+      label="Simplify"
+      right={
+        result.changed ? (
           <button
             type="button"
+            className="btn"
             onClick={() => onApply(result.formatted)}
             disabled={hasComments}
             title={
@@ -54,28 +39,21 @@ export function SimplifyPanel({ source, onApply }: SimplifyPanelProps) {
                 ? "Applying would remove the formula's comments"
                 : "Replace the formula with the simplified version"
             }
-            style={{
-              background: palette.surface,
-              color: hasComments ? palette.textMuted : palette.text,
-              border: `1px solid ${palette.border}`,
-              borderRadius: "8px",
-              padding: "0.25rem 0.7rem",
-              fontFamily: font.sans,
-              fontSize: "0.8rem",
-              cursor: hasComments ? "not-allowed" : "pointer",
-            }}
           >
             Apply
           </button>
-        ) : null}
-      </div>
-
+        ) : undefined
+      }
+    >
       {result.changed ? (
         <div style={{ padding: "0.8rem 1rem" }}>
           <pre
             style={{
               margin: 0,
-              fontFamily: font.mono,
+              background: palette.well,
+              border: `1px solid ${palette.border}`,
+              borderRadius: "8px",
+              padding: "0.6rem 0.8rem",
               fontSize: "0.85rem",
               whiteSpace: "pre-wrap",
               overflowWrap: "anywhere",
@@ -85,25 +63,39 @@ export function SimplifyPanel({ source, onApply }: SimplifyPanelProps) {
           </pre>
           <ol
             style={{
-              margin: "0.75rem 0 0",
-              paddingLeft: "1.4rem",
+              listStyle: "none",
+              margin: "0.85rem 0 0",
               display: "flex",
               flexDirection: "column",
-              gap: "0.45rem",
+              gap: "0.5rem",
             }}
           >
             {result.steps.map((step, i) => (
-              <li key={i} style={{ fontSize: "0.85rem" }}>
-                {step.title}
-                <div
+              <li
+                key={i}
+                style={{ display: "flex", gap: "0.7rem", fontSize: "0.84rem" }}
+              >
+                <span
+                  aria-hidden
                   style={{
-                    fontFamily: font.mono,
-                    fontSize: "0.78rem",
-                    color: palette.textMuted,
-                    overflowWrap: "anywhere",
+                    color: palette.accent,
+                    fontSize: "0.72rem",
+                    paddingTop: "0.15rem",
                   }}
                 >
-                  {step.detail}
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  {step.title}
+                  <div
+                    style={{
+                      fontSize: "0.76rem",
+                      color: palette.textMuted,
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {step.detail}
+                  </div>
                 </div>
               </li>
             ))}
@@ -127,7 +119,7 @@ export function SimplifyPanel({ source, onApply }: SimplifyPanelProps) {
             <li
               key={i}
               style={{
-                fontSize: "0.85rem",
+                fontSize: "0.82rem",
                 color: palette.textMuted,
                 display: "flex",
                 gap: "0.5rem",
@@ -141,6 +133,6 @@ export function SimplifyPanel({ source, onApply }: SimplifyPanelProps) {
           ))}
         </ul>
       ) : null}
-    </section>
+    </Panel>
   );
 }
