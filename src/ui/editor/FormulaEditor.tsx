@@ -1,6 +1,11 @@
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import { EditorState } from "@codemirror/state";
-import { EditorView, keymap, placeholder } from "@codemirror/view";
+import {
+  drawSelection,
+  EditorView,
+  keymap,
+  placeholder,
+} from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { lintGutter } from "@codemirror/lint";
 import { completionKeymap } from "@codemirror/autocomplete";
@@ -91,6 +96,13 @@ export function FormulaEditor({
         extensions: [
           contextField,
           history(),
+          // Draw the caret ourselves instead of using the native one: the
+          // native caret sizes itself from CM's 1em widget buffer and floats
+          // above the placeholder text at our 1.65 line-height, while CM's
+          // drawn cursor uses the placeholder widget's real coordinates.
+          // Also activates the .cm-cursor/.cm-selectionBackground styling in
+          // editorTheme.ts.
+          drawSelection(),
           keymap.of([
             { key: "Shift-Alt-f", run: formatView },
             ...completionKeymap,
