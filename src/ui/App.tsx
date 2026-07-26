@@ -260,7 +260,6 @@ function ContextPicker({ contextId, onChange }: ContextPickerProps) {
 interface ProblemsPanelProps {
   readonly source: string;
   readonly diagnostics: ReturnType<typeof analyze>;
-  readonly astKind: string;
 }
 
 function ProblemsPanel({ source, diagnostics }: ProblemsPanelProps) {
