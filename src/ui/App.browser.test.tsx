@@ -39,7 +39,8 @@ async function typeFormula(
 ): Promise<void> {
   const content = container.querySelector<HTMLElement>(".cm-content")!;
   await userEvent.click(content);
-  await userEvent.keyboard("{Control>}a{/Control}{Delete}");
+  // ControlOrMeta: select-all is Cmd+A on macOS, Ctrl+A elsewhere.
+  await userEvent.keyboard("{ControlOrMeta>}a{/ControlOrMeta}{Delete}");
   await userEvent.type(content, text);
 }
 

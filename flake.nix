@@ -21,22 +21,26 @@
       }: {
         formatter = pkgs.alejandra;
 
-        devShells.default =
+        devShells.default = let
+          # Playwright's official browser bundles from nixpkgs (patched to run on
+          # NixOS, plain prebuilt binaries elsewhere). The nixpkgs playwright-driver
+          # version must match the npm `playwright` version, or the revision lookup
+          # under PLAYWRIGHT_BROWSERS_PATH fails.
+          browsers = pkgs.playwright-driver.browsers.override {
+            withFirefox = false;
+            withWebkit = false;
+            withFfmpeg = false;
+          };
+        in
           pkgs.mkShell {
-            packages = with pkgs;
-              [
-                nodejs_26
-                pnpm
-                prettier
-              ]
-              ++ pkgs.lib.optionals (system == "x86_64-linux") [
-                chromium
-              ];
-          }
-          // pkgs.lib.optionalAttrs (system == "x86_64-linux") {
-            # Browser smoke tests drive Playwright against this Chromium instead of
-            # Playwright's prebuilt browsers, which do not run on NixOS.
-            CHROMIUM_BIN = "${pkgs.chromium}/bin/chromium";
+            packages = with pkgs; [
+              nodejs_26
+              pnpm
+              prettier
+            ];
+
+            PLAYWRIGHT_BROWSERS_PATH = browsers;
+            PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
             PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1";
           };
 

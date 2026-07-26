@@ -3,13 +3,10 @@ import react from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 
 /**
- * Browser smoke tests (real Chromium via Playwright). To keep these runnable
- * under Nix, we point Playwright at the nixpkgs-provided Chromium via
- * CHROMIUM_BIN (set in the flake devShell) instead of letting the npm package
- * download a prebuilt browser that won't run on NixOS.
+ * Browser smoke tests (real Chromium via Playwright). The flake devShell sets
+ * PLAYWRIGHT_BROWSERS_PATH to the nixpkgs playwright-browsers bundle, so
+ * Playwright's normal registry lookup finds a browser that runs on NixOS too.
  */
-const executablePath = process.env.CHROMIUM_BIN;
-
 export default defineConfig({
   plugins: [react()],
   test: {
@@ -19,7 +16,6 @@ export default defineConfig({
       headless: true,
       provider: playwright({
         launchOptions: {
-          ...(executablePath ? { executablePath } : {}),
           args: ["--no-sandbox"],
         },
       }),
