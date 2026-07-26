@@ -15,5 +15,7 @@ dist-ssr/
 
 # Test / coverage
 coverage/
+.vitest-attachments/
+__screenshots__/
 # Ephemeral conformance dump (CONF_DUMP) written by the conformance test in CI.
 conformance.json

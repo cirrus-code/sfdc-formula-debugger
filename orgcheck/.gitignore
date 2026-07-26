@@ -1,6 +1,10 @@
 node_modules/
-# Generated sfdx source (regenerate with `pnpm generate`); results/ is committed.
+# Generated sfdx source (regenerate with `pnpm generate`).
 sfdx/force-app/
 sfdx/.sf/
+# Raw collect output embeds the org id, username, and instance URL of whatever
+# dev org ran the pass — never commit it. Distill findings into the corpus /
+# VERIFICATION.md instead.
+results/
 plan.json
 data.apex

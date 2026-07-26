@@ -1,9 +1,19 @@
 {
   "name": "sfdc-formula-analyzer",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "A free, client-side Salesforce formula debugger — syntax highlighting, simulation, simplification, formatting, and linting. No backend, ever.",
+  "license": "MIT",
+  "author": "Ryan Faulhaber",
+  "homepage": "https://formulas.cirrus.tools",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cirrus-code/sfdc-formula-analyzer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cirrus-code/sfdc-formula-analyzer/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
