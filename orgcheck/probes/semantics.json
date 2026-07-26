@@ -83,6 +83,18 @@
   ],
   "probes": [
     {
+      "id": "unary_minus_blank",
+      "question": "🔬 unary minus over a blank number field, isolated (testSubUnary wraps it in subtraction): does -blank propagate null in blank mode, or coerce to 0? Decides the evaluator's toDecimal fallback for unary minus.",
+      "formula": "-customnumber1__c",
+      "returns": "Number",
+      "blankMode": "both",
+      "fields": { "customnumber1__c": { "type": "Number", "value": null } },
+      "interpret": {
+        "null": "blank propagates through unary minus (blank mode)",
+        "0": "blank coerces to 0 under unary minus"
+      }
+    },
+    {
       "id": "blank_mode_canary",
       "question": "End-to-end canary: formulaTreatBlanksAs=BlankAsZero must flip this from 2 to 1 — validates the harness's blank-mode plumbing itself.",
       "formula": "IF(customnumber1__c < 5, 1, 2)",
