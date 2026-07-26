@@ -3,7 +3,7 @@ import { FUNCTIONS } from "../registry/index.ts";
 import { BUILTINS, SPECIAL_FORMS } from "./builtins.ts";
 
 /**
- * Enforces the rule-1 invariant across the registry/engine boundary: a function
+ * Enforces the refuse-never-guess invariant across the registry/engine boundary: a function
  * marked `simulatable` must have an implementation, and one marked
  * non-simulatable must NOT — so the evaluator's only options are a real answer
  * or an honest UnsupportedError, never a silent guess.

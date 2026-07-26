@@ -3,8 +3,8 @@ import { assertNever, type Expr } from "./ast.ts";
 /**
  * Structural equality of two ASTs, ignoring trivia: spans, attached comments,
  * and the source-level case of keyword literals are not compared. This is the
- * equivalence the formatter's reparse-equality property is stated against
- * (CLAUDE.md rule 6) and the invariant the simplifier's rewrites preserve.
+ * equivalence the formatter's reparse-equality property is stated against,
+ * and the invariant the simplifier's rewrites preserve.
  *
  * Function-name and field-name case ARE compared — the formatter preserves them
  * verbatim, so a case change would be a real structural change, not trivia.

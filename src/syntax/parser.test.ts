@@ -37,7 +37,7 @@ describe("parser: literals", () => {
   });
 
   it("keeps numbers as raw strings (no IEEE float coercion)", () => {
-    // Rule 2: 0.1 must not be pre-rounded by the parser.
+    // 0.1 must not be pre-rounded through an IEEE double by the parser.
     expect(expectClean("0.1")).toMatchObject({ kind: "NumberLit", raw: "0.1" });
   });
 

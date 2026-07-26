@@ -22,7 +22,7 @@ export function SimplifyPanel({ source, onApply }: SimplifyPanelProps) {
   }
 
   // The simplified output is comment-free; refuse to silently destroy the
-  // user's comments on Apply (the spirit of rule 5).
+  // user's comments on Apply (comments must survive every transformation).
   const hasComments = source.includes("/*");
 
   return (

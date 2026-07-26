@@ -63,7 +63,8 @@ describe("lexer: identifiers and keywords", () => {
   });
 
   it("does not treat keyword-prefixed identifiers as keywords", () => {
-    // Known formulon grammar bug we must NOT replicate (CLAUDE.md).
+    // Known formulon grammar bug we must NOT replicate: identifiers may begin
+    // with keyword-like prefixes.
     expect(only("Null_Check__c").kind).toBe("identifier");
     expect(only("TRUEFIELD__c").kind).toBe("identifier");
     expect(only("FALSEHOOD").kind).toBe("identifier");

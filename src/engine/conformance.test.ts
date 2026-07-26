@@ -6,18 +6,12 @@ import { runRow, type RowStatus } from "./conformance.ts";
 /**
  * Conformance run against Salesforce's own oracle corpus (CONFORMANCE.md, WS2/WS5).
  * The conformance number = pass / (pass + fail) over the comparable subset. It is
- * the durable marketing metric — this test protects it with a locked baseline
+ * the headline metric — this test protects it with a locked baseline
  * that should only ever move up.
  */
 
-// Locked baseline: raise as the evaluator improves, never lower silently. Rules
-// verified via the WS3 JVM oracle (oracle/) lifted this 0.74 → 0.86, then a
-// corpus-driven semantics pass (FLOOR/CEILING toward-zero, zero-mode numeric
-// coercion, three-valued blank comparison, blank propagation, DATE bounds)
-// lifted it to 0.97, then a function port (TRUNC, MFLOOR/MCEILING, SUBSTR,
-// INITCAP, REVERSE, ASCII, CHR, IFERROR) moved ~740 rows into the comparable
-// set, then the field-valued oracle revealed the true numeric model — 39-sig-fig
-// math materialized to 32 places, plus '+' concatenates text — lifting it to 0.99.
+// Locked baseline: raise as the evaluator improves, never lower silently. The
+// gap to 100% is the triaged discrepancy backlog in VERIFICATION.md.
 const BASELINE = 0.98;
 
 const rows: CorpusRow[] = JSON.parse(

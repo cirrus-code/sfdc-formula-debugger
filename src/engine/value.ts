@@ -3,7 +3,7 @@ import type { SfType } from "../registry/index.ts";
 
 /**
  * The Salesforce value domain (DESIGN §7). All numeric math goes through
- * decimal.js with round-half-up — never IEEE floats (CLAUDE.md rule 2). Blankness
+ * decimal.js with round-half-up — never IEEE floats. Blankness
  * is a first-class state of every value, not a separate type.
  */
 
@@ -85,7 +85,7 @@ export function error(reason: string): FormulaError {
 /**
  * Thrown when evaluation hits a construct outside the supported simulation
  * subset (a non-simulatable function). Distinct from FormulaError: this is "we
- * refuse to guess" (rule 1), not "Salesforce would show #Error!".
+ * refuse to guess", not "Salesforce would show #Error!".
  */
 export class UnsupportedError extends Error {
   constructor(readonly functionName: string) {

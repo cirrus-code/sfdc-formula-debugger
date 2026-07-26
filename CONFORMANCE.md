@@ -49,7 +49,8 @@ For evaluator conformance:
   org-level "treat blanks as zeroes" toggle DESIGN requires.
 - Div-by-zero: the Java path throws `ArithmeticException` (→ our `#Error!`). The
   `toJavascript()` path instead returns `null` for `1/0`, so **do not use the
-  generated-JS path as the div-by-zero oracle** (rule 1). Use Java eval.
+  generated-JS path as the div-by-zero oracle** — it would teach the evaluator a
+  wrong answer. Use Java eval.
 
 ## Architecture: the corpus is the firewall
 
@@ -73,7 +74,7 @@ describes. Every corpus row carries provenance and a trust tier.
   corpus validates the parse tree indirectly and decisively.
 - **Not** error message / position parity. Our error **recovery** is a deliberate
   superset: where the OSS parser stops at the first error, we produce a partial
-  AST and multiple positioned diagnostics (rule 3). That divergence is expected
+  AST and multiple positioned diagnostics. That divergence is expected
   and allowlisted, never a conformance failure.
 - **Evaluator:** exact decimal value equality and typed-error equality
   (div-by-zero → `#Error!`), under **both** blank modes.
@@ -95,7 +96,7 @@ Read `Formula.g4` + `LexerRules.g4`; diff against our lexer/parser; fix; add
 tests that encode the grammar's precedence/associativity; upgrade the relevant
 VERIFICATION.md entries from ❓ to grammar-backed. Seed list in Backlog below.
 
-### WS2 — Import their golden corpus _(Phase 3, no JVM)_
+### WS2 — Import their golden corpus _(no JVM)_
 
 `impl/src/test/resources/com/force/formula/impl/formulaTestV2.xml` holds **404
 `<testcase>`s**, each with a formula, `<referenceField>` type declarations,
@@ -134,21 +135,24 @@ every discrepancy becomes a corpus row.
 
 Fast CI (`ci.yml`) runs our TS engine against the committed corpus on every
 push/PR — typecheck, lint, unit + conformance tests, browser smoke tests, build —
-and surfaces the pass rate (the **conformance number**, marketing copy) to the
+and surfaces the pass rate (the **conformance number**, the project's headline metric) to the
 job summary. No JVM. A separate _scheduled_ workflow (`oracle.yml`) builds the
 JVM oracle as a canary; corpus regeneration/expansion via WS3/WS4 with a drift PR
 is the remaining automation.
 
 ## Status snapshot
 
-Conformance is **~96.5%** over the comparable subset (`src/engine/conformance.test.ts`,
-baseline locked at 0.96). Path so far: WS3 oracle rules 0.74 → 0.86; a
+Conformance is **~98.9%** over the comparable subset (`src/engine/conformance.test.ts`,
+baseline locked at 0.98). Path so far: WS3 oracle rules 0.74 → 0.86; a
 corpus-driven semantics pass (FLOOR/CEILING toward-zero, zero-mode numeric
 coercion, three-valued blank comparison, blank propagation, DATE bounds) → 0.97;
 a function port (TRUNC, MFLOOR/MCEILING, SUBSTR, INITCAP, REVERSE, ASCII, CHR,
-IFERROR) moved ~740 rows out of "unsupported" into the comparable set. The
-dominant remaining gap is a Number division-scale precision nuance
-(`FLOOR((x/y)*y)`), pending a field-valued oracle probe (VERIFICATION.md).
+IFERROR) moved ~740 rows out of "unsupported" into the comparable set; the
+field-valued oracle then settled the numeric model (39-sig-fig internal math
+materialized to 32 places, `+` concatenating text) → 0.99. The remaining ~56
+failures are a diverse long tail — date arithmetic and rendering, context
+globals like `$System.originDateTime`, a few blank-interaction rows, locale-aware
+casing — triaged in VERIFICATION.md's conformance backlog.
 
 ## Licensing
 

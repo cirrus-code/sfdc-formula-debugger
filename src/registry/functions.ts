@@ -8,9 +8,10 @@ import type {
 
 /**
  * Function metadata table (DESIGN §4). Entries are typed data literals; a
- * self-consistency test validates them. `evalImpl` is intentionally absent —
- * evaluation lands in Phase 3; these entries drive type checking, availability
- * diagnostics, autocomplete, and hover.
+ * self-consistency test validates them. They drive type checking, availability
+ * diagnostics, autocomplete, and hover. Evaluation lives in the engine's
+ * builtin table, keyed by function name; a consistency test enforces that it
+ * agrees with each entry's `simulatable` flag.
  *
  * `contexts` restrictions and per-function availability are NOT yet org-verified
  * (see VERIFICATION.md); availability is surfaced as a soft warning only.
@@ -48,7 +49,7 @@ const CHANGE_CONTEXTS: readonly ContextId[] = [
 
 // Transcendental math: real Salesforce functions, but NOT simulatable — they
 // compute as non-correctly-rounded doubles (Java StrictMath) whose last ULP a
-// client cannot reproduce, so per rule 1 they refuse to simulate rather than
+// client cannot reproduce, so they refuse to simulate rather than
 // return a subtly-wrong value. They still parse, highlight, lint, and hover.
 const TRANSCENDENTAL: readonly FunctionSpec[] = (
   [
@@ -400,7 +401,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     returnType: fixed("Boolean"),
     contexts: "all",
     // Not simulated: the oracle's IN semantics are not reproducible from the
-    // corpus (e.g. IN("Left", "Left") → false), so per rule 9 it refuses rather
+    // corpus (e.g. IN("Left", "Left") → false), so it refuses rather
     // than guess (VERIFICATION.md).
     simulatable: false,
     docsUrl: DOCS,
@@ -528,12 +529,6 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     summary:
       "Rounds a number up toward positive infinity (mathematical ceiling).",
   },
-  // Transcendentals (LN/LOG/EXP/SIN/COS/TAN/ASIN/ACOS/ATAN/ATAN2) are
-  // intentionally NOT simulated: Salesforce computes them as non-correctly-rounded
-  // doubles (Java StrictMath) that differ from JS Math in the last ULP, so a
-  // faithful value cannot be reproduced client-side. Per rule 1 they refuse to
-  // simulate rather than ship a subtly-wrong answer (VERIFICATION.md).
-
   // --- Date & time --------------------------------------------------------
   {
     name: "TODAY",

@@ -9,7 +9,7 @@ import type { Diagnostic } from "./diagnostic.ts";
  * own kinds because they map to distinct AST literal nodes.
  *
  * `"error"` is emitted for characters the lexer cannot classify — lexing never
- * throws (CLAUDE.md rule 3 / DESIGN §3.1), so unknown input becomes a token.
+ * throws (DESIGN §3.1), so unknown input becomes a token.
  * `"eof"` is a zero-width sentinel that always terminates the stream and holds
  * any trailing trivia.
  */

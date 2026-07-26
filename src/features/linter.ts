@@ -23,8 +23,8 @@ import { getContext, getFunction } from "../registry/index.ts";
  *
  * Every rule here is a heuristic over an AST whose field types are Unknown, so
  * messages hedge ("looks like", "if X is a picklist") and severity never
- * exceeds `warning` — unlike the evaluator, which must be exact or refuse
- * (CLAUDE.md rule 1), the linter is allowed to be helpfully unsure.
+ * exceeds `warning` — unlike the evaluator, which must be exact or refuse,
+ * the linter is allowed to be helpfully unsure.
  */
 
 /** IF chains nested deeper than this suggest CASE() or restructuring. */

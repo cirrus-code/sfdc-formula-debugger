@@ -1,7 +1,7 @@
 /**
  * Registry type definitions — the shape of the semantic single source of truth
- * (DESIGN §4). The tables themselves are populated in Phase 2; this file fixes
- * the types every layer above depends on.
+ * (DESIGN §4). The tables themselves live in functions.ts and contexts.ts;
+ * this file fixes the types every layer above depends on.
  */
 
 /**
@@ -53,7 +53,7 @@ export interface FunctionSpec {
   readonly returnType: TypeRule;
   /** Contexts where Salesforce allows the function, or "all". */
   readonly contexts: readonly ContextId[] | "all";
-  /** false ⇒ hard "unsupported" during simulation (CLAUDE.md rule 1). */
+  /** false ⇒ hard "unsupported" during simulation — refuse, never guess. */
   readonly simulatable: boolean;
   readonly docsUrl: string;
   /** Short hover text. */

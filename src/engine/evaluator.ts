@@ -35,7 +35,7 @@ export interface EvalEnv {
  *
  * Returns an `SfValue` or a `FormulaError` (Salesforce's `#Error!`). Throws
  * `UnsupportedError` when the formula uses a construct outside the supported
- * simulation subset — an honest refusal, never a guess (rule 1). Unexpected
+ * simulation subset — an honest refusal, never a guess. Unexpected
  * type mishaps degrade to `#Error!` rather than crashing the editor.
  */
 export function evaluateFormula(ast: Expr, env: EvalEnv): EvalResult {
@@ -112,7 +112,9 @@ function toDecimal(v: SfValue, env: EvalEnv): Decimal {
     if (env.blankMode === "zero") {
       return new Decimal(0);
     }
-    // Signal "blank" via a sentinel the callers check through isBlankNumber.
+    // Blank-mode propagation happens in the callers — arithmetic and compare
+    // bail out before coercing — so a blank that still reaches here (unary
+    // minus, or a blank non-numeric operand) coerces to 0.
     return new Decimal(0);
   }
   return asDecimal(v);

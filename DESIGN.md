@@ -6,13 +6,12 @@ A free, entirely client-side web tool for working with Salesforce formulas. User
 a formula and get: instant syntax and semantic error highlighting, a simulation panel that
 detects field references and lets them supply values to compute a result, boolean logic
 simplification with step-by-step explanation, canonical reformatting, and lint findings. The
-tool is a marketing surface for the main Salesforce observability platform: it must load
-instantly, feel expert-grade, and never give a confidently wrong answer.
+tool is free and open source: it must load instantly, feel expert-grade, and never give a
+confidently wrong answer.
 
-**Product positioning note:** formulon.io already offers browser-based formula evaluation. Our
-differentiation is the debugger experience — editor-grade positioned diagnostics with error
-recovery, comment-preserving formatting, linting, step-by-step simplification, correct
-blank-handling semantics, and shareable permalinks. Evaluation alone is table stakes.
+The emphasis is the full debugger experience, not evaluation alone — editor-grade positioned
+diagnostics with error recovery, comment-preserving formatting, linting, step-by-step
+simplification, correct blank-handling semantics, and shareable permalinks.
 
 ### Goals
 
@@ -212,7 +211,8 @@ human-readable description: constant folding, identity/annihilator laws, double 
 De Morgan, absorption, `IF(x, TRUE, FALSE)` → `x`, `IF(x, y, IF(z, …))` chains → `CASE`
 suggestion, redundant parens. Applied to fixpoint with a step log; the UI renders the log as a
 step-by-step transformation (each step: rule name, before → after) — trust-building and
-shareable. Every rule must be blank-safe (rule 7 in CLAUDE.md); each rule ships with
+shareable. Every rule must be blank-safe (equivalence-preserving under Salesforce blank
+semantics, not just classical boolean algebra); each rule ships with
 property-test coverage comparing original vs rewritten over randomized inputs including blanks
 under both blank modes. Rules that can't be made blank-safe are demoted to _suggestions_
 ("equivalent if X is never blank") rather than applied rewrites.
@@ -250,18 +250,18 @@ Single-page layout: context picker (with Tier 2 disclaimer where applicable) →
 (highlighting, inline squiggles, hover docs, autocomplete) → tabbed or stacked panels:
 **Simulate** (field form + result + blank-mode toggle), **Problems** (diagnostics + lint),
 **Simplify** (step log + apply button), **Format** (one-click, in-editor). Mobile-usable but
-desktop-first. Errors and empty states follow direction-not-mood copy. Visual design is executed
-at build time under the frontend-design skill; product name, palette, and any platform
-cross-linking live in one theme/config module because branding/hosting is intentionally
-undecided (standalone microsite vs platform-domain path — open decision, revisit before launch).
+desktop-first. Errors and empty states follow direction-not-mood copy. Visual design follows
+the "calibrated instrument" direction; product name, palette, and any cross-linking live in one
+theme module (`src/theme/`) so branding changes stay a one-file change. The tool is hosted at
+`formulas.cirrus.tools`.
 
 ## 10. Testing & conformance
 
 - **Golden corpus** (`corpus/*.json`): `(formula, context, inputs, blankMode, expected)` rows.
   Sources, in trust order: real-org verification (authoritative), salesforce/formula-engine
   JS-generation oracle output, formulon's adapted tests (seed). The corpus is the project's
-  durable asset — language-agnostic, reusable if a Rust engine is ever built for the platform.
-- **Conformance number** (corpus pass rate) reported in CI; it is prospective marketing copy.
+  durable asset — language-agnostic, reusable by any future implementation.
+- **Conformance number** (corpus pass rate) reported in CI; it is the project's headline metric.
 - **Property tests** (fast-check): formatter idempotence + reparse-equality; simplifier
   equivalence incl. blanks/modes; lexer round-trip.
 - **Error-recovery suite:** malformed inputs asserting diagnostic count/positions/messages and
@@ -271,18 +271,12 @@ undecided (standalone microsite vs platform-domain path — open decision, revis
   mode, ADDMONTHS month-end, DST datetime math, TEXT() output formats, numeric precision
   boundaries, Tier 2 availability matrices).
 
-## 11. Phasing
+## 11. Build order
 
-1. **Core pipeline:** lexer → parser with recovery → AST → registry skeleton → CM6 editor with
-   token highlighting and positioned syntax diagnostics. (Usable and impressive already.)
-2. **Analysis + contexts:** type checker, context configs (all contexts, tiers), availability
-   diagnostics, autocomplete + hover from registry.
-3. **Evaluation:** value domain, formulon port with fixes, simulation boundary, field
-   extraction + form, blank-mode toggle, golden corpus seeded and running in CI.
-4. **Features:** formatter, linter, simplifier with step log, permalinks.
-5. **Polish + oracle:** formula-engine oracle corpus generation, org verification pass
-   (Tier 1 semantics locked), visual design pass, launch-readiness (conformance number, Tier 2
-   labeling, disclaimer copy).
-
-Phases 1–2 involve no unverified semantics and can proceed immediately; phase 3's corpus work
-runs in parallel with implementation.
+The layers were built bottom-up, mirroring the dependency direction in §2: the syntax pipeline
+first (lexer → error-recovering parser → AST → CodeMirror integration), then analysis and
+context configuration, then the evaluator (value domain, formulon port with fixes, simulation
+boundary, golden corpus in CI), then the AST-consuming features (formatter, linter, simplifier,
+permalinks), and finally the oracle conformance work and visual design. Contributors extending
+the tool should follow the same discipline: semantics land in the corpus before they land in
+code.

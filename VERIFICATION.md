@@ -1,6 +1,6 @@
 # VERIFICATION.md — behaviors pending org confirmation
 
-Per CLAUDE.md rule 9, no behavioral claim about Salesforce semantics ships as
+No behavioral claim about Salesforce semantics ships as
 "supported" until it is confirmed against a real dev org and encoded as a golden
 test. This file tracks every such open question. Until an item is verified, the
 implementation either follows the golden corpus or marks the construct
@@ -43,7 +43,7 @@ left-associative, with unary tighter than everything.
   identifier chars; we currently allow `[A-Za-z0-9_]` and split `.` as a path
   separator. Review whether `:`/`#` ever appear in real field references.
 
-## Registry data (Phase 2)
+## Registry data
 
 Encoded as best-effort config and surfaced only as **warnings** (never errors),
 suppressed entirely for Tier 2 contexts, until org-verified:
@@ -114,7 +114,8 @@ Ported and corpus-verified (golden tests in `evaluator.test.ts`):
   blank-aware (→ "").
 - ✅ **`REVERSE`** (propagates blank → null), **`ASCII`**, **`CHR`**.
 - ✅ **`IFERROR(expr, fallback)`** returns the fallback on a simulated `#Error`,
-  but lets an unsupported-function refusal propagate (rule 1).
+  but lets an unsupported-function refusal propagate (a refusal is not an error
+  to be caught).
 
 Deliberately **not simulated** (registered so they still parse/highlight/lint/
 hover, but refuse to simulate per rule 1):
@@ -125,7 +126,7 @@ hover, but refuse to simulate per rule 1):
   simulation refuses rather than ship a subtly-wrong answer. (`SQRT` is fine: IEEE
   mandates correctly-rounded square root.)
 - ⛔ **`IN`** — the oracle's semantics are not reproducible from the corpus
-  (`IN("Left", "Left")` → `false`); refuses rather than guess (rule 9).
+  (`IN("Left", "Left")` → `false`); refuses rather than guess.
 
 ## Numeric model — resolved via the field-valued oracle (WS3 extension)
 
@@ -161,18 +162,20 @@ verification before a fix:
 - 🔬 **Date/datetime result rendering** is quarantined (Java `toString` format),
   not compared.
 
-## Semantics (from CLAUDE.md NEEDS-VERIFICATION list)
+## CLAUDE.md NEEDS-VERIFICATION list — status
 
-- ❓ Case sensitivity of text `=` / `<>` comparisons (per context, if it differs).
-- ❓ Exact div-by-zero and overflow surfacing per context (formula field vs
-  validation rule).
-- ❓ Blank propagation through each arithmetic/comparison operator under both
-  blank-handling modes ("treat blanks as zeroes" vs "as blanks").
-- ❓ Date/datetime arithmetic edge cases: month-end `ADDMONTHS`, DST-adjacent
-  datetime math, `TEXT()` output formats per type.
-- ❓ Numeric precision/scale limits and rounding at display boundaries.
-- ❓ Per-context function and global availability for every Tier 2 context.
-
-## Verified
-
-_(none yet — corpus and org-verification work begins in Phase 3.)_
+- ✅ **Case sensitivity of text `=` / `<>`** — oracle-verified case-sensitive
+  (WS3 section above). Whether any context differs is org-pass wave 2.
+- ❓ **Exact div-by-zero and overflow surfacing per context** (formula field vs
+  validation rule) — org-pass wave 2.
+- ✅ **Blank propagation through arithmetic/comparison under both blank modes** —
+  corpus-verified (semantics-pass section above); the few remaining blank
+  interactions sit in the conformance backlog.
+- 🔬 **Date/datetime arithmetic edge cases** (month-end `ADDMONTHS`,
+  DST-adjacent datetime math, `TEXT()` output formats per type) — partly in the
+  conformance backlog; datetime rendering is quarantined.
+- 🔬 **Numeric precision/scale limits** — the internal model is resolved
+  (39-sig-fig / 32-place, field-valued-oracle section above); rounding at
+  display boundaries per field scale remains open.
+- ❓ **Per-context function and global availability for every Tier 2 context** —
+  org-pass wave 2.

@@ -167,7 +167,7 @@ describe("simplifier: step log and fixpoint", () => {
   });
 });
 
-// --- rule 7 enforcement: equivalence under the real evaluator -------------
+// --- equivalence under the real evaluator (blank semantics preserved) -----
 
 const S = span(0, 0);
 const ref = (name: string): Expr => ({

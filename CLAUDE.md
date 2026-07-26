@@ -1,8 +1,8 @@
 # CLAUDE.md — Salesforce Formula Debugger
 
-A free, client-side Salesforce formula debugger: syntax/error highlighting, simulation with
-user-supplied field values, boolean simplification, formatting, and linting. Marketing tool for
-the main platform. **No server. No backend. Ever.** Everything runs in the browser.
+A free, open-source, client-side Salesforce formula debugger: syntax/error highlighting,
+simulation with user-supplied field values, boolean simplification, formatting, and linting.
+**No server. No backend. Ever.** Everything runs in the browser.
 
 Read `DESIGN.md` before writing code. It is the authoritative spec; this file is the set of
 rules you must not break while implementing it.
@@ -12,8 +12,8 @@ rules you must not break while implementing it.
 1. **Never silently approximate.** If a formula uses any construct outside the explicitly
    supported simulation subset, simulation must fail with a hard, specific
    "unsupported: FUNCTION_NAME" error — never a best-effort guess. A wrong simulated answer is a
-   product failure; an honest "unsupported" is fine. This rule exists because the tool markets a
-   company whose brand is Salesforce-internals accuracy.
+   product failure; an honest "unsupported" is fine. Accuracy is the tool's entire value
+   proposition.
 2. **No IEEE-float arithmetic in the evaluator.** All Number/Currency/Percent math goes through
    `decimal.js`. `0.1 + 0.2` must equal `0.3`. Rounding is round-half-up (`ROUND(2.5) = 3`).
 3. **The parser must recover from errors.** Broken input must still produce a partial AST and
@@ -76,7 +76,7 @@ theme/         branding: product name, palette, fonts  (leaf: importable by all 
   diagnostics, `autocompletion`, `hoverTooltip`.
 - `decimal.js` for numeric values. `lz-string` for permalink encoding. Vitest for tests;
   `fast-check` for property tests.
-- Keep the bundle lean. This is a first-impression marketing page; avoid heavyweight deps.
+- Keep the bundle lean. This is a first-impression page; avoid heavyweight deps.
 
 ## Salesforce semantics you must model
 
@@ -136,8 +136,8 @@ those nearly verbatim. Their PEG grammar is reference-only — we write our own 
   round-trip (concat of token texts + trivia === source).
 - **Error-recovery tests:** a suite of malformed formulas asserting the count, positions, and
   messages of diagnostics, and the shape of the recovered AST.
-- CI must report the conformance number (corpus pass rate). That number is marketing copy;
-  protect it.
+- CI must report the conformance number (corpus pass rate). That number is the project's
+  headline metric; protect it.
 
 ## Out of scope — do not build
 
@@ -159,6 +159,7 @@ those nearly verbatim. Their PEG grammar is reference-only — we write our own 
   adding a node kind breaks compilation everywhere it must be handled).
 - Registry entries are typed data literals; validate the registry's internal consistency with a
   test (every function has a signature, contexts reference declared context ids, etc.).
-- When the UI is built, apply deliberate visual design per the frontend-design skill — this page
-  is a brand touchpoint, not an internal tool. Branding/hosting is intentionally undecided; keep
-  product name and colors in one theme/config module so rebranding is a one-file change.
+- When working on the UI, apply deliberate visual design per the frontend-design skill — this
+  page is a brand touchpoint, not an internal tool. The product name, palette, and cross-links
+  live in one theme module (`src/theme/`) so branding changes stay a one-file change. The tool
+  is hosted at `formulas.cirrus.tools`.

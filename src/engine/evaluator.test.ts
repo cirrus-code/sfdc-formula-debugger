@@ -48,7 +48,7 @@ function b(source: string, opts?: Parameters<typeof ev>[1]): boolean {
   return asBool(r);
 }
 
-describe("engine: decimal arithmetic (rule 2)", () => {
+describe("engine: decimal arithmetic (no IEEE floats)", () => {
   it("adds without IEEE error", () => {
     expect(n("0.1 + 0.2")).toBe("0.3");
   });
@@ -324,7 +324,7 @@ describe("engine: ported functions (corpus-verified)", () => {
   });
 });
 
-describe("engine: simulation boundary (rule 1)", () => {
+describe("engine: simulation boundary (refuse, never guess)", () => {
   it("refuses non-simulatable functions with UnsupportedError", () => {
     expect(() => ev("PRIORVALUE(Amount)")).toThrow(UnsupportedError);
     expect(() => ev("ISCHANGED(Amount)")).toThrow(UnsupportedError);

@@ -80,8 +80,8 @@ export function App() {
   );
   const editorRef = useRef<EditorHandle>(null);
 
-  // The only place formula text leaves the editor (CLAUDE.md rule 10):
-  // explicit user action, into the URL hash, nowhere else.
+  // The only place formula text leaves the editor: explicit user action,
+  // into the URL hash, nowhere else.
   const share = (
     fields: Record<string, PermalinkField>,
     blankMode: BlankMode,

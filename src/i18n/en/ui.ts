@@ -5,7 +5,7 @@
  */
 export const ui = {
   editor: {
-    placeholder: "Type a Salesforce formula…",
+    placeholder: "Type a Salesforce formula...",
   },
   toolbar: {
     format: "Format",
@@ -17,7 +17,7 @@ export const ui = {
     label: "Problems",
     none: "no problems",
     count: (n: number) => `${n} problem${n === 1 ? "" : "s"}`,
-    clean: "Parses cleanly.",
+    clean: "Parses correctly.",
     docsLink: "docs ↗",
   },
   simulate: {

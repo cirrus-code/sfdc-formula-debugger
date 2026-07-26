@@ -196,7 +196,8 @@ test("copies a permalink and restores formula, inputs, and result from it", asyn
   await userEvent.fill(valueInput, "5");
   await expect.element(first.getByText("10")).toBeInTheDocument();
 
-  // Copy link writes the state into the URL hash (and only then — rule 10).
+  // Copy link writes the state into the URL hash — and only then; formula
+  // text never leaves the page on its own.
   expect(window.location.hash).toBe("");
   await userEvent.click(first.getByRole("button", { name: /Copy link/ }));
   await expect.poll(() => window.location.hash.length).toBeGreaterThan(1);

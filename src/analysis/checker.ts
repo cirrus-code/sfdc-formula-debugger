@@ -83,8 +83,9 @@ class Checker {
       case "ErrorNode":
         return "Unknown";
       case "FieldRef":
-        // Field types come from inference + user selection (Phase 3). Unknown
-        // for now, which suppresses type diagnostics involving fields.
+        // Field types exist only in the simulator (user selection); the static
+        // checker sees fields as Unknown, which suppresses type diagnostics
+        // involving them.
         return "Unknown";
       case "Paren":
         return this.check(node.expr);

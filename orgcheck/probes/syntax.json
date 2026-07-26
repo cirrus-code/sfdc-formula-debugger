@@ -104,7 +104,7 @@
     },
     {
       "id": "null_prefix_ident",
-      "question": "CLAUDE.md: identifiers with keyword-like prefixes (Null_Check__c) must parse — confirm the product parses them (the formulon bug is formulon-only).",
+      "question": "Identifiers with keyword-like prefixes (Null_Check__c) must parse — confirm the product parses them (the formulon bug is formulon-only).",
       "formula": "IF(Null_Check__c, 1, 2)",
       "returns": "Number",
       "fields": { "Null_Check__c": { "type": "Boolean", "value": "true" } },

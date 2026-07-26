@@ -110,7 +110,8 @@ function buildField(f: CorpusField): SfValue {
     case "Multipicklist":
       return text(f.value);
     default:
-      // Date/Datetime/Time input encodings vary; we can't build them reliably yet.
+      // Date/Datetime/Time input encodings vary across the corpus; these rows
+      // are refused (counted as unsupported) rather than guessed.
       throw new Unsupported(`unbuildable field type ${f.type}`);
   }
 }

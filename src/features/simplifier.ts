@@ -20,7 +20,7 @@ import { formatExpr, needsParens } from "./formatter.ts";
  * fixpoint, with a step log the UI renders as a before → after transformation.
  *
  * Every applied rewrite is equivalence-preserving under the engine's verified
- * Salesforce semantics (CLAUDE.md rule 7) — which are NOT classical boolean
+ * Salesforce semantics — which are NOT classical boolean
  * algebra. The evaluator coerces blank to FALSE inside AND/OR/IF conditions,
  * propagates blank through NOT, short-circuits AND/OR left-to-right, and keeps
  * `=`/`<>` three-valued. Consequences, derived rule by rule:
@@ -385,7 +385,7 @@ const LITERAL_KINDS = new Set([
 /**
  * Fold a field-free, null-free subtree by running the real evaluator on it.
  * Skipped when evaluation errors (the #Error! must stay visible), refuses
- * (rule 1), yields blank, yields a type with no literal form, or when the
+ * (unsupported construct), yields blank, yields a type with no literal form, or when the
  * literal would print longer than the expression it replaces (folding 1/3 to
  * 32 decimal places is not a simplification).
  */

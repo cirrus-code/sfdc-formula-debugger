@@ -1,13 +1,12 @@
 /**
  * Single source of truth for branding and visual identity.
  *
- * Branding and hosting are intentionally undecided (standalone microsite vs.
- * platform-domain path). Keep the product name, palette, fonts, and any
- * platform cross-linking here so a rebrand is a one-file change — no
- * Salesforce semantics should leak into components. Marketing *copy* is
- * translatable prose and lives in i18n/ (en/copy.ts), not here.
+ * Keep the product name, palette, fonts, and any cross-linking here so a
+ * rebrand is a one-file change — no Salesforce semantics should leak into
+ * components. Product *copy* is translatable prose and lives in i18n/
+ * (en/copy.ts), not here.
  *
- * Visual direction: "calibrated instrument." The parent brand sells
+ * Visual direction: "calibrated instrument." The tool's promise is
  * Salesforce-internals accuracy, so the page reads as a precision bench
  * instrument — ink field, blueprint grid, hairline module panels, phosphor
  * signal accent, LED readout — with an Instrument Serif nameplate as the one
@@ -16,8 +15,8 @@
 
 export const product = {
   name: "Formula Debugger",
-  /** Marketing surface for the parent platform; link target TBD before launch. */
-  platformUrl: null as string | null,
+  /** Cross-link to the Cirrus platform the tool belongs to. */
+  platformUrl: "https://cirrus.tools" as string | null,
 } as const;
 
 export const palette = {

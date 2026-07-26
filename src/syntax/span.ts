@@ -4,7 +4,7 @@
  * exclusive, so an empty span has `start === end`.
  *
  * Every token, trivia, and AST node carries a span. It is the anchor for
- * diagnostics, hover, formatting, and highlighting (CLAUDE.md rule 4).
+ * diagnostics, hover, formatting, and highlighting.
  */
 export interface Span {
   readonly start: number;

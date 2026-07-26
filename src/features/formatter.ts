@@ -12,11 +12,11 @@ import {
  * Formatter (DESIGN §8.3): a pretty-printer over the AST. Canonical operator
  * spacing, precedence-driven parentheses, explicit `Paren` nodes preserved,
  * function calls broken one-argument-per-line past the width, and comments
- * (rule 5) reattached in position.
+ * reattached in position — a formatter that destroys comments is broken.
  *
  * Because `format = parse + print` and printing only ever changes trivia
- * (whitespace/line breaks), never node structure, the two rule-6 guarantees hold
- * by construction:
+ * (whitespace/line breaks), never node structure, the idempotence and
+ * reparse-equality guarantees hold by construction:
  *   - reparse-equality: `parse(format(x))` is structurally equal to `parse(x)`;
  *   - idempotence: `format(format(x)) === format(x)`, which follows from
  *     reparse-equality plus a deterministic printer.

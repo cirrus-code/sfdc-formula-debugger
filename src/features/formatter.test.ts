@@ -156,7 +156,7 @@ describe("formatter: canonical output", () => {
 
 const comments = (s: string): string[] => s.match(/\/\*[\s\S]*?\*\//g) ?? [];
 
-describe("formatter: comment preservation (rule 5)", () => {
+describe("formatter: comment preservation", () => {
   const cases = [
     "IF( /*a*/ x, 1, 2)",
     "IF(a /*a*/, b, c)",

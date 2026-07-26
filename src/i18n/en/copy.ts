@@ -1,5 +1,5 @@
 /**
- * Product/marketing copy. The product *name* is branding, not copy, and
+ * Product copy. The product *name* is branding, not copy, and
  * stays in theme/theme.ts; nothing here should embed it — interpolate the
  * name at the call site if a locale's copy ever needs it.
  */

@@ -2,12 +2,12 @@ import type { Span } from "./span.ts";
 import type { Trivia } from "./token.ts";
 
 /**
- * Discriminated-union AST for Salesforce formulas. Every node carries a `span`
- * (CLAUDE.md rule 4). One AST feeds every feature (rule 8) — there is no
- * per-feature representation.
+ * Discriminated-union AST for Salesforce formulas. Every node carries a `span`,
+ * the anchor for diagnostics, hover, and formatting. One AST feeds every
+ * feature — there is no per-feature representation.
  *
  * Numbers are kept as their raw source text; decoding to a value goes through
- * decimal.js in the engine (rule 2 — never introduce an IEEE float here).
+ * decimal.js in the engine (never introduce an IEEE float here).
  */
 
 export type BinaryOperator =
@@ -30,7 +30,7 @@ export type BinaryOperator =
 export type UnaryOperator = "-" | "+";
 
 /**
- * Comments attached to a node for the formatter (rule 5). The formatter computes
+ * Comments attached to a node for the formatter. The formatter computes
  * attachment in a side table (keeping the AST immutable), so this optional slot
  * is unused today; its shape is fixed so the type stays stable if a future pass
  * wants to carry comments on the node itself.
@@ -129,7 +129,7 @@ export type NodeKind = Expr["kind"];
 
 /**
  * Compile-time exhaustiveness guard for `switch` over `NodeKind`. Adding a node
- * kind makes every unhandled switch fail to compile (CLAUDE.md conventions).
+ * kind makes every unhandled switch fail to compile.
  */
 export function assertNever(x: never): never {
   throw new Error(`Unhandled AST node: ${JSON.stringify(x)}`);

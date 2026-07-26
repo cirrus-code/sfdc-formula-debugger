@@ -7,7 +7,7 @@ import {
  * Permalink codec (DESIGN §8.5): the shareable editor state, lz-compressed
  * into a URL hash fragment. Encoding happens only on the explicit "Copy link"
  * action — formula text is user data and must never leave the editor on its
- * own (CLAUDE.md rule 10).
+ * own.
  *
  * The payload carries a version field; decoding refuses unknown versions
  * rather than guessing at a future schema. A hash is untrusted input: decode
