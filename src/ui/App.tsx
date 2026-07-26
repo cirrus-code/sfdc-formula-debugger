@@ -50,19 +50,6 @@ const SEVERITY_COLOR: Record<string, string> = {
   info: palette.accent,
 };
 
-/** Nameplate treatment: last word of the product name set in italic accent. */
-function Nameplate({ name }: { name: string }) {
-  const words = name.split(" ");
-  const last = words[words.length - 1];
-  const head = words.slice(0, -1).join(" ");
-  return (
-    <h1>
-      {head ? `${head} ` : ""}
-      <em>{last}</em>
-    </h1>
-  );
-}
-
 export function App() {
   // The stylesheet resolves colors through --sfa-* vars; populate them from
   // the theme module before the first paint (idempotent, also covers tests
@@ -123,19 +110,7 @@ export function App() {
         className="nameplate rise rise-1"
         style={{ marginBottom: "2rem" }}
       >
-        <p
-          className="microcopy"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.55rem",
-            marginBottom: "1rem",
-          }}
-        >
-          <span className="led led--ok" aria-hidden />
-          {t().copy.badge}
-        </p>
-        <Nameplate name={product.name} />
+        <h1>{product.name}</h1>
         <p
           style={{
             marginTop: "0.75rem",
@@ -217,7 +192,6 @@ export function App() {
         <ProblemsPanel
           source={source}
           diagnostics={diagnostics}
-          astKind={ast.kind}
         />
       </div>
 
@@ -289,7 +263,7 @@ interface ProblemsPanelProps {
   readonly astKind: string;
 }
 
-function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
+function ProblemsPanel({ source, diagnostics }: ProblemsPanelProps) {
   return (
     <Panel
       label={t().ui.problems.label}
@@ -303,8 +277,6 @@ function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
           {diagnostics.length === 0
             ? t().ui.problems.none
             : t().ui.problems.count(diagnostics.length)}
-          {" · "}
-          {astKind}
         </span>
       }
     >
