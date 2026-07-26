@@ -4,6 +4,7 @@
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    sfdx-nix.url = "github:rfaulhaber/sfdx-nix";
   };
 
   outputs = inputs @ {flake-parts, ...}:
@@ -17,6 +18,7 @@
       perSystem = {
         pkgs,
         system,
+        inputs',
         ...
       }: {
         formatter = pkgs.alejandra;
@@ -34,6 +36,7 @@
         in
           pkgs.mkShell {
             packages = with pkgs; [
+              inputs'.sfdx-nix.packages.default
               nodejs_26
               pnpm
               prettier
