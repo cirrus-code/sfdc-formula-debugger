@@ -37,7 +37,12 @@ const SimplifyPanel = lazy(async () => {
   return { default: m.SimplifyPanel };
 });
 
-const SAMPLE = "IF(ISBLANK(Amount), 0, Amount * 1.1)";
+const SAMPLE = `/* Weighted deal value — a blank discount means list price */
+IF(
+  ISBLANK(Discount__c),
+  Amount * 0.85,
+  Amount * (1 - Discount__c)
+)`;
 
 const SEVERITY_COLOR: Record<string, string> = {
   error: palette.danger,

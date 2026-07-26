@@ -62,7 +62,9 @@ test("mounts the CodeMirror editor with the sample formula highlighted", async (
 
 test("shows a clean Problems panel for a valid formula", async () => {
   const screen = await render(<App />);
-  await expect.element(screen.getByText("Parses cleanly.")).toBeInTheDocument();
+  await expect
+    .element(screen.getByText("Parses correctly."))
+    .toBeInTheDocument();
 });
 
 test("surfaces positioned diagnostics for a broken formula", async () => {
@@ -116,16 +118,23 @@ test("simulates the formula live from field inputs", async () => {
   const screen = await render(<App />);
   await expect.element(screen.getByText("Simulate")).toBeInTheDocument();
 
-  // The sample IF(ISBLANK(Amount), 0, Amount * 1.1): set Amount=100 => 110.
+  // The sample's fields in extraction order: Discount__c, then Amount. With a
+  // non-blank discount the result is mode-independent: 200 * (1 - 0.25) = 150.
   await expect
-    .poll(() => screen.container.querySelector('input[placeholder="value"]'))
-    .toBeTruthy();
-  const valueInput = screen.container.querySelector<HTMLInputElement>(
-    'input[placeholder="value"]',
-  )!;
-  await userEvent.fill(valueInput, "100");
+    .poll(
+      () =>
+        screen.container.querySelectorAll('input[placeholder="value"]').length,
+    )
+    .toBe(2);
+  const [discountInput, amountInput] = Array.from(
+    screen.container.querySelectorAll<HTMLInputElement>(
+      'input[placeholder="value"]',
+    ),
+  );
+  await userEvent.fill(discountInput!, "0.25");
+  await userEvent.fill(amountInput!, "200");
 
-  await expect.element(screen.getByText("110")).toBeInTheDocument();
+  await expect.element(screen.getByText("150")).toBeInTheDocument();
 });
 
 test("surfaces lint findings in the Problems panel", async () => {
