@@ -91,12 +91,20 @@ describe("engine: '+' concatenates text (oracle-verified)", () => {
     ).toBe("aaaabbbb");
   });
 
-  it("propagates a blank text operand to null (unlike '&')", () => {
+  it("absorbs a single blank text operand like '&' (org-verified)", () => {
+    expect(
+      s("a + b", {
+        fields: {
+          a: { type: "Text", blank: false, data: "x" },
+          b: blank("Text"),
+        },
+      }),
+    ).toBe("x");
+  });
+
+  it("stays null when both text operands are blank (org-verified)", () => {
     const r = ev("a + b", {
-      fields: {
-        a: { type: "Text", blank: false, data: "x" },
-        b: blank("Text"),
-      },
+      fields: { a: blank("Text"), b: blank("Text") },
     });
     expect(isError(r)).toBe(false);
     expect((r as SfValue).blank).toBe(true);
@@ -273,6 +281,35 @@ describe("engine: blank propagation through functions (oracle-verified)", () => 
   it("UPPER/LOWER absorb a blank to empty text (blank-aware)", () => {
     expect(s("UPPER(t)", { fields: { t: blank("Text") } })).toBe("");
     expect(n("LEN(t)", { fields: { t: blank("Text") } })).toBe("0");
+  });
+});
+
+describe("engine: org-verified semantics (orgcheck run 2026-07-26)", () => {
+  it("MOD(x, 0) returns x, not an error", () => {
+    expect(n("MOD(3, 0)")).toBe("3");
+  });
+
+  it("SUBSTITUTE with a blank search term is a no-op", () => {
+    expect(
+      s("SUBSTITUTE(t, o, x)", {
+        fields: {
+          t: { type: "Text", blank: false, data: "Golden File" },
+          o: blank("Text"),
+          x: { type: "Text", blank: false, data: "Platinum" },
+        },
+      }),
+    ).toBe("Golden File");
+  });
+
+  it("evaluates && and || with AND()/OR() semantics", () => {
+    expect(n("IF(TRUE && FALSE, 1, 2)")).toBe("2");
+    expect(n("IF(FALSE || TRUE, 1, 2)")).toBe("1");
+  });
+
+  it("&& coerces a blank left operand to false and short-circuits", () => {
+    expect(
+      n("IF(b && (1 / 0 = 0), 1, 2)", { fields: { b: blank("Boolean") } }),
+    ).toBe("2");
   });
 });
 

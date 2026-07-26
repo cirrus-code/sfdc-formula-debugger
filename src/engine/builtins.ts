@@ -34,6 +34,30 @@ function dnum(v: SfValue): Decimal {
   return v.blank ? ZERO : asDecimal(v);
 }
 
+/**
+ * UPPER/LOWER with the optional locale argument (org-verified: the product
+ * accepts it, e.g. `upper("idempotent", "tr")` = "İDEMPOTENT"). Salesforce
+ * locale codes ("tr", "en_US") are BCP 47 with underscores; the special-cased
+ * alphabets (Turkish/Azeri dotted İ, Lithuanian) behave the same in Java and
+ * ICU. An unknown code is a loud error, never a silent default-locale fallback.
+ */
+function caseWithLocale(
+  v: SfValue,
+  loc: SfValue | undefined,
+  upper: boolean,
+): EvalResult {
+  const s = dstr(v);
+  if (loc === undefined || loc.blank) {
+    return text(upper ? s.toUpperCase() : s.toLowerCase());
+  }
+  try {
+    const tag = dstr(loc).replace(/_/g, "-");
+    return text(upper ? s.toLocaleUpperCase(tag) : s.toLocaleLowerCase(tag));
+  } catch {
+    return error("#Error! (unknown locale)");
+  }
+}
+
 /** Text input: a blank reads as empty string. */
 function dstr(v: SfValue): string {
   if (v.blank) {
@@ -43,7 +67,7 @@ function dstr(v: SfValue): string {
 }
 
 /** Boolean input: a null checkbox reads as false (DESIGN §Salesforce semantics). */
-function boolCoerce(v: SfValue): boolean {
+export function boolCoerce(v: SfValue): boolean {
   if (v.blank) {
     return false;
   }
@@ -85,7 +109,16 @@ export function concatString(v: SfValue): string {
       return v.data ? "True" : "False";
     case "Date":
       return formatDate(v.data);
-    case "Datetime":
+    case "Datetime": {
+      // TEXT(datetime) renders GMT as "YYYY-MM-DD HH:MM:SSZ" (documented
+      // format; shape org-verified via corpus:testOriginDateTime).
+      const d = new Date(v.data.epochMillis);
+      const p = (n: number) => String(n).padStart(2, "0");
+      return (
+        `${String(d.getUTCFullYear()).padStart(4, "0")}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ` +
+        `${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())}Z`
+      );
+    }
     case "Time":
     case "Unknown":
       return "";
@@ -145,10 +178,14 @@ export const BUILTINS: Record<string, Builtin> = {
   // Logical
   NOT: ([a]) => bool(!boolCoerce(a!)),
   ISBLANK: ([a]) => bool(isBlankText(a!) ? true : a!.blank),
-  ISNULL: ([a]) => bool(a!.blank),
+  // Text fields are never null (org- and oracle-verified, testISNULLWithText/
+  // TextArea): ISNULL is false and NULLVALUE never substitutes for a Text
+  // value, even a blank one. ISBLANK is the blank check for text.
+  ISNULL: ([a]) => bool(a!.blank && a!.type !== "Text"),
   ISNUMBER: ([a]) => bool(!a!.blank && isParsableNumber(dstr(a!))),
   ISPICKVAL: ([p, v]) => bool(dstr(p!) === dstr(v!)),
-  NULLVALUE: ([expr, sub]) => (expr!.blank ? sub! : expr!),
+  NULLVALUE: ([expr, sub]) =>
+    expr!.blank && expr!.type !== "Text" ? sub! : expr!,
   BLANKVALUE: ([expr, sub]) => (isBlankText(expr!) ? sub! : expr!),
 
   // Text
@@ -163,8 +200,8 @@ export const BUILTINS: Record<string, Builtin> = {
     return textOrBlank(dstr(a!).slice(from, from + Math.max(0, toInt(len!))));
   },
   TRIM: ([a]) => text(dstr(a!).trim()),
-  UPPER: ([a]) => text(dstr(a!).toUpperCase()),
-  LOWER: ([a]) => text(dstr(a!).toLowerCase()),
+  UPPER: ([a, loc]) => caseWithLocale(a!, loc, true),
+  LOWER: ([a, loc]) => caseWithLocale(a!, loc, false),
   CONTAINS: ([a, b]) => bool(dstr(a!).includes(dstr(b!))),
   BEGINS: ([a, b]) => bool(dstr(a!).startsWith(dstr(b!))),
   FIND: ([search, txt, start]) => {
@@ -173,6 +210,12 @@ export const BUILTINS: Record<string, Builtin> = {
     return num(idx < 0 ? 0 : idx + 1);
   },
   SUBSTITUTE: ([a, oldT, newT]) => {
+    // Per-argument blank behavior (org-verified, testSimpleSubstitute): a blank
+    // source propagates to null, but a blank search term is a no-op and a blank
+    // replacement deletes matches.
+    if (a!.blank) {
+      return blank("Text");
+    }
     const o = dstr(oldT!);
     return text(o === "" ? dstr(a!) : dstr(a!).split(o).join(dstr(newT!)));
   },
@@ -217,8 +260,9 @@ export const BUILTINS: Record<string, Builtin> = {
   CEILING: ([a]) => num(dnum(a!).toDecimalPlaces(0, Decimal.ROUND_UP)),
   MOD: ([a, b]) => {
     const d = dnum(b!);
-    // Salesforce MOD(x, 0) is a runtime error (not x), verified against the oracle.
-    return d.isZero() ? error("#Error! (MOD by zero)") : num(dnum(a!).mod(d));
+    // MOD(x, 0) returns x in the product (org-verified, semantics:mod_zero);
+    // the JVM oracle raises a runtime error here, but the org outranks it.
+    return num(d.isZero() ? dnum(a!) : dnum(a!).mod(d));
   },
   SQRT: ([a]) => {
     const d = dnum(a!);

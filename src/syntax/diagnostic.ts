@@ -13,6 +13,7 @@ export type DiagnosticCode =
   | "unterminated-string"
   | "unterminated-comment"
   | "unexpected-character"
+  | "nested-comment"
   // Parser
   | "expected-expression"
   | "expected-closing-paren"

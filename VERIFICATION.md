@@ -8,13 +8,14 @@ unsupported — it never guesses.
 
 Status legend: ❓ unverified · 🔬 verifying · ✅ verified (golden test id)
 
-**Org verification pass (`orgcheck/`):** every remaining ❓/🔬 below that a
-formula field can decide now has a probe in `orgcheck/probes/*.json` — see
-`orgcheck/README.md` for the run workflow (real dev org via the sf CLI; deploy
-rejections themselves are verdicts). After a run, upgrade entries here citing
-the probe id, and `corpus/org-verified.json` carries the org-tier rows.
-Per-context questions (availability matrices, div-by-zero per context) are the
-pass's wave 2.
+**Org verification pass (`orgcheck/`):** first run completed **2026-07-26**
+against a real Developer Edition org (`results/org-run-2026-07-26.json`);
+`corpus/org-verified.json` now carries 496 org-tier rows. Drift vs the JVM
+oracle: 385 match, 28 mismatch (org wins — see the org-pass section), 49
+incomparable renderings. Probes live in `orgcheck/probes/*.json`; see
+`orgcheck/README.md` for the run workflow (deploy rejections themselves are
+verdicts). Per-context questions (availability matrices, div-by-zero per
+context) are the pass's wave 2.
 
 ## Syntax / parsing
 
@@ -25,23 +26,34 @@ left-associative, with unary tighter than everything.
 
 - ✅ **Unary binds tighter than `^`**; **comparison binds tighter than equality**
   — both confirmed by the grammar (`Formula.g4`), matching what we already had.
-- ✅ **`&` shares the additive level** with `+`/`-` (was encoded below them; fixed).
-- 🔬 **`* /` bind tighter than `^`** — grammar-backed but surprising vs the usual
-  math convention; confirm the grammar reflects runtime via the WS3 eval oracle
-  or org before treating as settled.
-- 🔬 **`^` is left-associative** (`2^3^2` = `(2^3)^2`) — grammar-backed but
-  surprising; same cross-check as above.
-- ❓ **`&&` / `||` operators.** The OSS grammar accepts them (`INFIX_AND`/
-  `INFIX_OR`) below equality precedence, but the product docs don't list them and
-  DESIGN assumed they are not operators. Our lexer does not tokenize them yet
-  (`&&`→two `&`, `|`→error). Verify OSS-vs-product before deciding to lex them.
-- ❓ **`==` / `!=` operators.** The OSS grammar accepts them as first-class
-  equality operators (`EQUAL2`/`NOT_EQUAL2`), yet the product documents only
-  `=` / `<>`. We currently parse them and warn `nonstandard-operator`; revisit
-  the warning once product parity is verified.
-- ❓ **Identifier continuation chars.** `LexerRules.g4` lists `$ : . #` among
-  identifier chars; we currently allow `[A-Za-z0-9_]` and split `.` as a path
-  separator. Review whether `:`/`#` ever appear in real field references.
+- ✅ **`&` shares the additive level** with `+`/`-` (was encoded below them;
+  fixed). The org probe meant to confirm it (`syntax:amp_additive_level`) is
+  **inconclusive**: text `+` absorbs blank org-side (see the org-pass section),
+  so both candidate groupings of `"a" + blank & "c"` yield the observed
+  `"ac"`. A type-based wave-2 probe (e.g. `1 + 2 & "x"`) is needed.
+- ✅ **`* /` bind tighter than `^`** — org-verified: `2 * 3 ^ 2` = 36
+  (probe `syntax:pow_vs_muldiv`).
+- ✅ **`^` is left-associative** — org-verified: `2 ^ 3 ^ 2` = `(2^3)^2` = 64
+  (probe `syntax:pow_assoc`).
+- ✅ **`&&` / `||` are accepted by the product** and evaluate as AND/OR
+  (probes `syntax:andand_op`, `syntax:oror_op` — both saved and evaluated).
+  Lexed, parsed (below equality, `||` loosest), and evaluated with AND()/OR()
+  semantics; flagged `nonstandard-operator` (undocumented but accepted).
+- ✅ **`==` / `!=` are accepted by the product** (probes `syntax:eqeq_op`,
+  `syntax:noteq_op`). We already parse them; keep the `nonstandard-operator`
+  warning (the product docs still omit them) but its wording may now assert
+  they save fine.
+- ✅ **`:` / `#` lex as identifier chars in the product** — `foo:bar + 1` and
+  `foo#bar + 1` are rejected with *unknown-field* errors, not syntax errors
+  (probes `syntax:ident_colon`, `syntax:ident_hash`), matching
+  `LexerRules.g4`. No real field API name can contain them, so our lexer may
+  keep splitting — but the resulting diagnostic should read as unknown-field,
+  not as a syntax error.
+- ✅ **Comments are legal mid-expression and do NOT nest** — `1 /* a /* b */ + 2`
+  = 3, i.e. the first `*/` closes (probes `syntax:comment_basic`,
+  `syntax:comment_nested`).
+- ✅ **`NULL`-prefixed identifiers parse in the product** (`Null_Check__c`,
+  probe `syntax:null_prefix_ident`) — the formulon defect is theirs alone.
 
 ## Registry data
 
@@ -62,6 +74,88 @@ suppressed entirely for Tier 2 contexts, until org-verified:
   formula-definition length, not the compiled size (which cannot be computed
   client-side; the linter must say so).
 
+## Verified via the org pass (orgcheck/, run 2026-07-26)
+
+Real Developer Edition org, formula-field context, both blank modes. Org rows
+outrank the JVM oracle; where they disagree below, the org is authoritative.
+
+- ✅ **Blank-mode plumbing canary passed** (`semantics:blank_mode_canary`):
+  `IF(blankNumber < 5, 1, 2)` = 1 in zero mode (blank reads as 0), 2 in blank
+  mode (ordering vs blank is false) — the two-field deploy mechanism is sound.
+- ✅ **`MOD(x, 0)` returns `x` in the product** (`MOD(3, 0)` = 3, probe
+  `semantics:mod_zero`) — contradicts the JVM oracle's runtime error (below);
+  the evaluator follows the org.
+- ✅ **Text fields are never null for `ISNULL`/`NULLVALUE`** — org and oracle
+  agree (`testISNULLWithText`/`TextArea`, `testNVLWithTextArea`): `ISNULL` is
+  false and `NULLVALUE` never substitutes for a Text value, even a blank one;
+  `ISBLANK` is the blank check for text. Encoded in the evaluator.
+- ✅ **`CONTAINS`/`FIND` coerce blank operands to ""** — org and oracle agree
+  (`testIfContainsFunc`, `testFindOnText`): `CONTAINS(x, blank)` is true,
+  `CONTAINS(blank, y)` is false, `FIND(y, blank)` is 0. Both are blank-aware
+  in the evaluator now.
+- ✅ **Locale-aware `UPPER`/`LOWER`** — the undocumented second argument is
+  accepted and honored (`upper("idempotent", "tr")` = `"İDEMPOTENT"`,
+  `corpus:testUpperLocale`). Implemented via ICU (`toLocaleUpperCase`), whose
+  special-cased alphabets (Turkish/Azeri/Lithuanian) match Java's.
+- 🔬 **Product `TEXT()` number rendering is NOT the 32-place materialized
+  value** — the org renders `TEXT(1 / 3)` as `.333…` with **40 digits and no
+  leading zero**, and `^` results with ~39 significant figures
+  (`semantics:text_third`, `semantics:text_percent_field`,
+  `corpus:testExponentiationOperator#5/#18`). This contradicts the JVM
+  oracle's rendering and the 32-place function-boundary model for TEXT
+  specifically. The four rows are quarantined in
+  `org-conformance.test.ts` until the product's TEXT scale/format rule is
+  pinned down — do not silently match one tier by breaking the other.
+- ✅ **Text ordering is reflexive**: `"Left" > "Left"` = false, `<=` = true —
+  the oracle rows claiming otherwise (`testIfTextCompareGreaterThan#8`,
+  `testIfTextCompareLessEqual#8`) are oracle bugs.
+- ✅ **`SUBSTITUTE` with a blank search term is a no-op** (returns the input
+  text unchanged, e.g. `SUBSTITUTE("Golden File", blank, "Platinum")` =
+  `"Golden File"`) — org contradicts the oracle's null.
+- ✅ **Text `+` absorbs a blank operand** (`"aaaa" + blank` = `"aaaa"`, both
+  blank modes; `blank + blank` reads back null) — same as `&`, contradicting
+  the field-valued-oracle note below.
+- ✅ **`ADDMONTHS` month-end behavior** (probes `semantics:addmonths_*`):
+  Jan 31 + 1 = Feb 28 (Feb 29 in leap years), Jan 30 + 1 = Feb 28 (overflow
+  clamp), Feb 28 + 1 = Mar 31 (end-of-month-preserving, as documented).
+- ✅ **`DATE()` accepts years through 9999** (`DATE(4000/4001/9999, …)` all
+  save and evaluate; 10000 errors per corpus) — `MAX_YEAR = 9999` confirmed.
+- ✅ **`date + number` arithmetic** — the full `testAddDate` cluster is now
+  org-verified (`corpus/org-verified.json`), including blank/null cases.
+- ✅ **Unary minus over a blank number**: `-blank` = 0 in zero mode, null in
+  blank mode (probe `semantics:unary_minus_blank`).
+- ✅ **`$System.originDateTime`** is legal in formula fields and TEXT()s to
+  `1900-01-01 00:00:00Z` (probe `corpus:testOriginDateTime`).
+- ✅ **`TEXT(TIMEVALUE("17:30:45.125"))`** = `"17:30:45.125"` — milliseconds
+  render (probe `semantics:text_time`).
+- ✅ **Case sensitivity re-confirmed org-side**: `IF("a" = "A", 1, 2)` = 2
+  (probe `semantics:case_eq_formula_field`).
+
+Save-time function availability in the formula-field context:
+
+- ⛔ **`SUBSTR`** — "Function SUBSTR may not be used in this type of formula":
+  the function exists but is context-restricted; registry availability must
+  exclude formula fields.
+- ⛔ **`IFERROR`** — "Unknown function IFERROR" in a formula field (it is a
+  validation-rule-tier function); registry availability must exclude formula
+  fields. (This was a surprise rejection, not an `expectSaveError` probe.)
+- ✅ **`CHR`, 2-arg `UPPER`/`LOWER` (locale arg), `TIMEVALUE`** all save and
+  evaluate in formula fields.
+
+- ✅ **Div-by-zero is a real `#Error!` in formula fields**, not blank — settled
+  without UI access despite SOQL reading `#Error!` as null: a blank-aware
+  wrapper disambiguates the channel. `IF(ISBLANK(1 / 0), "BLANKRESULT",
+  "VALUERESULT")` reads back null (the error propagates through `ISBLANK`; a
+  blank would have produced `"BLANKRESULT"`), and `BLANKVALUE(1 / 0, 42)`
+  reads null, not 42 (probes `semantics:divzero_isblank`,
+  `semantics:divzero_blankvalue`). Errors propagate through blank-aware
+  functions; nothing catches them in this context (`IFERROR` is unavailable).
+  Per-context surfacing (validation rules etc.) remains wave 2.
+
+The `CHR`/locale-`UPPER`/`LOWER` oracle-drift rows ("" vs null) remain
+channel-ambiguous (SOQL cannot distinguish "" from null on text), not
+verdicts.
+
 ## Verified via the WS3 JVM oracle (oracle/)
 
 Confirmed against Salesforce's own engine and encoded; conformance rose 74% → 86%:
@@ -71,7 +165,8 @@ Confirmed against Salesforce's own engine and encoded; conformance rose 74% → 
   values keep their natural scale.
 - ✅ **`^` rejects non-integer exponents** (`2^0.5` → error; use SQRT for roots).
 - ✅ **`SQRT` is double-precision** (`SQRT(2)` = `1.4142135623730951`).
-- ✅ **`MOD(x, 0)` is a runtime error**, not `x`.
+- ✅ **`MOD(x, 0)` is a runtime error in the JVM oracle** — but the org pass
+  shows the product returns `x` (`MOD(3, 0)` = 3); org wins, see above.
 - ✅ **`ROUND` supports negative digits** (`ROUND(1234.5, -2)` = `1200`).
 - ✅ **Percent fields are ÷100 as input and ×100 as a result type** (99% ↔ 0.99).
 - ✅ **`LEFT`/`RIGHT`/`MID` return blank, not empty string, for an empty result.**
@@ -140,27 +235,34 @@ intermediates against the real engine and settled the numeric-scale question:
   Verified raw: `(1/9)*9 → 1.000…`, `FLOOR((1/9)*9) → 1`, `1/3 → 0.333…(32)`. Our
   engine now mirrors this (`value.ts` precision 39; `evaluator.ts` `materialize`),
   which flipped the whole `FLOOR/CEILING/TRUNC((x/y)*y)` cluster to pass.
-- ✅ **`+` concatenates text operands** (`"aaaa" + "bbbb"` → `"aaaabbbb"`), and a
-  blank text operand propagates to null (unlike `&`, which treats blank as "").
+- ✅ **`+` concatenates text operands** (`"aaaa" + "bbbb"` → `"aaaabbbb"`). The
+  oracle's blank half (blank text operand propagates to null) is contradicted
+  by the org pass: the product absorbs the blank (`"aaaa" + blank` → `"aaaa"`,
+  probe rows `corpus:testAddConcatSimple#2/#3`) — org wins.
 
 ## Conformance backlog (remaining gap to 100%)
 
-`src/engine/conformance.test.ts` sits at ~99% over the comparable subset. The
-remaining ~56 failures are diverse long-tail edge cases, each needing its own
-verification before a fix:
+`src/engine/conformance.test.ts` (oracle tier) sits at 99.3% (33 failures);
+`src/engine/org-conformance.test.ts` (org tier) is at 100% with 15 quarantined
+rows. Remaining items, each needing its own verification before a fix:
 
-- 🔬 **Date arithmetic** — `date + number` (should yield a date/null), `TEXT()` of
-  a blank date (→ null), and Java datetime rendering (quarantined).
-- 🔬 **`$System.originDateTime` and other context globals** in simulation.
-- 🔬 **Specific blank interactions** — a few `CONTAINS`/`SUBSTITUTE` rows where the
-  blank-propagation vs blank-absorb call differs from the oracle.
-- 🔬 **`DATE()` upper year bound** — `10000` errors and four-digit years pass;
-  whether the exact ceiling is `4000` or `9999` is unconfirmed. `MAX_YEAR = 9999`
-  is the widest bound consistent with the corpus.
-- 🔬 **Locale-aware `UPPER`/`LOWER`** — the optional locale second arg (e.g.
-  Turkish dotless-ı) is ignored; a handful of Unicode-casing rows fail.
-- 🔬 **Date/datetime result rendering** is quarantined (Java `toString` format),
-  not compared.
+- 🔬 **Date arithmetic** — full `date + number` evaluation (should yield a
+  date). The blank case is org-verified and fixed (blank date operand → null
+  in both modes, `testAddDate#0`); Java datetime rendering in the oracle stays
+  quarantined, and `TEXT(datetime)` now renders the documented GMT
+  `YYYY-MM-DD HH:MM:SSZ` shape (org-verified via `corpus:testOriginDateTime`).
+- ✅ **`$System.originDateTime`** simulates as its fixed value,
+  1900-01-01 00:00 GMT (org-verified).
+- ✅ **Blank interactions** (`CONTAINS`/`FIND`/`SUBSTITUTE`) — org-settled and
+  implemented (org-pass section).
+- ✅ **`DATE()` upper year bound is 9999** — org-verified (`DATE(4001, 1, 1)`
+  and `DATE(9999, 12, 31)` both evaluate; probes `semantics:date_year_*`).
+- ✅ **Locale-aware `UPPER`/`LOWER`** — implemented (org-pass section).
+- 🔬 **Product `TEXT()` number rendering** — new org finding (org-pass
+  section): no leading zero, ~40-digit scale; quarantined pending
+  investigation.
+- ✅ **Unary minus over blank** — org-verified `-blank` = 0 in zero mode,
+  null in blank mode (`semantics:unary_minus_blank`); encoded.
 
 ## CLAUDE.md NEEDS-VERIFICATION list — status
 

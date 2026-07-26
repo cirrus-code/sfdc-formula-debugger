@@ -145,6 +145,16 @@ describe("parser: operators and precedence", () => {
     expect((node.left as BinaryOp).op).toBe("&"); // (a & b) & c
   });
 
+  it("parses && below equality and || below && (org-verified)", () => {
+    // a = b && c = d || e  ->  ((a = b) && (c = d)) || e
+    const node = expectClean("a = b && c = d || e") as BinaryOp;
+    expect(node.op).toBe("||");
+    const and = node.left as BinaryOp;
+    expect(and.op).toBe("&&");
+    expect((and.left as BinaryOp).op).toBe("=");
+    expect((and.right as BinaryOp).op).toBe("=");
+  });
+
   it("parses unary minus", () => {
     expect(expectClean("-x")).toMatchObject({ kind: "UnaryOp", op: "-" });
   });

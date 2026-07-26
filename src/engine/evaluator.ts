@@ -10,6 +10,7 @@ import {
   asText,
   blank,
   bool,
+  datetimeValue,
   Decimal,
   error,
   isError,
@@ -21,7 +22,12 @@ import {
   type EvalResult,
   type SfValue,
 } from "./value.ts";
-import { BUILTINS, SPECIAL_FORMS, concatString } from "./builtins.ts";
+import {
+  BUILTINS,
+  SPECIAL_FORMS,
+  boolCoerce,
+  concatString,
+} from "./builtins.ts";
 
 export interface EvalEnv {
   readonly fields: ReadonlyMap<string, SfValue>;
@@ -78,7 +84,13 @@ function evaluate(node: Expr, env: EvalEnv): EvalResult {
     case "ErrorNode":
       return error("#Error! (cannot evaluate invalid formula)");
     case "FieldRef": {
-      const v = env.fields.get(node.path.join(".")) ?? blank("Unknown");
+      const key = node.path.join(".");
+      // $System.originDateTime is a fixed constant — 1900-01-01 00:00:00 GMT
+      // (org-verified, corpus:testOriginDateTime).
+      if (key.toLowerCase() === "$system.origindatetime") {
+        return datetimeValue(Date.UTC(1900, 0, 1));
+      }
+      const v = env.fields.get(key) ?? blank("Unknown");
       // "Treat blank fields as zeroes" mode: an empty Number/Currency/Percent
       // field reads as a real 0 everywhere it is used — arithmetic, ISNULL,
       // NULLVALUE — not as blank. Verified against the oracle corpus.
@@ -93,6 +105,11 @@ function evaluate(node: Expr, env: EvalEnv): EvalResult {
       const operand = evaluate(node.operand, env);
       if (isError(operand)) {
         return operand;
+      }
+      // Blank propagates through unary sign in blank mode; zero mode reads the
+      // blank as 0 (org-verified, semantics:unary_minus_blank).
+      if (operand.blank && env.blankMode === "blank") {
+        return blank("Number");
       }
       const d = toDecimal(operand, env);
       return node.op === "-" ? num(d.negated()) : num(d);
@@ -124,7 +141,30 @@ function isNumericType(v: SfValue): v is Extract<SfValue, { data: Decimal }> {
   return v.type === "Number" || v.type === "Currency" || v.type === "Percent";
 }
 
+function isDatelike(v: SfValue): boolean {
+  return v.type === "Date" || v.type === "Datetime" || v.type === "Time";
+}
+
 function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
+  // `&&`/`||` mirror AND()/OR(): blank coerces to false and evaluation
+  // short-circuits left-to-right, so they bypass the eager operand evaluation
+  // below.
+  if (node.op === "&&" || node.op === "||") {
+    const cond = evaluate(node.left, env);
+    if (isError(cond)) {
+      return cond;
+    }
+    const lb = boolCoerce(cond);
+    if (node.op === "&&" ? !lb : lb) {
+      return bool(node.op === "||");
+    }
+    const rest = evaluate(node.right, env);
+    if (isError(rest)) {
+      return rest;
+    }
+    return bool(boolCoerce(rest));
+  }
+
   const l = evaluate(node.left, env);
   if (isError(l)) {
     return l;
@@ -139,10 +179,14 @@ function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
       // Materialize numeric operands so a concatenated Number shows 32 places.
       return text(concatString(materialize(l)) + concatString(materialize(r)));
     case "+":
-      // Salesforce '+' concatenates when both operands are text — but, unlike
-      // '&', a blank operand propagates to null rather than acting as "".
+      // Salesforce '+' concatenates when both operands are text. A single blank
+      // operand absorbs to "" like '&', but blank + blank stays null
+      // (org-verified, testAddConcatSimple#2–#4).
       if (isTextType(l) && isTextType(r)) {
-        return l.blank || r.blank ? blank("Text") : text(asText(l) + asText(r));
+        if (l.blank && r.blank) {
+          return blank("Text");
+        }
+        return text(concatString(l) + concatString(r));
       }
       return arithmetic(node.op, l, r, env);
     case "-":
@@ -178,6 +222,12 @@ function arithmetic(
   r: SfValue,
   env: EvalEnv,
 ): EvalResult {
+  // A blank date-family operand nulls the result in BOTH modes — the
+  // "blanks as zeroes" coercion is numeric-only (org-verified,
+  // testAddDate#0 [zero]: blankDate + 40 = null).
+  if ((isDatelike(l) && l.blank) || (isDatelike(r) && r.blank)) {
+    return blank(isDatelike(l) && l.blank ? l.type : r.type);
+  }
   // In "blank" mode, a blank numeric operand makes the whole result blank.
   if (
     env.blankMode === "blank" &&
@@ -306,6 +356,13 @@ const BLANK_AWARE = new Set([
   "UPPER",
   "LOWER",
   "INITCAP",
+  // Per-argument: blank source propagates (handled in the builtin), blank
+  // search/replacement absorb (org-verified, testSimpleSubstitute).
+  "SUBSTITUTE",
+  // Blank operands coerce to "" (org- and oracle-verified: CONTAINS(x, blank)
+  // is true, CONTAINS(blank, y) is false, FIND(y, blank) is 0).
+  "CONTAINS",
+  "FIND",
 ]);
 
 function evalCall(node: FunctionCall, env: EvalEnv): EvalResult {

@@ -190,6 +190,50 @@ describe("lexer: trivia and comments", () => {
   });
 });
 
+describe("lexer: && / || operators (org-verified)", () => {
+  it("lexes && and || as single operator tokens", () => {
+    expect(kinds("a && b")).toEqual([
+      ["identifier", "a"],
+      ["operator", "&&"],
+      ["identifier", "b"],
+    ]);
+    expect(kinds("a || b")).toEqual([
+      ["identifier", "a"],
+      ["operator", "||"],
+      ["identifier", "b"],
+    ]);
+  });
+
+  it("still lexes a single & as the concat operator", () => {
+    expect(kinds('"a" & "b"')).toEqual([
+      ["string", '"a"'],
+      ["operator", "&"],
+      ["string", '"b"'],
+    ]);
+  });
+
+  it("errors on a lone |", () => {
+    const { tokens, diagnostics } = lex("a | b");
+    expect(tokens.some((t) => t.kind === "error")).toBe(true);
+    expect(diagnostics.some((d) => d.code === "unexpected-character")).toBe(
+      true,
+    );
+  });
+});
+
+describe("lexer: nested comment warning (org-verified: comments do not nest)", () => {
+  it("warns on an inner /* — the first */ closes the comment", () => {
+    const { diagnostics } = lex("1 /* a /* b */ + 2");
+    const nested = diagnostics.filter((d) => d.code === "nested-comment");
+    expect(nested).toHaveLength(1);
+    expect(nested[0]!.severity).toBe("warning");
+  });
+
+  it("stays silent for ordinary comments", () => {
+    expect(lex("1 /* plain */ + 2").diagnostics).toHaveLength(0);
+  });
+});
+
 describe("lexer: error recovery", () => {
   it("emits an error token for unknown characters and keeps going", () => {
     const { tokens, diagnostics } = lex("1 @ 2");

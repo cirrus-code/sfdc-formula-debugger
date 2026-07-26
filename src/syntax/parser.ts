@@ -25,29 +25,35 @@ export interface ParseResult {
  * Binary operator precedence (higher binds tighter), transcribed from the
  * Salesforce open-source grammar (salesforce/formula-engine `Formula.g4`), which
  * is authoritative — see CONFORMANCE.md. Rule nesting there gives, tightest to
- * loosest: `* /` > `^` > `+ - &` > relational > equality. All are
- * left-associative. Two points are surprising versus the usual math conventions
- * and are queued for eval-oracle cross-check (VERIFICATION.md): `* /` bind
- * tighter than `^`, and `^` is left- (not right-) associative.
+ * loosest: `* /` > `^` > `+ - &` > relational > equality > `&&` > `||`. All are
+ * left-associative. Two points that are surprising versus the usual math
+ * conventions — `* /` bind tighter than `^`, and `^` is left- (not right-)
+ * associative — are org-verified (VERIFICATION.md, probes
+ * `syntax:pow_vs_muldiv` / `syntax:pow_assoc`).
  *
  * `&` (concat) shares the additive level with `+`/`-`, so `"x" & 1 + 2` parses
  * as `("x" & 1) + 2`, not `"x" & (1 + 2)`.
+ *
+ * `&&`/`||` are undocumented but accepted by the product (org-verified); the
+ * grammar nests INFIX_OR below INFIX_AND below equality.
  */
 export const BINARY_PRECEDENCE: Record<BinaryOperator, number> = {
-  "*": 7,
-  "/": 7,
-  "^": 6,
-  "+": 5,
-  "-": 5,
-  "&": 5,
-  "<": 4,
-  "<=": 4,
-  ">": 4,
-  ">=": 4,
-  "=": 3,
-  "<>": 3,
-  "==": 3,
-  "!=": 3,
+  "*": 8,
+  "/": 8,
+  "^": 7,
+  "+": 6,
+  "-": 6,
+  "&": 6,
+  "<": 5,
+  "<=": 5,
+  ">": 5,
+  ">=": 5,
+  "=": 4,
+  "<>": 4,
+  "==": 4,
+  "!=": 4,
+  "&&": 3,
+  "||": 2,
 };
 
 export function parse(source: string): ParseResult {

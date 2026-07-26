@@ -104,6 +104,17 @@ class Lexer {
       this.pos < this.src.length &&
       !(this.peek() === "*" && this.peek(1) === "/")
     ) {
+      // Comments do not nest (org-verified: the first `*/` closes), so an
+      // inner `/*` is legal but almost certainly not what the author meant —
+      // everything after the first `*/` is live formula text.
+      if (this.peek() === "/" && this.peek(1) === "*") {
+        this.diagnostics.push({
+          code: "nested-comment",
+          severity: "warning",
+          span: span(this.pos, this.pos + 2),
+          message: t().syntax.lexer.nestedComment,
+        });
+      }
       this.pos++;
     }
     if (this.pos >= this.src.length) {
@@ -241,9 +252,26 @@ class Lexer {
       case "*":
       case "/":
       case "^":
-      case "&":
         this.pos++;
         return this.token("operator", start, leading);
+      case "&":
+        this.pos++;
+        if (this.peek() === "&") {
+          this.pos++;
+        } // `&&`
+        return this.token("operator", start, leading);
+      case "|":
+        this.pos++;
+        if (this.peek() === "|") {
+          this.pos++; // `||`
+          return this.token("operator", start, leading);
+        }
+        this.error(
+          "unexpected-character",
+          span(start, this.pos),
+          t().syntax.lexer.unexpectedPipe,
+        );
+        return this.token("error", start, leading);
       case "=":
         this.pos++;
         if (this.peek() === "=") {

@@ -47,6 +47,24 @@ const CHANGE_CONTEXTS: readonly ContextId[] = [
   "approval_step",
 ];
 
+// Org-verified (semantics/syntax probes, 2026-07-26): the formula-field save
+// rejects SUBSTR ("may not be used in this type of formula") and IFERROR
+// ("Unknown function"), so those carry every context except formula_field.
+// Availability in the remaining contexts is still best-effort (warnings only)
+// pending the wave-2 per-context matrix.
+const ALL_BUT_FORMULA_FIELD: readonly ContextId[] = [
+  "validation_rule",
+  "flow_formula",
+  "default_value",
+  "workflow_rule",
+  "workflow_field_update",
+  "approval_entry",
+  "approval_step",
+  "custom_button_link",
+  "email_template",
+  "quick_action",
+];
+
 // Transcendental math: real Salesforce functions, but NOT simulatable — they
 // compute as non-correctly-rounded doubles (Java StrictMath) whose last ULP a
 // client cannot reproduce, so they refuse to simulate rather than
@@ -258,21 +276,23 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   },
   {
     name: "UPPER",
-    params: [req("text", "Text")],
+    // The locale argument is undocumented but org-verified as accepted
+    // (probe corpus:testUpperLocale).
+    params: [req("text", "Text"), opt("locale", "Text")],
     returnType: fixed("Text"),
     contexts: "all",
     simulatable: true,
     docsUrl: DOCS,
-    summary: "Converts text to uppercase.",
+    summary: "Converts text to uppercase (optionally locale-aware).",
   },
   {
     name: "LOWER",
-    params: [req("text", "Text")],
+    params: [req("text", "Text"), opt("locale", "Text")],
     returnType: fixed("Text"),
     contexts: "all",
     simulatable: true,
     docsUrl: DOCS,
-    summary: "Converts text to lowercase.",
+    summary: "Converts text to lowercase (optionally locale-aware).",
   },
   {
     name: "CONTAINS",
@@ -353,7 +373,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
       opt("num_chars", "Number"),
     ],
     returnType: fixed("Text"),
-    contexts: "all",
+    contexts: ALL_BUT_FORMULA_FIELD,
     simulatable: true,
     docsUrl: DOCS,
     summary:
@@ -411,7 +431,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     name: "IFERROR",
     params: [req("expression", "Unknown"), req("fallback", "Unknown")],
     returnType: sameAsArg(1),
-    contexts: "all",
+    contexts: ALL_BUT_FORMULA_FIELD,
     simulatable: true,
     docsUrl: DOCS,
     summary:

@@ -4,6 +4,9 @@ export const syntax = {
     unterminatedString: "Unterminated string literal.",
     unexpectedDollar: "Unexpected '$': expected a global name.",
     unexpectedBang: "Unexpected '!'.",
+    unexpectedPipe: "Unexpected '|'. For logical OR, use '||' or OR().",
+    nestedComment:
+      "Block comments do not nest — this comment ends at the first '*/'.",
     unexpectedCharacter: (c: string) => `Unexpected character '${c}'.`,
   },
   parser: {

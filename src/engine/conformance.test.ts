@@ -11,8 +11,9 @@ import { runRow, type RowStatus } from "./conformance.ts";
  */
 
 // Locked baseline: raise as the evaluator improves, never lower silently. The
-// gap to 100% is the triaged discrepancy backlog in VERIFICATION.md.
-const BASELINE = 0.98;
+// gap to 100% is the triaged discrepancy backlog in VERIFICATION.md, which now
+// includes rows where the org tier contradicts this oracle (org wins).
+const BASELINE = 0.99;
 
 const rows: CorpusRow[] = JSON.parse(
   readFileSync("corpus/salesforce-v2.json", "utf8"),

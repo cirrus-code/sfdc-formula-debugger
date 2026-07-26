@@ -30,10 +30,20 @@ export interface RowOutcome {
   readonly got?: string;
 }
 
+export interface RunOptions {
+  /**
+   * The org readback channel (SOQL, orgcheck/) renders blank, whitespace-only
+   * text (trailing whitespace is trimmed at save), and `#Error!` all as null,
+   * so an org row whose expected value is "null" accepts any of the three.
+   * Oracle corpora leave this off — there "null" means precisely blank.
+   */
+  readonly nullIsChannelAmbiguous?: boolean;
+}
+
 /** Thrown internally when a row can't be set up within our current support. */
 class Unsupported extends Error {}
 
-export function runRow(row: CorpusRow): RowOutcome {
+export function runRow(row: CorpusRow, opts: RunOptions = {}): RowOutcome {
   let ast: Expr;
   try {
     ast = parse(row.formula).ast;
@@ -46,7 +56,7 @@ export function runRow(row: CorpusRow): RowOutcome {
       blankMode: row.blankMode,
       now: { epochMillis: 0 },
     });
-    return compare(result, row);
+    return compare(result, row, opts);
   } catch (e) {
     if (e instanceof Unsupported || e instanceof UnsupportedError) {
       return { status: "unsupported" };
@@ -119,6 +129,7 @@ function buildField(f: CorpusField): SfValue {
 function compare(
   result: ReturnType<typeof evaluateFormula>,
   row: CorpusRow,
+  opts: RunOptions,
 ): RowOutcome {
   const expected = row.expected;
 
@@ -127,7 +138,12 @@ function compare(
   }
   if (expected === "null") {
     const isBlank = !isError(result) && result.blank;
-    return { status: isBlank ? "pass" : "fail", got: describe(result) };
+    const ok = opts.nullIsChannelAmbiguous
+      ? isBlank ||
+        isError(result) ||
+        (!isError(result) && isText(result) && asText(result).trim() === "")
+      : isBlank;
+    return { status: ok ? "pass" : "fail", got: describe(result) };
   }
   if (isError(result)) {
     return { status: "fail", got: `#Error(${result.reason})` };

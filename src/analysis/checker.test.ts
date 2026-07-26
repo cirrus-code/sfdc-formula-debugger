@@ -54,6 +54,16 @@ describe("checker: operators", () => {
     expect(codes("1 == 1")).toContain("nonstandard-operator");
     expect(codes("1 != 2")).toContain("nonstandard-operator");
   });
+
+  it("flags && and || as nonstandard and expects boolean operands", () => {
+    expect(codes("ISBLANK(x) && ISBLANK(y)")).toContain(
+      "nonstandard-operator",
+    );
+    expect(codes("ISBLANK(x) || ISBLANK(y)")).toContain(
+      "nonstandard-operator",
+    );
+    expect(codes("1 && 2")).toContain("operator-type-mismatch");
+  });
 });
 
 describe("checker: context availability", () => {
@@ -71,6 +81,14 @@ describe("checker: context availability", () => {
 
   it("suppresses availability findings in Tier 2 contexts", () => {
     expect(codes("ISCHANGED(Amount)", "workflow_field_update")).not.toContain(
+      "function-not-available",
+    );
+  });
+
+  it("warns for SUBSTR and IFERROR in a formula field (org-verified)", () => {
+    expect(codes('SUBSTR("abc", 1)')).toContain("function-not-available");
+    expect(codes("IFERROR(1 / 0, 0)")).toContain("function-not-available");
+    expect(codes('SUBSTR("abc", 1)', "validation_rule")).not.toContain(
       "function-not-available",
     );
   });

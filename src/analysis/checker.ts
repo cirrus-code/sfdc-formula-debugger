@@ -154,6 +154,20 @@ class Checker {
           ),
         );
         return "Boolean";
+      case "&&":
+      case "||":
+        this.report(
+          "nonstandard-operator",
+          "warning",
+          node.opSpan,
+          t().checker.nonstandardOperator(
+            node.op,
+            node.op === "&&" ? "AND()" : "OR()",
+          ),
+        );
+        this.expectBoolean(left, node.left.span, node.op);
+        this.expectBoolean(right, node.right.span, node.op);
+        return "Boolean";
       default:
         return assertNever(node.op);
     }
@@ -181,6 +195,17 @@ class Checker {
         "warning",
         span,
         t().checker.operatorTypeMismatch(op, type),
+      );
+    }
+  }
+
+  private expectBoolean(type: SfType, span: Span, op: string): void {
+    if (type !== "Unknown" && type !== "Boolean") {
+      this.report(
+        "operator-type-mismatch",
+        "warning",
+        span,
+        t().checker.logicalOperatorTypeMismatch(op, type),
       );
     }
   }

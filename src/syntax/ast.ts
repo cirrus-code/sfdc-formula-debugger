@@ -24,7 +24,11 @@ export type BinaryOperator =
   | ">"
   | ">="
   | "=="
-  | "!=";
+  | "!="
+  // Undocumented but org-verified as accepted by the product (VERIFICATION.md):
+  // infix AND/OR, below equality precedence per the OSS grammar.
+  | "&&"
+  | "||";
 
 /** `NOT`/`AND`/`OR` are functions in Salesforce; the only prefix operators are sign. */
 export type UnaryOperator = "-" | "+";

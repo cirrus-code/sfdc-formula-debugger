@@ -26,6 +26,8 @@ const OPS: readonly BinaryOperator[] = [
   "<=",
   ">",
   ">=",
+  "&&",
+  "||",
 ];
 
 const leaf = fc.oneof(
