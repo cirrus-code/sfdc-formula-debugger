@@ -9,6 +9,7 @@ import {
   type SfValue,
 } from "../../engine/index.ts";
 import type { SfType } from "../../registry/index.ts";
+import { t } from "../../i18n/index.ts";
 import { palette, syntax, font } from "../../theme/theme.ts";
 import { Panel } from "../Panel.tsx";
 import { buildFieldValue, FIELD_TYPES, renderResult } from "./fieldValue.ts";
@@ -107,7 +108,7 @@ export function SimulatePanel({
 
   return (
     <Panel
-      label="Simulate"
+      label={t().ui.simulate.label}
       right={
         blankToggle ? (
           <label
@@ -119,14 +120,14 @@ export function SimulatePanel({
               fontSize: "0.75rem",
             }}
           >
-            Blank fields as
+            {t().ui.simulate.blankFieldsAs}
             <select
               className="select"
               value={blankMode}
               onChange={(e) => setBlankMode(e.target.value as BlankMode)}
             >
-              <option value="zero">zeroes</option>
-              <option value="blank">blanks</option>
+              <option value="zero">{t().ui.simulate.blankAsZeroes}</option>
+              <option value="blank">{t().ui.simulate.blankAsBlanks}</option>
             </select>
           </label>
         ) : undefined
@@ -140,7 +141,7 @@ export function SimulatePanel({
             fontSize: "0.82rem",
           }}
         >
-          No fields referenced.
+          {t().ui.simulate.noFields}
         </p>
       ) : (
         <div style={{ padding: "0.4rem 0" }}>
@@ -194,7 +195,7 @@ export function SimulatePanel({
                       })
                     }
                   />
-                  blank
+                  {t().ui.simulate.blankCheckbox}
                 </label>
               </div>
             );
@@ -219,17 +220,17 @@ export function SimulatePanel({
  * address bar then.
  */
 function ShareButton({ onShare }: { onShare: () => string }) {
-  const [label, setLabel] = useState("Copy link");
+  const [label, setLabel] = useState(() => t().ui.simulate.copyLink);
 
   const share = async (): Promise<void> => {
     const url = onShare();
     try {
       await navigator.clipboard.writeText(url);
-      setLabel("Copied!");
+      setLabel(t().ui.simulate.copied);
     } catch {
-      setLabel("Link is in the URL bar");
+      setLabel(t().ui.simulate.linkInUrlBar);
     }
-    setTimeout(() => setLabel("Copy link"), 2000);
+    setTimeout(() => setLabel(t().ui.simulate.copyLink), 2000);
   };
 
   return (
@@ -239,7 +240,7 @@ function ShareButton({ onShare }: { onShare: () => string }) {
       onClick={() => {
         void share();
       }}
-      title="Copy a link that restores this formula, inputs, and result"
+      title={t().ui.simulate.copyLinkTitle}
       style={{ marginLeft: "auto" }}
     >
       {label}
@@ -257,7 +258,7 @@ function FieldWidget({
   if (input.blank) {
     return (
       <span style={{ flex: 1, color: palette.textMuted, fontSize: "0.8rem" }}>
-        null
+        {t().ui.simulate.nullField}
       </span>
     );
   }
@@ -294,7 +295,9 @@ function FieldWidget({
           ? "decimal"
           : undefined
       }
-      placeholder={input.type === "Date" ? "" : "value"}
+      placeholder={
+        input.type === "Date" ? "" : t().ui.simulate.valuePlaceholder
+      }
       onChange={(e) => onChange({ value: e.target.value })}
       style={inputStyle}
     />
@@ -306,10 +309,10 @@ function resultLabel(outcome: {
   unsupported?: string;
 }): string {
   if (outcome.unsupported) {
-    return `Cannot simulate: ${outcome.unsupported} depends on org state`;
+    return t().ui.simulate.cannotSimulate(outcome.unsupported);
   }
   if (outcome.result === "#Error!") {
-    return "Salesforce would show #Error! here";
+    return t().ui.simulate.errorResult;
   }
   return outcome.result ?? "";
 }
@@ -342,7 +345,7 @@ function ResultBar({
         gap: "0.65rem",
       }}
     >
-      <span className="microcopy">Result</span>
+      <span className="microcopy">{t().ui.simulate.resultLabel}</span>
       <span className={`led ${led}`} aria-hidden />
       {/* Keyed so a changed result re-triggers the readout-in flash. */}
       <span

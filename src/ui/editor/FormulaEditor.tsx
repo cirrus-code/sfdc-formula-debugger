@@ -11,6 +11,7 @@ import { lintGutter } from "@codemirror/lint";
 import { completionKeymap } from "@codemirror/autocomplete";
 // Deep import — keeps the engine-dependent simplifier out of the eager bundle.
 import { format } from "../../features/formatter.ts";
+import { t } from "../../i18n/index.ts";
 import { sfHighlight } from "./highlight.ts";
 import { sfLinter } from "./lint.ts";
 import { sfEditorTheme } from "./editorTheme.ts";
@@ -109,7 +110,7 @@ export function FormulaEditor({
             ...defaultKeymap,
             ...historyKeymap,
           ]),
-          placeholder("Type a Salesforce formula…"),
+          placeholder(t().ui.editor.placeholder),
           sfHighlight,
           sfCompletion,
           sfHover,

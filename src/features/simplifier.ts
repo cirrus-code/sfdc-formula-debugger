@@ -12,6 +12,7 @@ import {
   UnsupportedError,
   type SfValue,
 } from "../engine/index.ts";
+import { t } from "../i18n/index.ts";
 import { formatExpr, needsParens } from "./formatter.ts";
 
 /**
@@ -74,7 +75,7 @@ export function simplify(root: Expr): SimplifyResult {
   if (countParens(deparened) < countParens(root)) {
     steps.push({
       rule: "redundant-parens",
-      title: "Remove redundant parentheses",
+      title: t().simplifier.redundantParens.title,
       detail: oneLine(deparened),
       before: formatExpr(root),
       after: formatExpr(deparened),
@@ -411,7 +412,7 @@ function foldConstant(node: Expr): Omit<Rewrite, "detail"> | null {
   return {
     node: literal,
     rule: "constant-fold",
-    title: "Fold constant expression",
+    title: t().simplifier.constantFold.title,
   };
 }
 
@@ -476,7 +477,7 @@ function literalIfCondition(node: Expr): Omit<Rewrite, "detail"> | null {
     return {
       node: node.args[cond.value ? 1 : 2]!,
       rule: "if-literal-condition",
-      title: `Take the ${cond.value ? "TRUE" : "FALSE"} branch`,
+      title: t().simplifier.ifLiteralCondition.takeBranch(cond.value),
     };
   }
   // A literal NULL condition coerces to FALSE in a boolean position.
@@ -484,7 +485,7 @@ function literalIfCondition(node: Expr): Omit<Rewrite, "detail"> | null {
     return {
       node: node.args[2]!,
       rule: "if-literal-condition",
-      title: "Take the FALSE branch (NULL condition is false)",
+      title: t().simplifier.ifLiteralCondition.takeFalseBranchNullCondition,
     };
   }
   return null;
@@ -507,7 +508,7 @@ function booleanShapedIf(node: Expr): Omit<Rewrite, "detail"> | null {
     return {
       node: cond,
       rule: "boolean-shaped-if",
-      title: "IF(x, TRUE, FALSE) is x",
+      title: t().simplifier.booleanShapedIf.isX,
     };
   }
   if (isBoolLit(thenB, false) && isBoolLit(elseB, true)) {
@@ -520,7 +521,7 @@ function booleanShapedIf(node: Expr): Omit<Rewrite, "detail"> | null {
         span: node.span,
       },
       rule: "boolean-shaped-if",
-      title: "IF(x, FALSE, TRUE) is NOT(x)",
+      title: t().simplifier.booleanShapedIf.isNotX,
     };
   }
   return null;
@@ -539,7 +540,11 @@ function doubleNegation(node: Expr): Omit<Rewrite, "detail"> | null {
   if (!booleanTyped(x)) {
     return null;
   }
-  return { node: x, rule: "double-negation", title: "Double negation cancels" };
+  return {
+    node: x,
+    rule: "double-negation",
+    title: t().simplifier.doubleNegation.title,
+  };
 }
 
 const NEGATED_EQUALITY: Partial<Record<BinaryOp["op"], BinaryOp["op"]>> = {
@@ -569,7 +574,7 @@ function negatedEquality(node: Expr): Omit<Rewrite, "detail"> | null {
   return {
     node: { ...inner, op: flipped },
     rule: "negated-equality",
-    title: `NOT(a ${inner.op} b) is a ${flipped} b`,
+    title: t().simplifier.negatedEquality.title(inner.op, flipped),
   };
 }
 
@@ -594,7 +599,7 @@ function flattenAndOr(node: Expr): Omit<Rewrite, "detail"> | null {
     return {
       node: { ...node, args },
       rule: "flatten-logical",
-      title: `Flatten nested ${name}`,
+      title: t().simplifier.flattenLogical.title(name),
     };
   }
   return null;
@@ -624,13 +629,13 @@ function dropIdentityArgs(node: Expr): Omit<Rewrite, "detail"> | null {
       return {
         node: kept[0]!,
         rule: "identity-law",
-        title: `${identity ? "TRUE" : "FALSE"} is the identity of ${name}`,
+        title: t().simplifier.identityLaw.title(identity, name),
       };
     }
     return {
       node: { ...node, args: kept },
       rule: "identity-law",
-      title: `${identity ? "TRUE" : "FALSE"} is the identity of ${name}`,
+      title: t().simplifier.identityLaw.title(identity, name),
     };
   }
   return null;
@@ -662,7 +667,7 @@ function truncateAfterAnnihilator(node: Expr): Omit<Rewrite, "detail"> | null {
           span: node.span,
         },
         rule: "short-circuit",
-        title: `${name} short-circuits at ${annihilator ? "TRUE" : "FALSE"}`,
+        title: t().simplifier.shortCircuit.constant(name, annihilator),
       };
     }
     if (i === node.args.length - 1) {
@@ -671,7 +676,7 @@ function truncateAfterAnnihilator(node: Expr): Omit<Rewrite, "detail"> | null {
     return {
       node: { ...node, args: node.args.slice(0, i + 1) },
       rule: "short-circuit",
-      title: `Arguments after ${annihilator ? "TRUE" : "FALSE"} are unreachable`,
+      title: t().simplifier.shortCircuit.truncated(annihilator),
     };
   }
   return null;
@@ -707,8 +712,8 @@ function dropRedundantArgs(node: Expr): Omit<Rewrite, "detail"> | null {
       const rewrite = {
         rule: duplicate ? "idempotence" : "absorption",
         title: duplicate
-          ? "Repeated condition is redundant"
-          : "Absorption: the outer condition already decides",
+          ? t().simplifier.idempotence.title
+          : t().simplifier.absorption.title,
       };
       if (args.length === 1) {
         if (!nonBlankBoolean(args[0]!)) {
@@ -781,10 +786,7 @@ function suggestDeMorgan(node: Expr, out: SimplifySuggestion[]): void {
     out.push({
       rule: "de-morgan",
       span: node.span,
-      message:
-        `De Morgan: ${oneLine(rewritten)} — equivalent only if no operand ` +
-        "can be blank (NOT of a blank is blank here, which AND/OR then treat " +
-        "as FALSE).",
+      message: t().simplifier.deMorgan.suggestion(oneLine(rewritten)),
     });
   }
 }
@@ -803,10 +805,7 @@ function suggestAnnihilator(node: Expr, out: SimplifySuggestion[]): void {
       out.push({
         rule: "annihilator",
         span: node.span,
-        message:
-          `This ${name} always returns ${annihilator ? "TRUE" : "FALSE"} — ` +
-          "equivalent to the constant unless an earlier argument produces " +
-          "#Error!.",
+        message: t().simplifier.annihilator.suggestion(name, annihilator),
       });
     }
   }
@@ -826,9 +825,7 @@ function suggestBooleanIf(node: Expr, out: SimplifySuggestion[]): void {
     out.push({
       rule: "boolean-shaped-if",
       span: node.span,
-      message:
-        `Equivalent to ${oneLine(cond)} — unless it is blank (a blank ` +
-        "condition takes the FALSE branch here, but stays blank on its own).",
+      message: t().simplifier.booleanShapedIf.suggestion(oneLine(cond)),
     });
   }
 }
@@ -857,10 +854,9 @@ function suggestOrderingNegation(node: Expr, out: SimplifySuggestion[]): void {
   out.push({
     rule: "ordering-negation",
     span: node.span,
-    message:
-      `Equivalent to ${oneLine({ ...inner, op: flipped })} — only if neither ` +
-      "operand can be blank (comparisons against blank are FALSE on both " +
-      "sides of the NOT).",
+    message: t().simplifier.orderingNegation.suggestion(
+      oneLine({ ...inner, op: flipped }),
+    ),
   });
 }
 
@@ -900,9 +896,7 @@ function suggestCaseChain(
   out.push({
     rule: "case-chain",
     span: node.span,
-    message:
-      `This IF chain reads as ${oneLine(caseCall)} — verify blank handling ` +
-      "before switching (CASE compares blanks its own way).",
+    message: t().simplifier.caseChain.suggestion(oneLine(caseCall)),
   });
 }
 

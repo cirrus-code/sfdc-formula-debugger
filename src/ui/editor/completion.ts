@@ -5,16 +5,24 @@ import {
   type CompletionResult,
 } from "@codemirror/autocomplete";
 import { FUNCTIONS } from "../../registry/index.ts";
+import { localizedFunctionSummary } from "../../i18n/index.ts";
 import { signature } from "./signature.ts";
 
-const FUNCTION_OPTIONS: readonly Completion[] = FUNCTIONS.map((spec) => ({
-  label: spec.name,
-  type: "function",
-  detail: signature(spec),
-  info: spec.summary,
-  // Insert the open paren so the signature/hover kicks in immediately.
-  apply: `${spec.name}(`,
-}));
+// Built lazily: the locale is installed at boot, after this module loads, so
+// summaries must not be resolved at import time.
+let functionOptions: readonly Completion[] | undefined;
+
+function getFunctionOptions(): readonly Completion[] {
+  functionOptions ??= FUNCTIONS.map((spec) => ({
+    label: spec.name,
+    type: "function",
+    detail: signature(spec),
+    info: localizedFunctionSummary(spec.name, spec.summary),
+    // Insert the open paren so the signature/hover kicks in immediately.
+    apply: `${spec.name}(`,
+  }));
+  return functionOptions;
+}
 
 function sfCompletionSource(
   context: CompletionContext,
@@ -25,7 +33,7 @@ function sfCompletionSource(
   }
   return {
     from: word.from,
-    options: FUNCTION_OPTIONS,
+    options: getFunctionOptions(),
     validFor: /^[A-Za-z0-9_]*$/,
   };
 }

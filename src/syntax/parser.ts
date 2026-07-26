@@ -1,3 +1,4 @@
+import { t } from "../i18n/index.ts";
 import { lex } from "./lexer.ts";
 import { mergeSpans, span, type Span } from "./span.ts";
 import type { Diagnostic, DiagnosticCode } from "./diagnostic.ts";
@@ -106,7 +107,7 @@ class Parser {
       this.error(
         "unexpected-token",
         span(start, end),
-        "Unexpected trailing input after the formula.",
+        t().syntax.parser.unexpectedTrailingInput,
       );
     }
     return expr;
@@ -216,7 +217,7 @@ class Parser {
         this.error(
           "expected-field-name",
           dot.span,
-          "Expected a field name after '.'.",
+          t().syntax.parser.expectedFieldName,
         );
         end = dot.span.end;
         break;
@@ -247,7 +248,7 @@ class Parser {
       this.error(
         "unexpected-token",
         this.current().span,
-        "Expected ',' or ')' in argument list.",
+        t().syntax.parser.expectedArgSeparator,
       );
       this.synchronizeArgs();
       if (this.current().kind === "comma") {
@@ -262,7 +263,7 @@ class Parser {
       this.error(
         "expected-closing-paren",
         at,
-        "Expected ')' to close the function call.",
+        t().syntax.parser.expectedClosingParenForCall,
       );
       end = this.prevEnd();
     }
@@ -286,7 +287,7 @@ class Parser {
       this.error(
         "expected-closing-paren",
         at,
-        "Expected ')' to close the group.",
+        t().syntax.parser.expectedClosingParenForGroup,
       );
       end = inner.span.end;
     }
@@ -297,7 +298,7 @@ class Parser {
     const tok = this.current();
     const at =
       tok.kind === "eof" ? span(tok.span.start, tok.span.start) : tok.span;
-    this.error("expected-expression", at, "Expected an expression.");
+    this.error("expected-expression", at, t().syntax.parser.expectedExpression);
     // Consume the offending token unless it is a separator the caller needs to
     // see (prevents infinite loops without swallowing structural tokens).
     if (tok.kind !== "eof" && tok.kind !== "comma" && tok.kind !== "rparen") {

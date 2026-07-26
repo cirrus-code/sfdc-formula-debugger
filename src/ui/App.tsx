@@ -12,6 +12,11 @@ import {
 } from "../features/permalink.ts";
 import type { BlankMode } from "../engine/value.ts";
 import { CONTEXTS, DEFAULT_CONTEXT_ID, getContext } from "../registry/index.ts";
+import {
+  localizedContextLabel,
+  localizedContextNote,
+  t,
+} from "../i18n/index.ts";
 import { applyThemeVars, palette, product } from "../theme/theme.ts";
 import { FormulaEditor, type EditorHandle } from "./editor/FormulaEditor.tsx";
 import { Panel } from "./Panel.tsx";
@@ -123,7 +128,7 @@ export function App() {
           }}
         >
           <span className="led led--ok" aria-hidden />
-          {product.badge}
+          {t().copy.badge}
         </p>
         <Nameplate name={product.name} />
         <p
@@ -134,7 +139,7 @@ export function App() {
             maxWidth: "36rem",
           }}
         >
-          {product.tagline}
+          {t().copy.tagline}
         </p>
       </header>
 
@@ -154,9 +159,9 @@ export function App() {
           type="button"
           className="btn"
           onClick={() => editorRef.current?.format()}
-          title="Format (Shift+Alt+F)"
+          title={t().ui.toolbar.formatTitle}
         >
-          Format
+          {t().ui.toolbar.format}
         </button>
       </div>
 
@@ -180,7 +185,7 @@ export function App() {
           }}
         >
           <span aria-hidden>⚠</span>
-          {context.notes}
+          {localizedContextNote(context.id, context.notes)}
         </p>
       ) : null}
 
@@ -226,10 +231,10 @@ export function App() {
           color: palette.textMuted,
         }}
       >
-        <span>{product.footer}</span>
+        <span>{t().copy.footer}</span>
         {product.platformUrl ? (
           <a href={product.platformUrl}>
-            {new URL(product.platformUrl).host} ↗
+            {t().ui.footer.platformLink(new URL(product.platformUrl).host)}
           </a>
         ) : null}
       </footer>
@@ -253,7 +258,7 @@ function ContextPicker({ contextId, onChange }: ContextPickerProps) {
         maxWidth: "100%",
       }}
     >
-      <span className="microcopy">Context</span>
+      <span className="microcopy">{t().ui.toolbar.contextLabel}</span>
       {/* min-width: 0 lets the select shrink below its widest option on
           narrow viewports instead of forcing horizontal page scroll. */}
       <select
@@ -264,8 +269,8 @@ function ContextPicker({ contextId, onChange }: ContextPickerProps) {
       >
         {CONTEXTS.map((c) => (
           <option key={c.id} value={c.id}>
-            {c.label}
-            {c.tier === 2 ? " (unverified)" : ""}
+            {localizedContextLabel(c.id, c.label)}
+            {c.tier === 2 ? t().ui.toolbar.contextUnverifiedSuffix : ""}
           </option>
         ))}
       </select>
@@ -282,7 +287,7 @@ interface ProblemsPanelProps {
 function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
   return (
     <Panel
-      label="Problems"
+      label={t().ui.problems.label}
       right={
         <span
           style={{
@@ -291,8 +296,8 @@ function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
           }}
         >
           {diagnostics.length === 0
-            ? "no problems"
-            : `${diagnostics.length} problem${diagnostics.length === 1 ? "" : "s"}`}
+            ? t().ui.problems.none
+            : t().ui.problems.count(diagnostics.length)}
           {" · "}
           {astKind}
         </span>
@@ -312,7 +317,7 @@ function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
           <span aria-hidden style={{ color: palette.accent }}>
             ✓
           </span>
-          <span>Parses cleanly.</span>
+          <span>{t().ui.problems.clean}</span>
         </p>
       ) : (
         <ul style={{ listStyle: "none" }}>
@@ -364,7 +369,7 @@ function ProblemsPanel({ source, diagnostics, astKind }: ProblemsPanelProps) {
                       rel="noreferrer"
                       style={{ fontSize: "0.72rem", marginLeft: "0.5rem" }}
                     >
-                      docs ↗
+                      {t().ui.problems.docsLink}
                     </a>
                   ) : null}
                 </span>

@@ -1,5 +1,6 @@
 import { hoverTooltip, type Tooltip } from "@codemirror/view";
 import { getFunction, type FunctionSpec } from "../../registry/index.ts";
+import { localizedFunctionSummary, t } from "../../i18n/index.ts";
 import { palette, font } from "../../theme/theme.ts";
 import { signature } from "./signature.ts";
 
@@ -13,13 +14,13 @@ function tooltipDom(spec: FunctionSpec): HTMLElement {
   root.appendChild(sig);
 
   const summary = document.createElement("div");
-  summary.textContent = spec.summary;
+  summary.textContent = localizedFunctionSummary(spec.name, spec.summary);
   summary.style.color = palette.text;
   root.appendChild(summary);
 
   if (!spec.simulatable) {
     const note = document.createElement("div");
-    note.textContent = "Not available in simulation (depends on org state).";
+    note.textContent = t().ui.hover.notSimulatable;
     note.style.cssText = `margin-top:4px;color:${palette.warning};font-size:12px;`;
     root.appendChild(note);
   }
@@ -28,7 +29,7 @@ function tooltipDom(spec: FunctionSpec): HTMLElement {
   link.href = spec.docsUrl;
   link.target = "_blank";
   link.rel = "noreferrer";
-  link.textContent = "Salesforce docs ↗";
+  link.textContent = t().ui.hover.salesforceDocs;
   link.style.cssText = `display:inline-block;margin-top:6px;color:${palette.accent};font-size:12px;`;
   root.appendChild(link);
 

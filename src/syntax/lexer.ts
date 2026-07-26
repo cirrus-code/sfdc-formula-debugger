@@ -1,3 +1,4 @@
+import { t } from "../i18n/index.ts";
 import { span, type Span } from "./span.ts";
 import type { Diagnostic } from "./diagnostic.ts";
 import type { LexResult, Token, TokenKind, Trivia } from "./token.ts";
@@ -109,7 +110,7 @@ class Lexer {
       this.error(
         "unterminated-comment",
         span(start, this.pos),
-        "Unterminated comment: missing closing '*/'.",
+        t().syntax.lexer.unterminatedComment,
       );
     } else {
       this.pos += 2; // consume "*/"
@@ -155,7 +156,7 @@ class Lexer {
         this.error(
           "unterminated-string",
           span(start, this.pos),
-          "Unterminated string literal.",
+          t().syntax.lexer.unterminatedString,
         );
         break;
       }
@@ -206,7 +207,7 @@ class Lexer {
       this.error(
         "unexpected-character",
         span(start, this.pos),
-        "Unexpected '$': expected a global name.",
+        t().syntax.lexer.unexpectedDollar,
       );
       return this.token("error", start, leading);
     }
@@ -270,7 +271,7 @@ class Lexer {
         this.error(
           "unexpected-character",
           span(start, this.pos),
-          "Unexpected '!'.",
+          t().syntax.lexer.unexpectedBang,
         );
         return this.token("error", start, leading);
       default:
@@ -278,7 +279,7 @@ class Lexer {
         this.error(
           "unexpected-character",
           span(start, this.pos),
-          `Unexpected character '${c}'.`,
+          t().syntax.lexer.unexpectedCharacter(c),
         );
         return this.token("error", start, leading);
     }

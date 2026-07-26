@@ -12,6 +12,7 @@ import {
   type SfValue,
 } from "../../engine/index.ts";
 import type { SfType } from "../../registry/index.ts";
+import { t } from "../../i18n/index.ts";
 
 /** Types offered in the simulation form's per-field type picker. */
 export const FIELD_TYPES: readonly SfType[] = [
@@ -75,7 +76,7 @@ export function renderResult(result: EvalResult): string {
     return "#Error!";
   }
   if (result.blank) {
-    return "(blank)";
+    return t().ui.simulate.blankResult;
   }
   switch (result.type) {
     case "Number":

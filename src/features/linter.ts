@@ -9,6 +9,11 @@ import {
   type StringLit,
 } from "../syntax/index.ts";
 import { analyze } from "../analysis/index.ts";
+import {
+  localizedContextLabel,
+  localizedFunctionLintNote,
+  t,
+} from "../i18n/index.ts";
 import { getContext, getFunction } from "../registry/index.ts";
 
 /**
@@ -126,10 +131,7 @@ function checkHardcodedId(node: StringLit, out: Diagnostic[]): void {
     code: "hardcoded-id",
     severity: "warning",
     span: node.span,
-    message:
-      `"${node.value}" looks like a hardcoded record ID. IDs are org-specific ` +
-      "(sandbox and production differ) — look the record up by name, or keep " +
-      "the ID in a Custom Label or Custom Setting.",
+    message: t().linter.hardcodedId(node.value),
   });
 }
 
@@ -145,10 +147,7 @@ function checkIfNesting(node: Expr, out: Diagnostic[]): void {
         code: "deep-if-nesting",
         severity: "info",
         span: node.calleeSpan,
-        message:
-          `IF calls nested ${depth} levels deep. CASE(), or splitting the ` +
-          "logic into helper formula fields, is usually easier to read and " +
-          "maintain.",
+        message: t().linter.deepIfNesting(depth),
         docsUrl: getFunction("CASE")?.docsUrl,
       });
       return;
@@ -194,9 +193,7 @@ function checkTextPicklistComparison(node: BinaryOp, out: Diagnostic[]): void {
     code: "prefer-ispickval",
     severity: "info",
     span: node.span,
-    message:
-      `If ${path} is a picklist, compare it with ISPICKVAL(${path}, ` +
-      `${literal.raw}) instead of converting with TEXT().`,
+    message: t().linter.preferIspickval(path, literal.raw),
     docsUrl: getFunction("ISPICKVAL")?.docsUrl,
   });
 }
@@ -225,7 +222,7 @@ function checkLintNotes(node: FunctionCall, out: Diagnostic[]): void {
       code: "discouraged-function",
       severity: "info",
       span: node.calleeSpan,
-      message: note.message,
+      message: localizedFunctionLintNote(note.id, note.message),
       docsUrl: spec.docsUrl,
     });
   }
@@ -245,10 +242,10 @@ function checkCharLimit(
     severity: "warning",
     // Highlight the overflowing tail rather than the whole document.
     span: span(context.charLimit, source.length),
-    message:
-      `Formula is ${source.length} characters; the ${context.label} limit is ` +
-      `${context.charLimit}. Salesforce actually enforces a compiled-size ` +
-      "limit, which differs from source length and cannot be computed " +
-      "exactly outside Salesforce.",
+    message: t().linter.charLimit(
+      source.length,
+      localizedContextLabel(context.id, context.label),
+      context.charLimit,
+    ),
   });
 }

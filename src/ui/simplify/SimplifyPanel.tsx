@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { simplifySource } from "../../features/simplifier.ts";
+import { t } from "../../i18n/index.ts";
 import { palette } from "../../theme/theme.ts";
 import { Panel } from "../Panel.tsx";
 
@@ -26,7 +27,7 @@ export function SimplifyPanel({ source, onApply }: SimplifyPanelProps) {
 
   return (
     <Panel
-      label="Simplify"
+      label={t().ui.simplify.label}
       right={
         result.changed ? (
           <button
@@ -36,11 +37,11 @@ export function SimplifyPanel({ source, onApply }: SimplifyPanelProps) {
             disabled={hasComments}
             title={
               hasComments
-                ? "Applying would remove the formula's comments"
-                : "Replace the formula with the simplified version"
+                ? t().ui.simplify.applyWouldRemoveComments
+                : t().ui.simplify.applyReplaces
             }
           >
-            Apply
+            {t().ui.simplify.apply}
           </button>
         ) : undefined
       }

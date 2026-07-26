@@ -8,6 +8,7 @@ import {
   type Severity,
   type Span,
 } from "../syntax/index.ts";
+import { localizedContextLabel, t } from "../i18n/index.ts";
 import {
   functionArity,
   getContext,
@@ -41,7 +42,11 @@ export function analyze(root: Expr, contextId: string): readonly Diagnostic[] {
       "return-type-mismatch",
       "warning",
       root.span,
-      `${context.label} must return ${context.requiredReturnType}, but this formula returns ${rootType}.`,
+      t().checker.returnTypeMismatch(
+        localizedContextLabel(context.id, context.label),
+        context.requiredReturnType,
+        rootType,
+      ),
     );
   }
 
@@ -90,7 +95,7 @@ class Checker {
             "operator-type-mismatch",
             "warning",
             node.operand.span,
-            `Unary '${node.op}' expects a number, got ${operand}.`,
+            t().checker.unaryOperatorTypeMismatch(node.op, operand),
           );
         }
         return "Number";
@@ -129,7 +134,7 @@ class Checker {
             "operator-type-mismatch",
             "warning",
             node.opSpan,
-            `Cannot compare ${left} and ${right} with '${node.op}'.`,
+            t().checker.comparisonTypeMismatch(left, right, node.op),
           );
         }
         return "Boolean";
@@ -142,7 +147,10 @@ class Checker {
           "nonstandard-operator",
           "warning",
           node.opSpan,
-          `'${node.op}' is not a Salesforce operator; use '${node.op === "==" ? "=" : "<>"}'.`,
+          t().checker.nonstandardOperator(
+            node.op,
+            node.op === "==" ? "=" : "<>",
+          ),
         );
         return "Boolean";
       default:
@@ -171,7 +179,7 @@ class Checker {
         "operator-type-mismatch",
         "warning",
         span,
-        `Operator '${op}' expects a number, got ${type}.`,
+        t().checker.operatorTypeMismatch(op, type),
       );
     }
   }
@@ -183,7 +191,7 @@ class Checker {
         "unknown-function",
         "error",
         node.calleeSpan,
-        `Unknown function '${node.callee}'.`,
+        t().checker.unknownFunction(node.callee),
       );
       for (const arg of node.args) {
         this.check(arg);
@@ -210,7 +218,11 @@ class Checker {
         "wrong-arity",
         "error",
         node.span,
-        `${spec.name} expects ${describeArity(min, max)} argument(s), got ${n}.`,
+        t().checker.wrongArity(
+          spec.name,
+          t().checker.arity(min, max === Number.POSITIVE_INFINITY ? null : max),
+          n,
+        ),
       );
     }
   }
@@ -231,7 +243,12 @@ class Checker {
           "argument-type-mismatch",
           "warning",
           arg.span,
-          `${spec.name} argument '${param.name}' expects ${param.type}, got ${actual}.`,
+          t().checker.argumentTypeMismatch(
+            spec.name,
+            param.name,
+            param.type,
+            actual,
+          ),
         );
       }
     });
@@ -242,25 +259,16 @@ class Checker {
       return;
     }
     if (!spec.contexts.includes(this.contextId)) {
-      const label = getContext(this.contextId)?.label ?? this.contextId;
+      const englishLabel = getContext(this.contextId)?.label ?? this.contextId;
+      const label = localizedContextLabel(this.contextId, englishLabel);
       this.report(
         "function-not-available",
         "warning",
         node.calleeSpan,
-        `${spec.name} is not available in ${label}.`,
+        t().checker.functionNotAvailable(spec.name, label),
       );
     }
   }
-}
-
-function describeArity(min: number, max: number): string {
-  if (max === Number.POSITIVE_INFINITY) {
-    return `at least ${min}`;
-  }
-  if (min === max) {
-    return `${min}`;
-  }
-  return `${min}–${max}`;
 }
 
 /** The param governing argument `i`, following a trailing variadic param. */

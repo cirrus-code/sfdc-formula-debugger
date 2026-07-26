@@ -52,10 +52,17 @@ analysis/      type checker, context validator, diagnostics
 engine/        evaluator + value domain (decimal.js)
 registry/      function metadata table + formula-context configs  (data, minimal code)
 syntax/        lexer, parser (recursive descent + Pratt), AST types, spans, comments
+i18n/          locale packs — every user-facing string  (leaf: importable by all layers)
+theme/         branding: product name, palette, fonts  (leaf: importable by all layers)
 ```
 
 - `syntax/` has zero dependencies on anything above it and no knowledge of specific functions —
-  function names are just identifiers at parse time.
+  function names are just identifiers at parse time. It may import `i18n/` (as may every layer).
+- `i18n/` holds all user-visible prose; no other layer embeds user-facing English. The `en` pack
+  defines the catalog shape (`LocalePack`); interpolated messages are typed functions. Registry
+  prose (function summaries, lint notes, context labels) stays in `registry/` as the English
+  source and is translated via sparse per-locale overlays. `i18n/` imports nothing from src/.
+  See `src/i18n/README.md` before adding strings or a locale.
 - `registry/` is the single source of truth for function signatures, per-context availability,
   simulatability, docs URLs, and lint notes. Adding a formula context or a function must be a
   data change, not a code change (except new evaluator implementations).
