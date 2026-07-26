@@ -5,6 +5,7 @@ import {
   EditorView,
   keymap,
   placeholder,
+  tooltips,
 } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { lintGutter } from "@codemirror/lint";
@@ -111,6 +112,11 @@ export function FormulaEditor({
             ...historyKeymap,
           ]),
           placeholder(t().ui.editor.placeholder),
+          // Mount tooltips on <body>: the .rise entrance animations create
+          // stacking contexts on the page sections, so tooltips rendered
+          // inside the editor would paint beneath later siblings (e.g. the
+          // completion list disappearing behind the simulation panel).
+          tooltips({ parent: document.body }),
           sfHighlight,
           sfCompletion,
           sfHover,
