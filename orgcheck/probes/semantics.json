@@ -176,6 +176,27 @@
       "expectSaveError": "maybe"
     },
     {
+      "id": "divzero_isblank",
+      "question": "❓ is 1/0 blank or #Error!? SOQL reads both as null; a blank-aware wrapper disambiguates: blank → the IF branch value, error → propagates and the wrapper reads null.",
+      "formula": "IF(ISBLANK(1 / 0), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "interpret": {
+        "BLANKRESULT": "1/0 evaluates to blank — div-by-zero yields null, not #Error!, in formula fields",
+        "VALUERESULT": "1/0 produced a non-blank value — investigate",
+        "null": "the error propagated through ISBLANK — 1/0 is a real #Error! in formula fields"
+      }
+    },
+    {
+      "id": "divzero_blankvalue",
+      "question": "❓ cross-check of divzero_isblank via BLANKVALUE(1/0, 42).",
+      "formula": "BLANKVALUE(1 / 0, 42)",
+      "returns": "Number",
+      "interpret": {
+        "42": "1/0 is blank (BLANKVALUE substituted the fallback)",
+        "null": "the error propagated through BLANKVALUE — 1/0 is a real #Error!"
+      }
+    },
+    {
       "id": "mod_zero",
       "question": "✅-recheck MOD(x, 0) is a runtime error (oracle-verified) in the product formula-field context.",
       "formula": "MOD(3, 0)",

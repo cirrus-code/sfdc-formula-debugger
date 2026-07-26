@@ -7,4 +7,4 @@ sfdx/.sf/
 # VERIFICATION.md instead.
 results/
 plan.json
-data.apex
+data-*.apex

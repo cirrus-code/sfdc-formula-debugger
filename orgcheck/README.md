@@ -13,9 +13,9 @@ Dev tool only. It never ships, and the app never gains org connectivity.
 
 ```
 probes/*.json ──generate──▶ sfdx/force-app (one formula field per probe × blank mode,
-      +                      TEXT() twins, typed input fields)  +  data.apex  +  plan.json
+      +                      TEXT() twins, typed input fields)  +  data-*.apex  +  plan.json
 corpus/salesforce-v2.json
-                ──collect──▶ deploy (−−ignore-errors: rejections ARE verdicts)
+                ──collect──▶ staged deploys (rejections ARE verdicts)
                              → insert records → SOQL readback → results/org-run-<date>.json
                 ──emit─────▶ corpus/org-verified.json (org-tier rows) + oracle-drift report
 ```
@@ -41,10 +41,13 @@ corpus/salesforce-v2.json
   corrupt the probe (generate.ts logs every drop).
 - **Save rejections are data.** `expectSaveError` probes ask whether the
   product even accepts a construct (`&&`, `==`, `SUBSTR`, 2-arg `UPPER`,
-  `foo:bar` identifiers…). The deploy runs with `--ignore-errors` and
-  per-component failures land in the results with their error message — for
-  identifier probes the _kind_ of message (syntax vs unknown-field) is the
-  verdict.
+  `foo:bar` identifiers…). Rejections land in the results with their error
+  message — for identifier probes the _kind_ of message (syntax vs
+  unknown-field) is the verdict. Because one invalid field makes the org
+  discard **every** component in the same deploy (even with
+  `--ignore-errors`), collect deploys in rounds: record the rejections, drop
+  them from the package, retry until clean — with the expected-rejection
+  probes as their own batch so they can't suppress the main metadata.
 
 ## Running the pass
 
@@ -65,7 +68,8 @@ pnpm emit -- results/org-run-<date>.json   # → corpus/org-verified.json + drif
 
 `collect` accepts `--skip-deploy` (reuse `results/deploy-map.json`) and
 `--skip-data` for fast re-reads. Re-running is idempotent: the deploy upserts
-metadata and `data.apex` wipes and reloads all probe records.
+metadata and the `data-*.apex` scripts (chunked to fit the execute-anonymous
+script-size limit; the first chunk wipes) reload all probe records.
 
 After a run: read the collect/emit summaries, update the corresponding
 `VERIFICATION.md` entries (❓/🔬 → ✅ with the probe id as the golden-test

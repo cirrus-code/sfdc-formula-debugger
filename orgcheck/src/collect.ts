@@ -5,7 +5,13 @@
 //   pnpm collect -- --org <alias> [--skip-deploy] [--skip-data]
 
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import type { Plan, PlanFormulaField } from "./shared.ts";
 
@@ -34,6 +40,9 @@ function sfJson(cmdArgs: string[], cwd: string): any {
       cwd,
       encoding: "utf8",
       maxBuffer: 64 * 1024 * 1024,
+      // A FORCE_COLOR in the caller's env makes oclif colorize --json output,
+      // which breaks parsing; force it off for the child.
+      env: { ...process.env, FORCE_COLOR: "0" },
     });
   } catch (e) {
     // sf exits non-zero on partial failure but still emits result JSON.
@@ -54,6 +63,15 @@ const plan: Plan = JSON.parse(readFileSync(join(ROOT, "plan.json"), "utf8"));
 mkdirSync(join(ROOT, "results"), { recursive: true });
 
 // ---- deploy ----
+//
+// A metadata deploy is effectively all-or-nothing per request on current orgs:
+// one invalid formula field makes the org discard every other component in the
+// package, even with --ignore-errors (the response then counts only the failed
+// components — nothing persists). So the pass deploys in rounds: each round
+// records the rejections (often the verdict itself), drops them from the
+// package, and retries, until a round lands clean. The expected-rejection
+// probes go through the same loop as a separate second batch so their
+// rejections cannot suppress the main metadata.
 
 type DeployMap = Record<string, { deployed: boolean; problem?: string }>;
 let deployMap: DeployMap = {};
@@ -62,36 +80,121 @@ if (skipDeploy) {
   deployMap = JSON.parse(readFileSync(DEPLOY_MAP, "utf8"));
   console.log("skip-deploy: reusing", DEPLOY_MAP);
 } else {
-  console.log("deploying probe metadata…");
-  const deploy = sfJson(
+  console.log("converting source to metadata format…");
+  const convertDir = join(ROOT, "results", "mdapi-src");
+  rmSync(convertDir, { recursive: true, force: true });
+  sfJson(
     [
       "project",
-      "deploy",
-      "start",
+      "convert",
+      "source",
       "--source-dir",
       "force-app",
-      "-o",
-      org,
-      "--ignore-conflicts",
-      "--ignore-errors",
-      "--wait",
-      "33",
+      "--output-dir",
+      convertDir,
     ],
     join(ROOT, "sfdx"),
   );
-  const details = deploy.result?.details ?? {};
+  const objectSrc = readFileSync(
+    join(convertDir, "objects", `${plan.objectApiName}.object`),
+    "utf8",
+  );
+  // A field block's first <fullName> is the field's own (nested ones, e.g.
+  // picklist values, come later).
+  const FIELD_RE = / {4}<fields>[\s\S]*?<\/fields>\n/g;
+  const nameOf = (block: string) => block.match(/<fullName>([^<]+)/)![1];
+
   const asArray = (x: unknown) => {
     if (Array.isArray(x)) {
       return x;
     }
     return x ? [x] : [];
   };
-  for (const c of asArray(details.componentSuccesses)) {
-    deployMap[c.fullName] = { deployed: true };
-  }
-  for (const c of asArray(details.componentFailures)) {
-    deployMap[c.fullName] = { deployed: false, problem: c.problem };
-  }
+
+  const pkgDir = join(ROOT, "results", "deploy-pkg");
+  const deployRounds = (
+    label: string,
+    fields: string[],
+    withObject: boolean,
+  ) => {
+    const pending = new Set(fields);
+    for (let round = 1; pending.size > 0; round++) {
+      if (round > 8) {
+        throw new Error(`${label}: still failing after 8 deploy rounds`);
+      }
+      rmSync(pkgDir, { recursive: true, force: true });
+      mkdirSync(join(pkgDir, "objects"), { recursive: true });
+      writeFileSync(
+        join(pkgDir, "objects", `${plan.objectApiName}.object`),
+        objectSrc.replace(FIELD_RE, (block) =>
+          pending.has(nameOf(block)) ? block : "",
+        ),
+      );
+      const objectMember = withObject
+        ? `    <types>\n        <members>${plan.objectApiName}</members>\n        <name>CustomObject</name>\n    </types>\n`
+        : "";
+      writeFileSync(
+        join(pkgDir, "package.xml"),
+        `<?xml version="1.0" encoding="UTF-8"?>\n<Package xmlns="http://soap.sforce.com/2006/04/metadata">\n    <types>\n${[
+          ...pending,
+        ]
+          .sort()
+          .map((m) => `        <members>${plan.objectApiName}.${m}</members>`)
+          .join(
+            "\n",
+          )}\n        <name>CustomField</name>\n    </types>\n${objectMember}    <version>62.0</version>\n</Package>\n`,
+      );
+      console.log(`${label}: deploy round ${round}, ${pending.size} fields…`);
+      const res = sfJson(
+        [
+          "project",
+          "deploy",
+          "start",
+          "--metadata-dir",
+          pkgDir,
+          "-o",
+          org,
+          "--ignore-errors",
+          "--wait",
+          "33",
+        ],
+        ROOT,
+      );
+      const failures = asArray(res.result?.details?.componentFailures).filter(
+        (c) => c.fullName !== "package.xml",
+      );
+      if (failures.length === 0) {
+        for (const m of pending) {
+          deployMap[`${plan.objectApiName}.${m}`] = { deployed: true };
+        }
+        console.log(`${label}: ${pending.size} components deployed`);
+        return;
+      }
+      for (const c of failures) {
+        deployMap[c.fullName] = { deployed: false, problem: c.problem };
+        pending.delete(c.fullName.replace(`${plan.objectApiName}.`, ""));
+        console.log(`  rejected: ${c.fullName} — ${c.problem}`);
+      }
+    }
+  };
+
+  const expectErr = new Set(
+    plan.formulaFields
+      .filter((ff) => ff.expectSaveError !== undefined)
+      .map((ff) => ff.apiName),
+  );
+  const allFields = [...objectSrc.matchAll(FIELD_RE)].map((m) => nameOf(m[0]));
+  deployRounds(
+    "main metadata",
+    allFields.filter((f) => !expectErr.has(f)),
+    true,
+  );
+  deployRounds(
+    "expected-rejection probes",
+    allFields.filter((f) => expectErr.has(f)),
+    false,
+  );
+
   writeFileSync(DEPLOY_MAP, JSON.stringify(deployMap, null, 1));
   const failed = Object.values(deployMap).filter((d) => !d.deployed).length;
   console.log(
@@ -110,15 +213,91 @@ function fieldStatus(ff: PlanFormulaField): {
   );
 }
 
+// ---- field access ----
+//
+// API-deployed fields carry no field-level security, and anonymous Apex and
+// SOQL both run as the CLI user, so without a grant the fields are invisible
+// ("Field does not exist" at Apex compile). Deploy and assign a permission set
+// covering exactly the fields that survived deployment.
+
+const PERMSET = "FxProbe_Access";
+{
+  const permDir = join(ROOT, "results", "permset-pkg");
+  rmSync(permDir, { recursive: true, force: true });
+  mkdirSync(join(permDir, "permissionsets"), { recursive: true });
+  const entry = (api: string, editable: boolean) =>
+    `    <fieldPermissions>\n        <editable>${editable}</editable>\n        <field>${plan.objectApiName}.${api}</field>\n        <readable>true</readable>\n    </fieldPermissions>`;
+  const rows = [
+    entry("ProbeKey__c", true),
+    ...plan.inputFields.map((f) => entry(f.apiName, true)),
+    ...plan.formulaFields
+      .filter((ff) => fieldStatus(ff).deployed)
+      .map((ff) => entry(ff.apiName, false)),
+  ];
+  writeFileSync(
+    join(permDir, "permissionsets", `${PERMSET}.permissionset`),
+    `<?xml version="1.0" encoding="UTF-8"?>\n<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">\n${rows.join(
+      "\n",
+    )}\n    <label>FxProbe Access</label>\n    <objectPermissions>\n        <allowCreate>true</allowCreate>\n        <allowDelete>true</allowDelete>\n        <allowEdit>true</allowEdit>\n        <allowRead>true</allowRead>\n        <modifyAllRecords>true</modifyAllRecords>\n        <viewAllRecords>true</viewAllRecords>\n        <object>${plan.objectApiName}</object>\n    </objectPermissions>\n</PermissionSet>\n`,
+  );
+  writeFileSync(
+    join(permDir, "package.xml"),
+    `<?xml version="1.0" encoding="UTF-8"?>\n<Package xmlns="http://soap.sforce.com/2006/04/metadata">\n    <types>\n        <members>${PERMSET}</members>\n        <name>PermissionSet</name>\n    </types>\n    <version>62.0</version>\n</Package>\n`,
+  );
+  console.log("granting field access (permission set)…");
+  const res = sfJson(
+    [
+      "project",
+      "deploy",
+      "start",
+      "--metadata-dir",
+      permDir,
+      "-o",
+      org,
+      "--wait",
+      "20",
+    ],
+    ROOT,
+  );
+  if (res.result?.status !== "Succeeded") {
+    throw new Error(
+      `permission set deploy failed: ${JSON.stringify(res.result?.details?.componentFailures)}`,
+    );
+  }
+  const assign = sfJson(
+    ["org", "permset", "assign", "--name", PERMSET, "-o", org],
+    ROOT,
+  );
+  const assignFailures = (assign.result?.failures ?? []).filter(
+    (f: { message?: string }) => !/uplicate/.test(f.message ?? ""),
+  );
+  if (assignFailures.length > 0) {
+    throw new Error(
+      `permission set assignment failed: ${JSON.stringify(assignFailures)}`,
+    );
+  }
+}
+
 // ---- data ----
 
 if (!skipData) {
-  console.log("loading probe records…");
-  const run = sfJson(["apex", "run", "--file", "data.apex", "-o", org], ROOT);
-  if (!run.result?.success) {
-    throw new Error(
-      `data.apex failed: ${run.result?.exceptionMessage ?? JSON.stringify(run.result)}`,
-    );
+  const scripts = readdirSync(ROOT)
+    .filter((f) => /^data-\d+\.apex$/.test(f))
+    .sort();
+  if (scripts.length === 0) {
+    throw new Error("no data-*.apex scripts found; run pnpm generate first");
+  }
+  for (const script of scripts) {
+    console.log(`loading probe records… (${script})`);
+    const run = sfJson(["apex", "run", "--file", script, "-o", org], ROOT);
+    if (!run.result?.success) {
+      const why =
+        run.result?.compileProblem ||
+        run.result?.exceptionMessage ||
+        run.message ||
+        JSON.stringify(run);
+      throw new Error(`${script} failed: ${why}`);
+    }
   }
 }
 

@@ -9,7 +9,7 @@ import { returnToDataType, type ProbeReturn } from "./shared.ts";
 
 const ROOT = join(dirname(new URL(import.meta.url).pathname), "..");
 
-const resultsPath = process.argv[2];
+const resultsPath = process.argv.slice(2).find((a) => a !== "--");
 if (!resultsPath) {
   console.error("usage: pnpm emit -- results/org-run-<date>.json");
   process.exit(1);
