@@ -8,6 +8,9 @@
     "generate": "node --experimental-strip-types src/generate.ts",
     "collect": "node --experimental-strip-types src/collect.ts",
     "emit": "node --experimental-strip-types src/emit.ts",
+    "generate-ctx": "node --experimental-strip-types src/generate-ctx.ts",
+    "collect-ctx": "node --experimental-strip-types src/collect-ctx.ts",
+    "emit-ctx": "node --experimental-strip-types src/emit-ctx.ts",
     "sf": "sf"
   },
   "devDependencies": {

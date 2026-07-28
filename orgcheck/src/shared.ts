@@ -44,6 +44,10 @@ export interface Probe {
   /** True: save rejection is the expected outcome. "maybe": rejection is one
    * of the possible verdicts (e.g. contested operators). */
   readonly expectSaveError?: boolean | "maybe";
+  /** True: the observed value is env-specific (session ids, org ids) — the
+   * save/evaluate outcome is the verdict, but the value must not be emitted
+   * into the committed corpus. */
+  readonly envSpecific?: boolean;
   readonly fields?: Readonly<Record<string, FieldSpec>>;
   /** Map from observed result → what that result means. */
   readonly interpret?: Readonly<Record<string, string>>;
@@ -98,6 +102,7 @@ export interface PlanFormulaField {
   /** Set on TEXT() twins: apiName of the primary field they mirror. */
   readonly twinOf?: string;
   readonly expectSaveError?: boolean | "maybe";
+  readonly envSpecific?: boolean;
   readonly interpret?: Readonly<Record<string, string>>;
   /** Org field name (lowercased) → original corpus field name. Corpus-ref
    * inputs are namespaced per test so each org field needs only one type and

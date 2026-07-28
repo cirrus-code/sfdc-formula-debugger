@@ -1,0 +1,165 @@
+{
+  "$comment": "Wave-2 manifest: per-context availability probes. The function matrix itself is derived from src/registry/functions.ts (one registry — rule 8); this file holds only what cannot be derived: invocation overrides for functions whose minimal call needs shaping, the global-variable probes, and the runtime validation-rule probes. Placeholders: {T:Type} resolves to a typed input field on containers that can reference fields, else a literal; {F:Type} requires a real field reference (probe is untestable in containers without fields).",
+
+  "invocationOverrides": {
+    "CASE": { "formula": "CASE({T:Number}, 1, \"a\", \"b\")", "returns": "Text" },
+    "ISPICKVAL": { "formula": "ISPICKVAL({F:Picklist}, \"a\")", "returns": "Boolean" },
+    "IN": { "formula": "IN({T:Text}, \"a\", \"b\")", "returns": "Boolean" },
+    "TEXT": { "formula": "TEXT({T:Number})", "returns": "Text" },
+    "TRUNC": { "formula": "TRUNC({T:Number}, 0)", "returns": "Number" },
+    "VLOOKUP": {
+      "formula": "VLOOKUP($ObjectType.FxRt__c.Fields.Gate__c, $ObjectType.FxRt__c.Fields.Name, {T:Text})",
+      "returns": "Text",
+      "taint": ["$ObjectType"],
+      "$comment": "VLOOKUP resolves only custom-object fields, and the match field must be the object's Name field — standard-object references reject with field-does-not-exist."
+    },
+    "PRIORVALUE": { "formula": "PRIORVALUE({F:Text})", "returns": "Text" },
+    "ISCHANGED": { "formula": "ISCHANGED({F:Text})", "returns": "Boolean" }
+  },
+
+  "globals": [
+    { "name": "$User", "formula": "$User.Alias", "returns": "Text" },
+    { "name": "$Profile", "formula": "$Profile.Name", "returns": "Text" },
+    { "name": "$UserRole", "formula": "$UserRole.Name", "returns": "Text" },
+    { "name": "$Organization", "formula": "$Organization.Name", "returns": "Text" },
+    {
+      "name": "$Setup",
+      "formula": "$Setup.FxSet__c.Val__c",
+      "returns": "Text",
+      "support": "FxSet__c"
+    },
+    { "name": "$Label", "formula": "$Label.FxLbl", "returns": "Text", "support": "FxLbl" },
+    {
+      "name": "$Permission",
+      "formula": "$Permission.FxPerm",
+      "returns": "Boolean",
+      "support": "FxPerm"
+    },
+    {
+      "name": "$CustomMetadata",
+      "formula": "$CustomMetadata.FxMeta__mdt.sample.Val__c",
+      "returns": "Text",
+      "support": "FxMeta__mdt"
+    },
+    { "name": "$System", "formula": "$System.OriginDateTime", "returns": "Datetime" },
+    { "name": "$Api", "formula": "$Api.Session_ID", "returns": "Text" },
+    {
+      "name": "$Flow",
+      "formula": "$Flow.CurrentDate",
+      "returns": "Date",
+      "containers": ["flow_formula"]
+    }
+  ],
+
+  "runtimeProbes": [
+    {
+      "id": "rt_canary_fired",
+      "object": "FxRt__c",
+      "gate": "rt_canary_fired",
+      "condition": "1 = 1",
+      "question": "Channel canary: a gated always-true rule must block its own record's insert with our marker message.",
+      "interpret": {
+        "FIRED": "channel sound — gated rules fire and the marker survives into the DML error",
+        "SAVED": "CHANNEL BROKEN — do not trust any runtime verdict from this run"
+      }
+    },
+    {
+      "id": "rt_case_eq",
+      "object": "FxRt__c",
+      "gate": "rt_case_eq",
+      "condition": "\"a\" = \"A\"",
+      "question": "Is text = case-sensitive in the validation-rule context (formula fields: yes, org-verified)?",
+      "interpret": {
+        "FIRED": "case-INsensitive in validation rules — differs from formula fields",
+        "SAVED": "case-sensitive, same as formula fields"
+      }
+    },
+    {
+      "id": "rt_blank_lt",
+      "object": "FxRt__c",
+      "gate": "rt_blank_lt",
+      "condition": "BlankN__c < 5",
+      "question": "Does a blank Number compare like 0 in validation rules (which blank mode does the VR context behave as)?",
+      "interpret": {
+        "FIRED": "blank Number reads as 0 (zero-mode behavior)",
+        "SAVED": "ordering vs blank is false (blank-mode behavior)"
+      }
+    },
+    {
+      "id": "rt_blank_eq_zero",
+      "object": "FxRt__c",
+      "gate": "rt_blank_eq_zero",
+      "condition": "BlankN__c = 0",
+      "question": "Is blank Number = 0 true in validation rules?",
+      "interpret": {
+        "FIRED": "blank numeric equals 0 (zero-mode behavior)",
+        "SAVED": "blank numeric = 0 is false (blank-mode behavior, matches corpus three-valued rule)"
+      }
+    },
+    {
+      "id": "rt_blank_text_eq",
+      "object": "FxRt__c",
+      "gate": "rt_blank_text_eq",
+      "condition": "BlankT__c = \"\"",
+      "question": "Does a blank Text field equal \"\" in validation rules (formula fields: true, corpus-verified)?",
+      "interpret": {
+        "FIRED": "blank text coerces to \"\" — same as formula fields",
+        "SAVED": "blank text does NOT equal \"\" here — differs from formula fields"
+      }
+    },
+    {
+      "id": "rt_isblank",
+      "object": "FxRt__c",
+      "gate": "rt_isblank",
+      "condition": "ISBLANK(BlankN__c)",
+      "question": "Sanity: ISBLANK on an empty Number fires in a validation rule.",
+      "interpret": {
+        "FIRED": "ISBLANK(blank) is true — sanity holds",
+        "SAVED": "ISBLANK(blank) false in VRs — investigate before trusting blank probes"
+      }
+    },
+    {
+      "id": "err_divzero",
+      "object": "FxErr1__c",
+      "condition": "(1 / 0) = 1",
+      "question": "How does a runtime #Error! surface in a validation rule: blocked save with a system error, silently false, or rule fired?",
+      "interpret": {
+        "ERR": "runtime error surfaces as its own DML failure (capture the message text)",
+        "SAVED": "the error is swallowed and the rule is treated as false/skipped",
+        "FIRED": "div-by-zero compares equal?! — investigate"
+      }
+    },
+    {
+      "id": "err_iferror_divzero",
+      "object": "FxErr2__c",
+      "condition": "IFERROR((1 / 0) = 1, TRUE)",
+      "question": "Does IFERROR catch a div-by-zero inside a validation rule (it is unavailable in formula fields — org-verified)?",
+      "interpret": {
+        "FIRED": "IFERROR catches the error and returns the fallback TRUE — rule fires",
+        "SAVED": "IFERROR did not catch (or evaluated false)",
+        "ERR": "error propagates through IFERROR — it does not catch div-by-zero here"
+      }
+    },
+    {
+      "id": "err_shortcircuit_and",
+      "object": "FxErr3__c",
+      "condition": "AND(FALSE, (1 / 0) = 1)",
+      "question": "Does AND short-circuit past a runtime error in its second operand? (Only meaningful if err_divzero shows errors surface.)",
+      "interpret": {
+        "SAVED": "AND(FALSE, …) never evaluates the erroring operand (short-circuit) — or errors read as false; disambiguate via err_divzero",
+        "ERR": "AND evaluates operands eagerly — the error escapes even under a FALSE guard"
+      }
+    },
+    {
+      "id": "err_shortcircuit_or",
+      "object": "FxErr4__c",
+      "condition": "OR(TRUE, (1 / 0) = 1)",
+      "question": "Does OR short-circuit past a runtime error once TRUE is decided?",
+      "interpret": {
+        "FIRED": "OR(TRUE, …) fires without evaluating the erroring operand (short-circuit)",
+        "ERR": "OR evaluates operands eagerly — the error escapes despite the TRUE",
+        "SAVED": "OR(TRUE, …) neither fired nor errored?! — investigate"
+      }
+    }
+  ]
+}

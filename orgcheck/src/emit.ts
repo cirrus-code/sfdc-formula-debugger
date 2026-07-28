@@ -70,6 +70,11 @@ for (const p of results.probes) {
   if (!p.deployed) {
     continue;
   }
+  // Env-specific observations (session ids…) prove save/evaluate outcomes but
+  // must never land in the committed corpus.
+  if (p.envSpecific) {
+    continue;
+  }
   for (const [i, row] of (p.rows as ResultRow[]).entries()) {
     const expected = expectedFor(p.returns, row);
     corpusRows.push({

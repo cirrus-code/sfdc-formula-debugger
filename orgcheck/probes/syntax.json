@@ -127,6 +127,31 @@
         "3": "comments do NOT nest (first */ closes)",
         "SAVE_ERROR": "comments nest (outer unterminated) — or */ sequencing rejected outright; read the message"
       }
+    },
+    {
+      "id": "amp_vs_rel",
+      "question": "VERIFICATION: does & bind tighter than relational ops? Text-only probes can't discriminate (both + and & concat), so use the compile error's *type report*: ('x' & 1) > 0 errors with & receiving Number; 'x' & (1 > 0) errors with & receiving Boolean.",
+      "formula": "\"x\" & 1 > 0",
+      "returns": "Checkbox",
+      "expectSaveError": "maybe",
+      "note": "If it saves instead of erroring, & coerces numbers — the read-back value then discriminates grouping."
+    },
+    {
+      "id": "amp_vs_eq",
+      "question": "VERIFICATION: & vs equality precedence via the compile error's type report — & receiving Number ⇒ & grouped first; & receiving Boolean ⇒ = grouped first.",
+      "formula": "\"x\" & 1 = 1",
+      "returns": "Checkbox",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "amp_additive_typed",
+      "question": "VERIFICATION (wave-1 leftover): type-based & probe — the blank-absorbing text probe was inconclusive. Error mentioning & with Number ⇒ (1+2) grouped first (& at-or-below additive); a clean save documents whether & coerces numeric operands.",
+      "formula": "1 + 2 & \"x\"",
+      "returns": "Text",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "3x": "& coerces numbers and (1+2) groups first — & at-or-below the additive level, matching the grammar"
+      }
     }
   ]
 }

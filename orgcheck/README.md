@@ -89,12 +89,55 @@ rows.
   the "div-by-zero surfacing" open question; the `divzero_*` / `iferror_*`
   probes plus UI observation settle it (check the record page for `#Error!` by
   hand for those probes).
+- **Create vs update validation asymmetry** (wave-2 discovery): flows and
+  weblinks accept formula content lazily when the component is *created* but
+  validate fully on *update*. A first deploy of a fresh org can therefore
+  produce false acceptances for those types — always confirm through a second
+  (upsert) deploy before trusting them. Active flows also require `<scale>`
+  on Number/Currency variables at update time.
 
-## Wave 2 — not built yet
+## Wave 2 — per-context availability (`*-ctx` scripts)
 
-The per-context availability matrix (validation rules, workflow, approval,
-default values, every Tier 2 context) needs ValidationRule/WorkflowRule
-metadata probes and DML-triggered error observation. Same manifest pattern
-(`probes/contexts.json`, save-acceptance = verdict), separate generator
-support. Also pending: ISPICKVAL/picklist coercion probes, DST probes under a
-non-GMT org TZ, and compiled-size limit exploration.
+Wave 2 asks a different question than wave 1: not "what does this formula
+evaluate to" but "does this **context's** compiler accept this construct at
+all". Each probe is one metadata component per (construct × context) — a
+validation rule, workflow rule/field update, custom-field default value,
+Draft flow, global quick action, weblink, email template, or approval
+process — and the per-component deploy accept/reject, with its message, is
+the verdict:
+
+```
+src/registry/functions.ts (the one registry, 66 fns) + probes/contexts.json
+        ──generate-ctx──▶ ctx-plan.json (metadata fragments + batches) + data-ctx.apex
+        ──collect-ctx──▶ canary-gated staged deploys + DML runtime probes
+                          → results/ctx-run-<date>.json
+        ──emit-ctx─────▶ corpus/org-availability.json + registry drift report
+```
+
+- **Canary gating.** Per container: an ok-canary (must deploy) and a
+  bogus-function canary (must be *rejected* — proves the container actually
+  compiles formulas). A container that swallows `FXBOGUSFN123(1)` validates
+  nothing; its acceptances are meaningless and the whole container is
+  reported unverifiable rather than encoded (rule 1 applied to the harness).
+- **Rejection taxonomy.** `Unknown function X` / `may not be used in this
+  type of formula` ⇒ unavailable. `Incorrect parameter type/number of
+  parameters` ⇒ **available** (the compiler resolved the function; the probe
+  was ill-shaped — fix the invocation override). Anything else is conclusive
+  only for taint-free probes.
+- **Taint tracking.** Field-capable containers pass typed input fields as
+  arguments (no helper functions); detached containers (default value, flow,
+  quick action, email) use literals, and helpers like a `DATE(2026, 1, 1)`
+  constructor are recorded as taint so a rejection is never silently
+  misattributed.
+- **Runtime probes.** Gated active validation rules + `Database.insert`
+  (allOrNone=false) + the debug channel settle div-by-zero surfacing,
+  IFERROR catching, AND/OR short-circuit, case sensitivity, and blank
+  semantics inside validation rules. Error-capable probes get their own
+  single-record objects (`FxErr*`) so an eagerly-evaluated error cannot
+  poison neighboring probes.
+- `--only <batchPrefix>` reruns a single container; `--compose-only
+  <batchId>` writes the package without deploying (XML inspection).
+
+Still pending after wave 2: ISPICKVAL/picklist coercion value probes, DST
+probes under a non-GMT org TZ, compiled-size limit exploration, and runtime
+observation for non-VR contexts (flow interviews, field-update execution).
