@@ -87,6 +87,25 @@ function isTextType(v: SfValue): boolean {
   );
 }
 
+function htmlEncode(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function jsEncode(s: string, doubleQuotes: boolean): string {
+  const base = s.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+  return doubleQuotes ? base.replace(/"/g, '\\"') : base;
+}
+
+/** Picklist value equality: case-insensitive, otherwise exact. */
+function picklistEquals(a: string, b: string): boolean {
+  return a.toUpperCase() === b.toUpperCase();
+}
+
 function isBlankText(v: SfValue): boolean {
   return v.blank || (isTextType(v) && asText(v) === "");
 }
@@ -207,7 +226,24 @@ export const BUILTINS: Record<string, Builtin> = {
   // value, even a blank one. ISBLANK is the blank check for text.
   ISNULL: ([a]) => bool(a!.blank && a!.type !== "Text"),
   ISNUMBER: ([a]) => bool(!a!.blank && isParsableNumber(dstr(a!))),
-  ISPICKVAL: ([p, v]) => bool(dstr(p!) === dstr(v!)),
+  // Case-INsensitive, unlike text = (org-verified, semantics:ispickval_case:
+  // ISPICKVAL(pick holding "a", "A") is true); the literal must otherwise
+  // match exactly — trailing whitespace is not trimmed (ispickval_space).
+  ISPICKVAL: ([p, v]) => bool(picklistEquals(dstr(p!), dstr(v!))),
+  // Multi-select membership, same case-insensitive equality per selected
+  // value; a semicolon-joined literal matches nothing (org-verified,
+  // semantics:includes_*). Blank field → false, not null.
+  INCLUDES: ([m, v]) =>
+    bool(
+      !m!.blank &&
+        dstr(m!)
+          .split(";")
+          .some((sel) => picklistEquals(sel, dstr(v!))),
+    ),
+  // Blank multi-select counts 0, not null (org-verified,
+  // semantics:picklistcount_blank, both modes).
+  PICKLISTCOUNT: ([m]) =>
+    num(m!.blank || dstr(m!) === "" ? 0 : dstr(m!).split(";").length),
   NULLVALUE: ([expr, sub]) =>
     expr!.blank && expr!.type !== "Text" ? sub! : expr!,
   BLANKVALUE: ([expr, sub]) => (isBlankText(expr!) ? sub! : expr!),
@@ -224,6 +260,70 @@ export const BUILTINS: Record<string, Builtin> = {
     return textOrBlank(dstr(a!).slice(from, from + Math.max(0, toInt(len!))));
   },
   TRIM: ([a]) => text(dstr(a!).trim()),
+  // Renders as a literal <br> tag in formula-field output (org-verified,
+  // semantics:br_render: "a" & BR() & "b" reads back "a<br>b"); flow
+  // interviews render it as a newline instead — see the registry lint note.
+  BR: () => text("<br>"),
+  // Corpus-verified overloads (testFormatDuration*): seconds [, includeDays],
+  // or the absolute difference of a Time pair (HH:MM:SS) or Datetime pair
+  // (always D:HH:MM:SS). Fractions truncate (.99 → 0s); hours accumulate past
+  // 24 unless days are split out; a blank includeDays checkbox reads false
+  // while a blank operand nulls. Negative seconds are unverified — refuse.
+  FORMATDURATION: ([a, b]) => {
+    const hms = (t: number, hoursPad: number) =>
+      `${String(Math.floor(t / 3600)).padStart(hoursPad, "0")}:${String(Math.floor(t / 60) % 60).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
+    const dhms = (t: number) =>
+      `${Math.floor(t / 86_400)}:${String(Math.floor(t / 3600) % 24).padStart(2, "0")}:${String(Math.floor(t / 60) % 60).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
+    if (a!.type === "Time" && b !== undefined && b.type === "Time") {
+      if (a!.blank || b.blank) {
+        return blank("Text");
+      }
+      return text(
+        hms(Math.floor(Math.abs(a!.data.millisOfDay - b.data.millisOfDay) / 1000), 2),
+      );
+    }
+    if (a!.type === "Datetime" && b !== undefined && b.type === "Datetime") {
+      if (a!.blank || b.blank) {
+        return blank("Text");
+      }
+      return text(
+        dhms(Math.floor(Math.abs(a!.data.epochMillis - b.data.epochMillis) / 1000)),
+      );
+    }
+    if (a!.blank) {
+      return blank("Text");
+    }
+    const secs = dnum(a!).truncated().toNumber();
+    if (secs < 0) {
+      return error("#Error! (FORMATDURATION: negative seconds unverified)");
+    }
+    return text(b !== undefined && boolCoerce(b) ? dhms(secs) : hms(secs, 2));
+  },
+  // Entity set org-verified via the flow interview channel (fv_htmlencode):
+  // < > & " become named entities, apostrophe becomes &#39;.
+  HTMLENCODE: ([a]) => text(htmlEncode(dstr(a!))),
+  // Backslash-escapes both quote kinds (fv_jsencode: a"b → a\"b, d'e → d\'e).
+  // A literal backslash in the input is unprobeable org-side (flow formulas
+  // reject backslash strings), so it follows the Java convention and escapes.
+  JSENCODE: ([a]) => text(jsEncode(dstr(a!), true)),
+  // NOT a plain JSENCODE∘HTMLENCODE: the org escapes only the apostrophe (and
+  // by convention the backslash) before HTML-encoding — a double quote comes
+  // out as a bare &quot; while an apostrophe comes out as \&#39;
+  // (fv_jsinhtmlencode: a"b<e> → a&quot;b&lt;e&gt;, d'e → d\&#39;e).
+  JSINHTMLENCODE: ([a]) => text(htmlEncode(jsEncode(dstr(a!), false))),
+  // Java-URLEncoder parity: space becomes +, everything outside
+  // [A-Za-z0-9.*_-] percent-encodes as UTF-8 (org-verified on space & / ? = +
+  // via the fv_urlencode flow probe, which matches this rule exactly).
+  URLENCODE: ([a]) =>
+    text(
+      dstr(a!).replace(/[^A-Za-z0-9.*_-]/gu, (ch) =>
+        ch === " "
+          ? "+"
+          : [...new TextEncoder().encode(ch)]
+              .map((b) => `%${b.toString(16).toUpperCase().padStart(2, "0")}`)
+              .join(""),
+      ),
+    ),
   UPPER: ([a, loc]) => caseWithLocale(a!, loc, true),
   LOWER: ([a, loc]) => caseWithLocale(a!, loc, false),
   CONTAINS: ([a, b]) => bool(dstr(a!).includes(dstr(b!))),
@@ -463,10 +563,11 @@ export const SPECIAL_FORMS: Record<string, SpecialForm> = {
     if (v.blank) {
       return text("");
     }
-    // Number/Currency get the product renderer on the pre-materialization
-    // value. Percent keeps the legacy path — its TEXT scale interaction with
-    // the ×100 result convention is still quarantined (VERIFICATION.md).
-    if (v.type === "Number" || v.type === "Currency") {
+    // Numeric types get the product renderer on the pre-materialization
+    // value. A Percent renders its internal ÷100 value — TEXT(99% field) is
+    // ".99", org-verified (semantics:text_percent_field), not the ×100
+    // display convention.
+    if (v.type === "Number" || v.type === "Currency" || v.type === "Percent") {
       return text(renderProductNumber(v.data, args[0]!.kind === "NumberLit"));
     }
     if (v.type === "Time") {

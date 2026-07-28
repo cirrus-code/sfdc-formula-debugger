@@ -383,3 +383,31 @@ describe("engine: simulation boundary (refuse, never guess)", () => {
     }
   });
 });
+
+describe("engine: encode family (org-verified via flow interviews, fv_* probes)", () => {
+  const textOf = (r: ReturnType<typeof ev>) => {
+    if (isError(r) || r.blank) {
+      throw new Error("expected a text value");
+    }
+    return asText(r);
+  };
+
+  it("HTMLENCODE emits the org's entity set (fv_htmlencode)", () => {
+    expect(textOf(ev(`HTMLENCODE('<a> & "b"')`))).toBe("&lt;a&gt; &amp; &quot;b&quot;");
+    expect(textOf(ev(`HTMLENCODE("it's")`))).toBe("it&#39;s");
+  });
+
+  it("JSENCODE backslash-escapes both quote kinds (fv_jsencode)", () => {
+    expect(textOf(ev(`JSENCODE('a"b')`))).toBe('a\\"b');
+    expect(textOf(ev(`JSENCODE("d'e")`))).toBe("d\\'e");
+  });
+
+  it("JSINHTMLENCODE escapes only the apostrophe before HTML-encoding (fv_jsinhtmlencode)", () => {
+    expect(textOf(ev(`JSINHTMLENCODE('a"b<e>')`))).toBe("a&quot;b&lt;e&gt;");
+    expect(textOf(ev(`JSINHTMLENCODE("d'e")`))).toBe("d\\&#39;e");
+  });
+
+  it("URLENCODE matches Java URLEncoder on the probed characters (fv_urlencode)", () => {
+    expect(textOf(ev(`URLENCODE("a b&c/d?e=f+g")`))).toBe("a+b%26c%2Fd%3Fe%3Df%2Bg");
+  });
+});

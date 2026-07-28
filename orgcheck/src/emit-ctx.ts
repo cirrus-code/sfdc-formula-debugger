@@ -204,3 +204,10 @@ if (results.runtime.length > 0) {
     );
   }
 }
+
+if ((results.flowValues ?? []).length > 0) {
+  console.log("\n--- flow value probes ---");
+  for (const fv of results.flowValues) {
+    console.log(`${fv.id}: ${fv.outcome} — ${(fv.value ?? "").slice(0, 200)}`);
+  }
+}

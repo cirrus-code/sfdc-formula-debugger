@@ -23,6 +23,7 @@ export type FieldType =
   | "Boolean"
   | "Time"
   | "Picklist"
+  | "Multipicklist"
   | "Currency"
   | "Percent";
 

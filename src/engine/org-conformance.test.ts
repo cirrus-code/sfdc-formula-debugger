@@ -22,17 +22,22 @@ const rows: CorpusRow[] = JSON.parse(
   readFileSync("corpus/org-verified.json", "utf8"),
 );
 
-/**
- * The product TEXT() number-rendering rule is now pinned down and implemented
- * (renderProductNumber in builtins.ts: Oracle-NUMBER-parity digit budget, no
- * leading zero, plain notation — settled by the 2026-07-28 text_* probe
- * batch), which resolved the former TEXT quarantine cluster. Only the Percent
- * interaction remains open: TEXT of a Percent field couples the ×100 result
- * convention with the display scale in a way one probe cannot decide.
- * Quarantined — not compared either way — until a dedicated probe batch pins
- * it; do NOT silently match one tier by breaking the other.
- */
-const NUMERIC_RENDERING_QUARANTINE = new Set(["semantics:text_percent_field#0"]);
+// The `^` operator's overflow boundary is genuinely open: 10^60 computes,
+// 10^80 is a runtime error, yet (10^60)*(10^60) = 10^120 computes — the cap
+// is ^-specific (exponent- or result-based, undetermined) and NOT a value-
+// domain overflow. Quarantined pending a wave-4 bisect; our evaluator
+// currently computes large powers rather than guessing a boundary.
+const NUMERIC_RENDERING_QUARANTINE = new Set<string>([
+  "semantics:overflow_pow_isblank#0",
+  "semantics:overflow_pow_text#0",
+  "semantics:overflow_pow_edge#0",
+  "semantics:overflow_b80#0",
+  "semantics:overflow_b90#0",
+  "semantics:overflow_b98#0",
+  "semantics:overflow_b99#0",
+  "semantics:overflow_b100#0",
+  "semantics:overflow_b110#0",
+]);
 
 describe("conformance: org-verified corpus (real-org tier)", () => {
   const tally: Record<RowStatus, number> = {

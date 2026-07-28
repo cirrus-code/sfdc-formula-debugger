@@ -64,6 +64,45 @@
     }
   ],
 
+  "flowValueProbes": [
+    {
+      "id": "fv_htmlencode",
+      "formula": "HTMLENCODE('<a> & \"b\"') & '|' & HTMLENCODE(\"it's\")",
+      "returns": "Text",
+      "question": "Wave-3: HTMLENCODE's exact entity set — angle brackets, ampersand, both quote kinds (flows are its only runtime-observable home)."
+    },
+    {
+      "id": "fv_jsencode",
+      "formula": "JSENCODE('a\"b') & '|' & JSENCODE(\"d'e\")",
+      "returns": "Text",
+      "question": "Wave-3: JSENCODE's exact escapes (double quote, apostrophe; a literal backslash is a flow-formula syntax error, so it cannot be probed here)."
+    },
+    {
+      "id": "fv_jsinhtmlencode",
+      "formula": "JSINHTMLENCODE('a\"b<e>') & '|' & JSINHTMLENCODE(\"d'e\")",
+      "returns": "Text",
+      "question": "Wave-3: JSINHTMLENCODE composition order and entity set."
+    },
+    {
+      "id": "fv_urlencode",
+      "formula": "URLENCODE('a b&c/d?e=f+g')",
+      "returns": "Text",
+      "question": "Wave-3: URLENCODE — space as %20 or +, and which reserved characters escape."
+    },
+    {
+      "id": "fv_divzero",
+      "formula": "1 / 0",
+      "returns": "Number",
+      "question": "Wave-3: div-by-zero surfacing in a running flow — interview error or null?"
+    },
+    {
+      "id": "fv_br",
+      "formula": "'a' & BR() & 'b'",
+      "returns": "Text",
+      "question": "Wave-3: BR() rendering seen from a flow interview (cross-check the formula-field probe)."
+    }
+  ],
+
   "runtimeProbes": [
     {
       "id": "rt_canary_fired",

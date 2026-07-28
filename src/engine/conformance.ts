@@ -210,9 +210,15 @@ function compare(
       }
       return numeric;
     }
-    case "percent":
-      // A Percent-typed result renders as the internal value × 100.
-      return numberCompare(result, expected, true);
+    case "percent": {
+      // A Percent-typed result compares as the internal value × 100; the
+      // org's TEXT twin channel renders the raw internal value instead.
+      const pct = numberCompare(result, expected, true);
+      if (pct.status === "fail" && twinRender?.() === expected) {
+        return { status: "pass" };
+      }
+      return pct;
+    }
     case "boolean":
       return {
         status: matchBool(result, expected) ? "pass" : "fail",

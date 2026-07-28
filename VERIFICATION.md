@@ -316,6 +316,53 @@ context (email templates are their only plausible, unverifiable home);
 rejected only by quick actions; **`DISTANCE`/`GEOLOCATION`** everywhere
 except buttons.
 
+## Wave-3 value pass (2026-07-28) — refuse-list graduations
+
+Value probes (formula-field readback plus a new **flow interview channel**:
+`Flow.Interview.createInterview` over the deployed Active flows, payloads
+base64'd past the debug log's entity encoding) pinned the semantics of eight
+formerly-refusing functions, now simulated with golden coverage:
+
+- ✅ **`INCLUDES` and `ISPICKVAL` are case-INsensitive** — unlike text `=`
+  (probes `ispickval_case`, `includes_case`); literals must otherwise match
+  exactly (no whitespace trimming, `ispickval_space`); a semicolon-joined
+  literal matches nothing (`includes_joined`); blank multi-selects read false
+  / count 0 in both modes (`includes_blank`, `picklistcount_blank`).
+- ✅ **`FORMATDURATION`** — three corpus-verified overloads: seconds
+  (fractions truncate, hours accumulate: 1000000 → `277:46:40`), seconds +
+  include-days (`11:13:46:40`), and symmetric absolute differences of a Time
+  pair (`HH:MM:SS`) or Datetime pair (always `D:HH:MM:SS`). A blank
+  include-days checkbox reads false while blank operands null
+  (testFormatDuration* clusters). Negative seconds stay a loud refusal.
+- ✅ **`BR()` is context-dependent**: a literal `<br>` tag in formula-field
+  output (`br_render` = `"a<br>b"`) but a real newline in flow interviews
+  (`fv_br`) — simulated as the formula-field rendering, with a lint note.
+- ✅ **Encode family** (via the flow channel, their only observable home):
+  `HTMLENCODE` maps `< > & "` to named entities and `'` to `&#39;`;
+  `JSENCODE` backslash-escapes both quote kinds; `JSINHTMLENCODE` is NOT a
+  plain composition — it JS-escapes only the apostrophe before HTML-encoding
+  (`a"b<e>` → `a&quot;b&lt;e&gt;` but `d'e` → `d\&#39;e`); `URLENCODE`
+  matches Java URLEncoder (space → `+`, `%XX` otherwise) on every probed
+  character.
+- ✅ **Formula fields short-circuit like validation rules**: `AND(FALSE, …)`,
+  `OR(TRUE, …)`, and the undocumented `&&` all skip an erroring operand
+  (`ff_shortcircuit_*`).
+- ✅ **`TEXT(percent)` renders the internal ÷100 value** through the product
+  renderer (99% field → `".99"`, `× 2` → `"1.98"`) — the last TEXT
+  quarantine is resolved.
+- ⛔ **`CASESAFEID` stays refusing**: the 18-char suffix algorithm is
+  confirmed for a real prefix (`001…` → `…AAA`) but the function *validates*
+  its input against the org's key-prefix registry (a 15-char non-ID passes
+  through unchanged, `casesafeid_mixed`) — org state a client cannot know.
+- 🔬 **`^` has an overflow cap that is NOT value overflow**: `10^60`
+  computes, `10^80` is a runtime error, yet `(10^60)*(10^60)` = 10^120
+  computes fine. The boundary and its basis (exponent vs result magnitude)
+  need a wave-4 bisect; the affected rows are quarantined.
+- Flow-context runtime facts: **div-by-zero yields null in a running flow**
+  (vs `#Error!` in formula fields and a blocked save in validation rules),
+  and **flow formulas reject string literals containing backslashes** at
+  deploy (a syntax error there, legal text in formula fields).
+
 ## Function port (unsupported → simulated)
 
 Ported and corpus-verified (golden tests in `evaluator.test.ts`):
@@ -414,16 +461,21 @@ verification before a fix:
   contexts are Tier 1 now). `email_template` is structurally unverifiable at
   deploy (no compile check) and stays Tier 2 best-effort.
 
-## Open follow-ups (wave 3 candidates)
+## Open follow-ups (wave 4 candidates)
 
-- Formula-field runtime probes for `AND`/`OR` short-circuit past `#Error!`
-  (verified for validation rules; FF assumed matching — our evaluator
-  short-circuits — but not yet org-pinned).
-- Percent-field `TEXT()` rendering (the one quarantined org row).
-- Overflow surfacing per context; compiled-size limits; DST probes under a
-  non-GMT org TZ; ISPICKVAL/picklist coercion value probes.
-- Runtime observation channels for non-VR contexts (flow interviews,
-  workflow field-update execution).
+Wave 3 (2026-07-28) closed: FF short-circuit ✅, Percent TEXT ✅,
+ISPICKVAL/INCLUDES coercion ✅, flow-interview runtime channel ✅ (built —
+`flowValueProbes` in `orgcheck/probes/contexts.json`), and the refuse-list
+graduations above. Still open:
+
+- **`^` overflow bisect** — pin the boundary in (60, 80] for `10^N` and
+  whether it is exponent- or magnitude-based (a non-10 base discriminates);
+  also the value domain's own ceiling (≥ 1e120 works via `*`).
+- `CASESAFEID` — refusal is likely permanent (org-state prefix validation),
+  but a UI-side note could explain the suffix algorithm.
+- Compiled-size limits; DST probes under a non-GMT org TZ.
+- Runtime observation for workflow field-update execution (the last context
+  with no value channel).
 - ~~Registry function coverage~~ — closed 2026-07-28: audited against the
   official reference (101 functions registered; 35 added, of which 16
   corpus-backed and simulated — see the function-port-2 section). Remaining

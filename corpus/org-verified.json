@@ -9963,6 +9963,369 @@
  },
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_percent_math#0",
+  "formula": "TEXT(custompercent__c * 2)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "custompercent__c",
+    "type": "Percent",
+    "value": "99"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "1.98"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:ff_shortcircuit_and#0",
+  "formula": "IF(AND(FALSE, (1 / 0) = 1), 1, 2)",
+  "dataType": "Double",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "2"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:ff_shortcircuit_or#0",
+  "formula": "IF(OR(TRUE, (1 / 0) = 1), 1, 2)",
+  "dataType": "Double",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "1"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:ff_shortcircuit_ampamp#0",
+  "formula": "IF(FALSE && (1 / 0) = 1, 1, 2)",
+  "dataType": "Double",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "2"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_pow_isblank#0",
+  "formula": "IF(ISBLANK(10 ^ 300), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_pow_text#0",
+  "formula": "TEXT(10 ^ 300)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_pow_edge#0",
+  "formula": "TEXT(10 ^ 125)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_b40#0",
+  "formula": "TEXT(10 ^ 40)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "10000000000000000000000000000000000000000"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_b60#0",
+  "formula": "TEXT(10 ^ 60)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "1000000000000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_b80#0",
+  "formula": "TEXT(10 ^ 80)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_b90#0",
+  "formula": "TEXT(10 ^ 90)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_b98#0",
+  "formula": "TEXT(10 ^ 98)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_b99#0",
+  "formula": "TEXT(10 ^ 99)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_b100#0",
+  "formula": "TEXT(10 ^ 100)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_b110#0",
+  "formula": "TEXT(10 ^ 110)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:overflow_mult#0",
+  "formula": "TEXT((10 ^ 60) * (10 ^ 60))",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:ispickval_case#0",
+  "formula": "IF(ISPICKVAL(custompick__c, \"A\"), 1, 2)",
+  "dataType": "Double",
+  "fields": [
+   {
+    "name": "custompick__c",
+    "type": "Text",
+    "value": "a"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "1"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:ispickval_space#0",
+  "formula": "IF(ISPICKVAL(custompick__c, \"a \"), 1, 2)",
+  "dataType": "Double",
+  "fields": [
+   {
+    "name": "custompick__c",
+    "type": "Text",
+    "value": "a"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "2"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:br_render#0",
+  "formula": "\"a\" & BR() & \"b\"",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "a<br>b"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:casesafeid_std#0",
+  "formula": "CASESAFEID(\"001000000000001\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "001000000000001AAA"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:casesafeid_mixed#0",
+  "formula": "CASESAFEID(\"a0B1c2D3e4F5g6h\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "a0B1c2D3e4F5g6h"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:casesafeid_short#0",
+  "formula": "CASESAFEID(\"abc\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "abc"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:formatduration_hms#0",
+  "formula": "FORMATDURATION(3661)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "01:01:01"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:formatduration_day#0",
+  "formula": "FORMATDURATION(90061)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "25:01:01"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:formatduration_days_arg#0",
+  "formula": "FORMATDURATION(90061, TRUE)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "1:01:01:01"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:includes_basic#0",
+  "formula": "IF(INCLUDES(custommulti__c, \"a\"), 1, 2)",
+  "dataType": "Double",
+  "fields": [
+   {
+    "name": "custommulti__c",
+    "type": "Multipicklist",
+    "value": "a;b"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "1"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:includes_case#0",
+  "formula": "IF(INCLUDES(custommulti__c, \"A\"), 1, 2)",
+  "dataType": "Double",
+  "fields": [
+   {
+    "name": "custommulti__c",
+    "type": "Multipicklist",
+    "value": "a;b"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "1"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:includes_joined#0",
+  "formula": "IF(INCLUDES(custommulti__c, \"a;b\"), 1, 2)",
+  "dataType": "Double",
+  "fields": [
+   {
+    "name": "custommulti__c",
+    "type": "Multipicklist",
+    "value": "a;b"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "2"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:includes_blank#0",
+  "formula": "IF(INCLUDES(custommulti__c, \"a\"), 1, 2)",
+  "dataType": "Double",
+  "fields": [
+   {
+    "name": "custommulti__c",
+    "type": "Multipicklist",
+    "value": null
+   }
+  ],
+  "blankMode": "zero",
+  "expected": "2"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:includes_blank#0",
+  "formula": "IF(INCLUDES(custommulti__c, \"a\"), 1, 2)",
+  "dataType": "Double",
+  "fields": [
+   {
+    "name": "custommulti__c",
+    "type": "Multipicklist",
+    "value": null
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "2"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:picklistcount_two#0",
+  "formula": "PICKLISTCOUNT(custommulti__c)",
+  "dataType": "Double",
+  "fields": [
+   {
+    "name": "custommulti__c",
+    "type": "Multipicklist",
+    "value": "a;b"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "2"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:picklistcount_blank#0",
+  "formula": "PICKLISTCOUNT(custommulti__c)",
+  "dataType": "Double",
+  "fields": [
+   {
+    "name": "custommulti__c",
+    "type": "Multipicklist",
+    "value": null
+   }
+  ],
+  "blankMode": "zero",
+  "expected": "0"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:picklistcount_blank#0",
+  "formula": "PICKLISTCOUNT(custommulti__c)",
+  "dataType": "Double",
+  "fields": [
+   {
+    "name": "custommulti__c",
+    "type": "Multipicklist",
+    "value": null
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "0"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:text_small_thirds#0",
   "formula": "TEXT(2 / 30000)",
   "dataType": "Text",

@@ -17,6 +17,7 @@ import { childSortKey } from "./shared-ctx.ts";
 import type {
   CtxComponent,
   CtxContainerStatus,
+  CtxFlowValueResult,
   CtxPlan,
   CtxProbeResult,
   CtxResults,
@@ -442,6 +443,55 @@ if (!skipRuntime && (!only || only === "runtime")) {
   }
 }
 
+// ---- flow value probes: run the interviews, read the output variables ----
+
+const flowValues: CtxFlowValueResult[] = [];
+
+if (!skipRuntime && (!only || only === "flow_values")) {
+  const anyFlowLive = plan.flowValueProbes.some((fv) =>
+    probeResults.some(
+      (r) => r.id === `flowvalue:${fv.id}` && r.outcome === "accepted",
+    ),
+  );
+  if (plan.flowValueProbes.length > 0 && anyFlowLive) {
+    console.log("flow values: running interviews…");
+    const run = sfJson(["apex", "run", "--file", "flows-run.apex", "-o", org]);
+    if (!run.result?.success) {
+      console.warn(
+        `flows-run.apex failed: ${run.result?.compileProblem || run.result?.exceptionMessage || "unknown"}`,
+      );
+    }
+    const raw: string = run.result?.logs ?? "";
+    writeFileSync(join(ROOT, "results", "ctx-flow-log.txt"), raw);
+    const logs = raw
+      .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&");
+    const seen = new Map<string, { outcome: "VALUE" | "ERROR"; value: string }>();
+    for (const m of logs.matchAll(/CTXRESULT\|([^|]+)\|(FLOWVAL64|FLOWERR)\|([^\n]*)/g)) {
+      const [, id, kind, payload] = m;
+      seen.set(id, {
+        outcome: kind === "FLOWVAL64" ? "VALUE" : "ERROR",
+        value:
+          kind === "FLOWVAL64"
+            ? Buffer.from(payload.trim(), "base64").toString("utf8")
+            : payload.trim(),
+      });
+    }
+    for (const fv of plan.flowValueProbes) {
+      const r = seen.get(fv.id);
+      flowValues.push({
+        id: fv.id,
+        outcome: r?.outcome ?? "NOT_RUN",
+        value: r?.value,
+      });
+    }
+  }
+}
+
 // ---- org identity + write ----
 
 const display = sfJson(["org", "display", "-o", org]).result ?? {};
@@ -469,6 +519,7 @@ const results: CtxResults = {
   probes: probeResults,
   untestable: plan.untestable,
   runtime,
+  flowValues,
 };
 const stamp = results.collectedAt.slice(0, 10);
 // A partial (--only) run must never clobber a full run's results.
@@ -491,4 +542,7 @@ for (const rt of plan.runtimeProbes) {
   console.log(
     `\n${rt.id}: ${r.outcome}${r.message ? ` — ${r.message.slice(0, 140)}` : ""}\n  ⇒ ${meaning}`,
   );
+}
+for (const fv of flowValues) {
+  console.log(`\n${fv.id}: ${fv.outcome} — ${(fv.value ?? "").slice(0, 160)}`);
 }

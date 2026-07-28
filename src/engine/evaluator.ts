@@ -246,11 +246,12 @@ function arithmetic(
   r: SfValue,
   env: EvalEnv,
 ): EvalResult {
-  // A blank date-family operand nulls the result in BOTH modes — the
-  // "blanks as zeroes" coercion is numeric-only (org-verified,
-  // testAddDate#0 [zero]: blankDate + 40 = null).
-  if ((isDatelike(l) && l.blank) || (isDatelike(r) && r.blank)) {
-    return blank(isDatelike(l) && l.blank ? l.type : r.type);
+  // A blank operand in date-family arithmetic nulls the result in BOTH
+  // modes — the "blanks as zeroes" coercion is numeric-only (org-verified,
+  // testAddDate#0 [zero]). This covers a typeless blank meeting a temporal
+  // (e.g. TIMEVALUE(blank) − TIMEVALUE(t), testSubtractTwoTimeFields).
+  if ((isDatelike(l) || isDatelike(r)) && (l.blank || r.blank)) {
+    return blank(isDatelike(l) ? l.type : r.type);
   }
   // In "blank" mode, a blank numeric operand makes the whole result blank.
   if (
@@ -481,6 +482,12 @@ const BLANK_AWARE = new Set([
   "ISNULL",
   "ISNUMBER",
   "ISPICKVAL",
+  // Blank multi-select: INCLUDES is false, PICKLISTCOUNT is 0 (org-verified).
+  "INCLUDES",
+  "PICKLISTCOUNT",
+  // Handles blanks per-argument: a blank operand nulls but a blank
+  // includeDays checkbox reads false (corpus, testFormatDurationSecondsBool).
+  "FORMATDURATION",
   "NULLVALUE",
   "BLANKVALUE",
   "LEN",

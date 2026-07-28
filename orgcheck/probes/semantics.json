@@ -368,6 +368,233 @@
       "returns": "Text"
     },
     {
+      "id": "text_percent_math",
+      "question": "Percent TEXT rule confirmation: arithmetic over a percent renders the internal ÷100 value through the product renderer (predicts 1.98 for 99% × 2).",
+      "formula": "TEXT(custompercent__c * 2)",
+      "returns": "Text",
+      "fields": { "custompercent__c": { "type": "Percent", "value": "99" } }
+    },
+    {
+      "id": "ff_shortcircuit_and",
+      "question": "Wave-3: does AND short-circuit past a runtime #Error! in FORMULA FIELDS (org-verified for validation rules)?",
+      "formula": "IF(AND(FALSE, (1 / 0) = 1), 1, 2)",
+      "returns": "Number",
+      "interpret": {
+        "2": "AND short-circuits past the erroring operand in formula fields",
+        "null": "the error propagates — AND evaluates eagerly in formula fields"
+      }
+    },
+    {
+      "id": "ff_shortcircuit_or",
+      "question": "Wave-3: does OR short-circuit past a runtime #Error! in formula fields?",
+      "formula": "IF(OR(TRUE, (1 / 0) = 1), 1, 2)",
+      "returns": "Number",
+      "interpret": {
+        "1": "OR short-circuits past the erroring operand in formula fields",
+        "null": "the error propagates — OR evaluates eagerly in formula fields"
+      }
+    },
+    {
+      "id": "ff_shortcircuit_ampamp",
+      "question": "Wave-3: does the undocumented && operator short-circuit past #Error! like AND()?",
+      "formula": "IF(FALSE && (1 / 0) = 1, 1, 2)",
+      "returns": "Number",
+      "interpret": {
+        "2": "&& short-circuits like AND()",
+        "null": "&& evaluates eagerly"
+      }
+    },
+    {
+      "id": "overflow_pow_isblank",
+      "question": "Wave-3: overflow surfacing — does 10^300 compute, blank, or #Error! in a formula field? (Oracle NUMBER caps near 1e126.)",
+      "formula": "IF(ISBLANK(10 ^ 300), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "interpret": {
+        "null": "overflow is a real #Error! (propagates through ISBLANK, like div-by-zero)",
+        "BLANKRESULT": "overflow yields blank",
+        "VALUERESULT": "10^300 computes to a value"
+      }
+    },
+    {
+      "id": "overflow_pow_text",
+      "question": "Wave-3: if 10^300 computes, what does TEXT render? (null ⇒ overflow errors.)",
+      "formula": "TEXT(10 ^ 300)",
+      "returns": "Text"
+    },
+    {
+      "id": "overflow_pow_edge",
+      "question": "Wave-3: Oracle NUMBER's ceiling — does 10^125 still compute where 10^126 may not?",
+      "formula": "TEXT(10 ^ 125)",
+      "returns": "Text"
+    },
+    {
+      "id": "overflow_b40",
+      "question": "Wave-3 overflow bisect: 10^40.",
+      "formula": "TEXT(10 ^ 40)",
+      "returns": "Text"
+    },
+    {
+      "id": "overflow_b60",
+      "question": "Wave-3 overflow bisect: 10^60.",
+      "formula": "TEXT(10 ^ 60)",
+      "returns": "Text"
+    },
+    {
+      "id": "overflow_b80",
+      "question": "Wave-3 overflow bisect: 10^80.",
+      "formula": "TEXT(10 ^ 80)",
+      "returns": "Text"
+    },
+    {
+      "id": "overflow_b90",
+      "question": "Wave-3 overflow bisect: 10^90.",
+      "formula": "TEXT(10 ^ 90)",
+      "returns": "Text"
+    },
+    {
+      "id": "overflow_b98",
+      "question": "Wave-3 overflow bisect: 10^98.",
+      "formula": "TEXT(10 ^ 98)",
+      "returns": "Text"
+    },
+    {
+      "id": "overflow_b99",
+      "question": "Wave-3 overflow bisect: 10^99 (a 100-digit integer).",
+      "formula": "TEXT(10 ^ 99)",
+      "returns": "Text"
+    },
+    {
+      "id": "overflow_b100",
+      "question": "Wave-3 overflow bisect: 10^100 (101 digits).",
+      "formula": "TEXT(10 ^ 100)",
+      "returns": "Text"
+    },
+    {
+      "id": "overflow_b110",
+      "question": "Wave-3 overflow bisect: 10^110.",
+      "formula": "TEXT(10 ^ 110)",
+      "returns": "Text"
+    },
+    {
+      "id": "overflow_mult",
+      "question": "Wave-3 overflow: is the boundary about ^ specifically, or any operation — 10^60 × 10^60 via multiplication.",
+      "formula": "TEXT((10 ^ 60) * (10 ^ 60))",
+      "returns": "Text"
+    },
+    {
+      "id": "ispickval_case",
+      "question": "Wave-3: is ISPICKVAL case-sensitive (text = is, org-verified)?",
+      "formula": "IF(ISPICKVAL(custompick__c, \"A\"), 1, 2)",
+      "returns": "Number",
+      "fields": { "custompick__c": { "type": "Picklist", "value": "a" } },
+      "interpret": {
+        "2": "ISPICKVAL is case-sensitive, like text =",
+        "1": "ISPICKVAL is case-INsensitive — differs from text ="
+      }
+    },
+    {
+      "id": "ispickval_space",
+      "question": "Wave-3: does ISPICKVAL trim/ignore trailing whitespace in the literal?",
+      "formula": "IF(ISPICKVAL(custompick__c, \"a \"), 1, 2)",
+      "returns": "Number",
+      "fields": { "custompick__c": { "type": "Picklist", "value": "a" } },
+      "interpret": {
+        "1": "trailing whitespace in the literal is ignored",
+        "2": "the literal must match exactly"
+      }
+    },
+    {
+      "id": "br_render",
+      "question": "Wave-3: what does BR() concatenate as in a formula-field value (newline? CR LF?) — SOQL JSON shows the raw characters.",
+      "formula": "\"a\" & BR() & \"b\"",
+      "returns": "Text"
+    },
+    {
+      "id": "casesafeid_std",
+      "question": "Wave-3: CASESAFEID of a known 15-char ID — pins the 18-char suffix algorithm.",
+      "formula": "CASESAFEID(\"001000000000001\")",
+      "returns": "Text"
+    },
+    {
+      "id": "casesafeid_mixed",
+      "question": "Wave-3: CASESAFEID with mixed-case letters (each uppercase letter sets a bit in the suffix).",
+      "formula": "CASESAFEID(\"a0B1c2D3e4F5g6h\")",
+      "returns": "Text"
+    },
+    {
+      "id": "casesafeid_short",
+      "question": "Wave-3: CASESAFEID of non-ID text — error, null, or pass-through?",
+      "formula": "CASESAFEID(\"abc\")",
+      "returns": "Text",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "formatduration_hms",
+      "question": "Wave-3: FORMATDURATION(3661) rendering — HH:MM:SS shape?",
+      "formula": "FORMATDURATION(3661)",
+      "returns": "Text"
+    },
+    {
+      "id": "formatduration_day",
+      "question": "Wave-3: FORMATDURATION past 24h — do hours accumulate (25:01:01) or roll into days?",
+      "formula": "FORMATDURATION(90061)",
+      "returns": "Text"
+    },
+    {
+      "id": "formatduration_days_arg",
+      "question": "Wave-3: the optional second argument (include days) — accepted shape and effect.",
+      "formula": "FORMATDURATION(90061, TRUE)",
+      "returns": "Text",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "includes_basic",
+      "question": "Wave-3: INCLUDES membership over a;b.",
+      "formula": "IF(INCLUDES(custommulti__c, \"a\"), 1, 2)",
+      "returns": "Number",
+      "fields": { "custommulti__c": { "type": "Multipicklist", "value": "a;b" } },
+      "interpret": { "1": "member found", "2": "not found?! investigate" }
+    },
+    {
+      "id": "includes_case",
+      "question": "Wave-3: is INCLUDES case-sensitive?",
+      "formula": "IF(INCLUDES(custommulti__c, \"A\"), 1, 2)",
+      "returns": "Number",
+      "fields": { "custommulti__c": { "type": "Multipicklist", "value": "a;b" } },
+      "interpret": { "2": "case-sensitive", "1": "case-insensitive" }
+    },
+    {
+      "id": "includes_joined",
+      "question": "Wave-3: does INCLUDES match a semicolon-joined literal (\"a;b\") or only single values?",
+      "formula": "IF(INCLUDES(custommulti__c, \"a;b\"), 1, 2)",
+      "returns": "Number",
+      "fields": { "custommulti__c": { "type": "Multipicklist", "value": "a;b" } },
+      "interpret": { "1": "joined literals match", "2": "only single values match" }
+    },
+    {
+      "id": "includes_blank",
+      "question": "Wave-3: INCLUDES over a blank multi-select — false or null?",
+      "formula": "IF(INCLUDES(custommulti__c, \"a\"), 1, 2)",
+      "returns": "Number",
+      "blankMode": "both",
+      "fields": { "custommulti__c": { "type": "Multipicklist", "value": null } }
+    },
+    {
+      "id": "picklistcount_two",
+      "question": "Wave-3: PICKLISTCOUNT over two selections.",
+      "formula": "PICKLISTCOUNT(custommulti__c)",
+      "returns": "Number",
+      "fields": { "custommulti__c": { "type": "Multipicklist", "value": "a;b" } }
+    },
+    {
+      "id": "picklistcount_blank",
+      "question": "Wave-3: PICKLISTCOUNT over a blank multi-select — 0 or null?",
+      "formula": "PICKLISTCOUNT(custommulti__c)",
+      "returns": "Number",
+      "blankMode": "both",
+      "fields": { "custommulti__c": { "type": "Multipicklist", "value": null } }
+    },
+    {
       "id": "text_small_thirds",
       "question": "🔬 TEXT budget mechanism for sub-1 values with leading fraction zeros: 2/30000 = 0.0000666… — 40 total fraction digits (36 sixes) ⇒ scale-40 cap; 40 SIGNIFICANT sixes (44 fraction digits) ⇒ significance-based cap.",
       "formula": "TEXT(2 / 30000)",

@@ -108,6 +108,11 @@ function registerField(
     if (type === "Picklist") {
       info.picklistValues.add(value);
     }
+    if (type === "Multipicklist") {
+      for (const v of value.split(";")) {
+        info.picklistValues.add(v);
+      }
+    }
   }
 }
 
@@ -410,6 +415,7 @@ function inputFieldXml(f: PlanInputField): string {
     case "Datetime":
       lines.push(`    <type>DateTime</type>`);
       break;
+    case "Multipicklist":
     case "Picklist": {
       const values = (f.picklistValues ?? [])
         .map(
@@ -418,9 +424,12 @@ function inputFieldXml(f: PlanInputField): string {
         )
         .join("\n");
       lines.push(
-        `    <type>Picklist</type>`,
+        `    <type>${f.type === "Multipicklist" ? "MultiselectPicklist" : "Picklist"}</type>`,
         `    <valueSet>\n        <restricted>true</restricted>\n        <valueSetDefinition>\n            <sorted>false</sorted>\n${values}\n        </valueSetDefinition>\n    </valueSet>`,
       );
+      if (f.type === "Multipicklist") {
+        lines.push(`    <visibleLines>3</visibleLines>`);
+      }
       break;
     }
   }
@@ -509,6 +518,7 @@ function apexValue(spec: FieldSpec): string {
     case "Text":
     case "TextArea":
     case "Picklist":
+    case "Multipicklist":
       return apexString(v);
     case "Date": {
       const [y, m, d] = v.split(":").map(Number);

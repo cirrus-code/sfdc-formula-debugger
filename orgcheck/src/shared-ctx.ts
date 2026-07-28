@@ -29,7 +29,8 @@ export type CtxComponentKind =
   | "return_type" // wrong-typed formula; rejection message reveals the requirement
   | "function" // one registry function's availability probe
   | "global" // one $Global's availability probe
-  | "runtime_rule"; // active gated VR for the DML-triggered runtime pass
+  | "runtime_rule" // active gated VR for the DML-triggered runtime pass
+  | "flow_value"; // Active flow whose interview output is a value probe
 
 /** One deployable metadata component (or a child fragment of a shared file). */
 export interface CtxComponent {
@@ -72,10 +73,18 @@ export interface CtxUntestable {
 
 /** Ordered deploy unit. Canary batches gate their container's matrix batch. */
 export interface CtxBatch {
-  readonly id: string; // "support" | "runtime" | "<container>:canary" | "<container>:matrix"
+  readonly id: string; // "support" | "runtime" | "flow_values" | "<container>:canary" | "<container>:matrix"
   readonly container?: CtxContainerId;
-  readonly phase: "support" | "canary" | "matrix" | "runtime";
+  readonly phase: "support" | "canary" | "matrix" | "runtime" | "flow_values";
   readonly componentIds: readonly string[];
+}
+
+/** A flow whose formula VALUE is read back by running the interview. */
+export interface CtxFlowValueProbe {
+  readonly id: string;
+  readonly formula: string;
+  readonly returns: string;
+  readonly question: string;
 }
 
 export interface CtxRuntimeProbe {
@@ -95,6 +104,7 @@ export interface CtxPlan {
   readonly batches: readonly CtxBatch[];
   readonly untestable: readonly CtxUntestable[];
   readonly runtimeProbes: readonly CtxRuntimeProbe[];
+  readonly flowValueProbes: readonly CtxFlowValueProbe[];
   /** Objects the runtime pass inserts into (permission-set + readback scope):
    * object api name → editable input field api names. */
   readonly runtimeObjects: Readonly<Record<string, readonly string[]>>;
@@ -139,6 +149,12 @@ export interface CtxRuntimeResult {
   readonly message?: string;
 }
 
+export interface CtxFlowValueResult {
+  readonly id: string;
+  readonly outcome: "VALUE" | "ERROR" | "NOT_RUN";
+  readonly value?: string;
+}
+
 export interface CtxResults {
   readonly collectedAt: string;
   readonly org: Readonly<Record<string, unknown>>;
@@ -146,4 +162,5 @@ export interface CtxResults {
   readonly probes: readonly CtxProbeResult[];
   readonly untestable: readonly CtxUntestable[];
   readonly runtime: readonly CtxRuntimeResult[];
+  readonly flowValues: readonly CtxFlowValueResult[];
 }
