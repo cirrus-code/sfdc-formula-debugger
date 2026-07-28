@@ -104,7 +104,9 @@ export function concatString(v: SfValue): string {
     case "Number":
     case "Currency":
     case "Percent":
-      return v.data.toString();
+      // toFixed() (no argument) renders the full stored value in plain
+      // notation — toString() would emit scientific notation below 1e-7.
+      return v.data.toFixed();
     case "Boolean":
       return v.data ? "True" : "False";
     case "Date":
@@ -242,7 +244,9 @@ export const BUILTINS: Record<string, Builtin> = {
     const code = toInt(a!);
     return code > 0 ? text(String.fromCodePoint(code)) : blank("Text");
   },
-  TEXT: ([a]) => text(concatString(a!)),
+  // TEXT lives in SPECIAL_FORMS: it must see the pre-materialization value
+  // (the product renders ~40 digits, more than the 32-place function boundary)
+  // and must know whether its argument is a bare literal.
   VALUE: ([a]) => {
     const s = dstr(a!).trim();
     return isParsableNumber(s)
@@ -306,7 +310,56 @@ export const BUILTINS: Record<string, Builtin> = {
   },
 };
 
+/**
+ * Product TEXT() rendering of a computed number (org-verified 2026-07-28,
+ * semantics:text_* probes): plain notation always (never scientific), integers
+ * bare, trailing zeros stripped, and the leading zero of the integer part
+ * dropped ("0.5" renders ".5", "-0.5" renders "-.5").
+ *
+ * Digit budget: 39 significant digits when the most significant digit sits at
+ * an even decimal position (units, hundreds, …), 40 when odd — the signature
+ * of an Oracle-NUMBER-style base-100 mantissa (20 pairs) aligned to the
+ * decimal point, where an odd-aligned leading digit shares its pair. Fits
+ * every probe: TEXT(4/3) 39 sig, TEXT(1000/3) 39, TEXT(20000/3) 40,
+ * TEXT(1/3)/TEXT(2/3) 40 (HALF_UP at the boundary), TEXT(2/30000) 40.
+ *
+ * A bare numeric literal is the exception: the compiler constant-folds it with
+ * a conventional rendering that keeps the leading zero (TEXT(0.5) = "0.5",
+ * org-verified) — while still stripping trailing zeros (TEXT(2.50) = "2.5").
+ */
+export function renderProductNumber(d: Decimal, literal: boolean): string {
+  if (d.isInteger()) {
+    return d.toFixed(0);
+  }
+  if (literal) {
+    return d.toFixed();
+  }
+  // d.e is the decimal position of the most significant digit (units = 0).
+  const parity = ((d.e % 2) + 2) % 2;
+  const rounded = d.toSignificantDigits(39 + parity, Decimal.ROUND_HALF_UP);
+  return rounded.toFixed().replace(/^(-?)0\./, "$1.");
+}
+
 export const SPECIAL_FORMS: Record<string, SpecialForm> = {
+  TEXT: (args, env, evaluate) => {
+    if (args.length < 1) {
+      return error("#Error! (TEXT needs 1 argument)");
+    }
+    const v = evaluate(args[0]!, env);
+    if (isError(v)) {
+      return v;
+    }
+    if (v.blank) {
+      return text("");
+    }
+    // Number/Currency get the product renderer on the pre-materialization
+    // value. Percent keeps the legacy path — its TEXT scale interaction with
+    // the ×100 result convention is still quarantined (VERIFICATION.md).
+    if (v.type === "Number" || v.type === "Currency") {
+      return text(renderProductNumber(v.data, args[0]!.kind === "NumberLit"));
+    }
+    return text(concatString(v));
+  },
   IF: (args, env, evaluate) => {
     if (args.length < 3) {
       return error("#Error! (IF needs 3 arguments)");

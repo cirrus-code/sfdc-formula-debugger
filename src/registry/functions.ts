@@ -13,8 +13,12 @@ import type {
  * builtin table, keyed by function name; a consistency test enforces that it
  * agrees with each entry's `simulatable` flag.
  *
- * `contexts` restrictions and per-function availability are NOT yet org-verified
- * (see VERIFICATION.md); availability is surfaced as a soft warning only.
+ * `contexts` data is org-verified where possible (corpus/org-availability.json,
+ * wave-2 pass 2026-07-28; enforced by org-availability.test.ts): each function
+ * was save-probed in every context whose metadata container compile-checks
+ * formulas — all of them except email templates, whose merge formulas the org
+ * never validates at deploy. Availability is still surfaced as a soft warning
+ * only; the email context remains best-effort.
  */
 
 // Salesforce's function reference is a single doc; per-function deep links are
@@ -37,33 +41,25 @@ const rest = (name: string, type: SfType): ParamSpec => ({
   variadic: true,
 });
 
-// Contexts where org-state / change-tracking functions are allowed. Restricted
-// (not "all") so using them in a formula field produces an availability finding.
+// Contexts where change-tracking functions are allowed. Org-verified
+// (wave-2 matrix, 2026-07-28): validation rules, field updates, and approval
+// criteria accept them; workflow RULES reject them ("may not be used in this
+// type of formula") — surprising, but the org is authoritative.
 const CHANGE_CONTEXTS: readonly ContextId[] = [
   "validation_rule",
-  "workflow_rule",
   "workflow_field_update",
   "approval_entry",
   "approval_step",
 ];
 
-// Org-verified (semantics/syntax probes, 2026-07-26): the formula-field save
-// rejects SUBSTR ("may not be used in this type of formula") and IFERROR
-// ("Unknown function"), so those carry every context except formula_field.
-// Availability in the remaining contexts is still best-effort (warnings only)
-// pending the wave-2 per-context matrix.
-const ALL_BUT_FORMULA_FIELD: readonly ContextId[] = [
-  "validation_rule",
-  "flow_formula",
-  "default_value",
-  "workflow_rule",
-  "workflow_field_update",
-  "approval_entry",
-  "approval_step",
-  "custom_button_link",
-  "email_template",
-  "quick_action",
-];
+// Org-verified (wave-2 matrix, 2026-07-28): functions the OSS engine supports
+// but EVERY verifiable product context rejects at save ("Unknown function" /
+// "may not be used in this type of formula") — formula fields, validation
+// rules, workflow rules/field updates, default values, approval criteria,
+// flow formulas, custom buttons, and quick actions all refuse them. They stay
+// registered so they parse/highlight/hover, and the checker warns wherever
+// they appear (suppressed only in the deploy-unverifiable email context).
+const NO_VERIFIED_CONTEXT: readonly ContextId[] = [];
 
 // Transcendental math: real Salesforce functions, but NOT simulatable — they
 // compute as non-correctly-rounded doubles (Java StrictMath) whose last ULP a
@@ -360,7 +356,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     name: "CONCATENATE",
     params: [rest("text", "Text")],
     returnType: fixed("Text"),
-    contexts: "all",
+    contexts: NO_VERIFIED_CONTEXT,
     simulatable: true,
     docsUrl: DOCS,
     summary: "Joins several text values into one.",
@@ -373,7 +369,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
       opt("num_chars", "Number"),
     ],
     returnType: fixed("Text"),
-    contexts: ALL_BUT_FORMULA_FIELD,
+    contexts: NO_VERIFIED_CONTEXT,
     simulatable: true,
     docsUrl: DOCS,
     summary:
@@ -419,7 +415,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     name: "IN",
     params: [req("value", "Unknown"), rest("compare", "Unknown")],
     returnType: fixed("Boolean"),
-    contexts: "all",
+    contexts: NO_VERIFIED_CONTEXT,
     // Not simulated: the oracle's IN semantics are not reproducible from the
     // corpus (e.g. IN("Left", "Left") → false), so it refuses rather
     // than guess (VERIFICATION.md).
@@ -431,7 +427,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     name: "IFERROR",
     params: [req("expression", "Unknown"), req("fallback", "Unknown")],
     returnType: sameAsArg(1),
-    contexts: ALL_BUT_FORMULA_FIELD,
+    contexts: NO_VERIFIED_CONTEXT,
     simulatable: true,
     docsUrl: DOCS,
     summary:
@@ -515,7 +511,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     name: "POWER",
     params: [req("number", "Number"), req("power", "Number")],
     returnType: fixed("Number"),
-    contexts: "all",
+    contexts: ["custom_button_link"],
     simulatable: true,
     docsUrl: DOCS,
     summary: "Raises a number to a power.",
@@ -528,6 +524,13 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     simulatable: true,
     docsUrl: DOCS,
     summary: "Truncates a number to a number of digits (toward zero).",
+    lintNotes: [
+      {
+        id: "trunc-arity-outside-formula-fields",
+        message:
+          "Only formula fields accept single-argument TRUNC(n); every other context requires both arguments (org-verified).",
+      },
+    ],
   },
   {
     name: "MFLOOR",

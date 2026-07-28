@@ -4,7 +4,7 @@ import {
   type Expr,
   type FunctionCall,
 } from "../syntax/index.ts";
-import { getFunction } from "../registry/index.ts";
+import { CONTEXTS, getFunction } from "../registry/index.ts";
 import {
   asDecimal,
   asText,
@@ -71,6 +71,15 @@ function materialize(v: SfValue): SfValue {
   return { ...v, data: v.data.toDecimalPlaces(MAX_SCALE) };
 }
 
+// Global roots the registry marks non-simulatable in any context ($Setup,
+// $CustomMetadata, $Permission, $Label, $System, $Api) — lowercased for the
+// case-insensitive reference match.
+const ORG_STATE_GLOBAL_ROOTS = new Set(
+  CONTEXTS.flatMap((c) => c.globals)
+    .filter((g) => !g.simulatable)
+    .map((g) => g.name.toLowerCase()),
+);
+
 function evaluate(node: Expr, env: EvalEnv): EvalResult {
   switch (node.kind) {
     case "NumberLit":
@@ -89,6 +98,16 @@ function evaluate(node: Expr, env: EvalEnv): EvalResult {
       // (org-verified, corpus:testOriginDateTime).
       if (key.toLowerCase() === "$system.origindatetime") {
         return datetimeValue(Date.UTC(1900, 0, 1));
+      }
+      // Org-state globals ($Setup, $CustomMetadata, $Api…) resolve to org
+      // data we cannot know — refuse rather than read as blank (rule 1). An
+      // explicitly supplied value still wins (it is user input, not a guess).
+      if (
+        node.path[0]?.startsWith("$") &&
+        !env.fields.has(key) &&
+        ORG_STATE_GLOBAL_ROOTS.has(node.path[0].toLowerCase())
+      ) {
+        throw new UnsupportedError(node.path[0]);
       }
       const v = env.fields.get(key) ?? blank("Unknown");
       // "Treat blank fields as zeroes" mode: an empty Number/Currency/Percent

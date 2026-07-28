@@ -79,16 +79,27 @@ describe("checker: context availability", () => {
     );
   });
 
-  it("suppresses availability findings in Tier 2 contexts", () => {
+  it("allows change functions in field updates (org-verified, Tier 1)", () => {
     expect(codes("ISCHANGED(Amount)", "workflow_field_update")).not.toContain(
       "function-not-available",
     );
   });
 
-  it("warns for SUBSTR and IFERROR in a formula field (org-verified)", () => {
+  it("suppresses availability findings in Tier 2 contexts", () => {
+    expect(codes('CONCATENATE("a", "b")', "email_template")).not.toContain(
+      "function-not-available",
+    );
+  });
+
+  it("warns for SUBSTR and IFERROR outside flows (org-verified)", () => {
     expect(codes('SUBSTR("abc", 1)')).toContain("function-not-available");
     expect(codes("IFERROR(1 / 0, 0)")).toContain("function-not-available");
-    expect(codes('SUBSTR("abc", 1)', "validation_rule")).not.toContain(
+    // The wave-2 matrix overturned SUBSTR's assumed validation-rule tier:
+    // the org rejects it there too ("may not be used in this type of formula").
+    expect(codes('SUBSTR("abc", 1)', "validation_rule")).toContain(
+      "function-not-available",
+    );
+    expect(codes("IFERROR(1 / 0, 0)", "validation_rule")).toContain(
       "function-not-available",
     );
   });

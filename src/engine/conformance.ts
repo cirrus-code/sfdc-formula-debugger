@@ -56,7 +56,20 @@ export function runRow(row: CorpusRow, opts: RunOptions = {}): RowOutcome {
       blankMode: row.blankMode,
       now: { epochMillis: 0 },
     });
-    return compare(result, row, opts);
+    // Org-tier numeric expectations come from the TEXT() twin channel
+    // (orgcheck reads TEXT(expr) for exact rendering), which sees the
+    // pre-materialization value at the product's full digit budget. When the
+    // materialized numeric comparison can't decide, compare what our own
+    // TEXT(expr) renders — the same question the org answered.
+    const twinRender = (): string | null => {
+      const twin = evaluateFormula(parse(`TEXT(${row.formula})`).ast, {
+        fields,
+        blankMode: row.blankMode,
+        now: { epochMillis: 0 },
+      });
+      return !isError(twin) && isText(twin) ? asText(twin) : null;
+    };
+    return compare(result, row, opts, twinRender);
   } catch (e) {
     if (e instanceof Unsupported || e instanceof UnsupportedError) {
       return { status: "unsupported" };
@@ -130,6 +143,7 @@ function compare(
   result: ReturnType<typeof evaluateFormula>,
   row: CorpusRow,
   opts: RunOptions,
+  twinRender?: () => string | null,
 ): RowOutcome {
   const expected = row.expected;
 
@@ -155,8 +169,13 @@ function compare(
   switch (row.dataType.toLowerCase()) {
     case "double":
     case "currency":
-    case "number":
-      return numberCompare(result, expected, false);
+    case "number": {
+      const numeric = numberCompare(result, expected, false);
+      if (numeric.status === "fail" && twinRender?.() === expected) {
+        return { status: "pass" };
+      }
+      return numeric;
+    }
     case "percent":
       // A Percent-typed result renders as the internal value × 100.
       return numberCompare(result, expected, true);

@@ -23,19 +23,16 @@ const rows: CorpusRow[] = JSON.parse(
 );
 
 /**
- * Product TEXT() number rendering under investigation (VERIFICATION.md): the
- * org renders TEXT(1/3) with 40 digits and no leading zero (".333…"), which
- * contradicts the oracle-verified 32-place materialization model for values
- * handed to functions. Quarantined — not compared either way — until the
- * product's TEXT scale/format rule is pinned down; do NOT silently match one
- * tier by breaking the other.
+ * The product TEXT() number-rendering rule is now pinned down and implemented
+ * (renderProductNumber in builtins.ts: Oracle-NUMBER-parity digit budget, no
+ * leading zero, plain notation — settled by the 2026-07-28 text_* probe
+ * batch), which resolved the former TEXT quarantine cluster. Only the Percent
+ * interaction remains open: TEXT of a Percent field couples the ×100 result
+ * convention with the display scale in a way one probe cannot decide.
+ * Quarantined — not compared either way — until a dedicated probe batch pins
+ * it; do NOT silently match one tier by breaking the other.
  */
-const NUMERIC_RENDERING_QUARANTINE = new Set([
-  "corpus:testExponentiationOperator#5",
-  "corpus:testExponentiationOperator#18",
-  "semantics:text_third#0",
-  "semantics:text_percent_field#0",
-]);
+const NUMERIC_RENDERING_QUARANTINE = new Set(["semantics:text_percent_field#0"]);
 
 describe("conformance: org-verified corpus (real-org tier)", () => {
   const tally: Record<RowStatus, number> = {

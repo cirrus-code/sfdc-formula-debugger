@@ -1,6 +1,6 @@
 [
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "syntax:pow_vs_muldiv#0",
   "formula": "2 * 3 ^ 2",
   "dataType": "Double",
@@ -9,7 +9,7 @@
   "expected": "36"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "syntax:pow_assoc#0",
   "formula": "2 ^ 3 ^ 2",
   "dataType": "Double",
@@ -18,7 +18,7 @@
   "expected": "64"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "syntax:unary_vs_pow#0",
   "formula": "- 2 ^ 2",
   "dataType": "Double",
@@ -27,7 +27,7 @@
   "expected": "4"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "syntax:amp_additive_level#0",
   "formula": "\"a\" + t_blank__c & \"c\"",
   "dataType": "Text",
@@ -42,7 +42,7 @@
   "expected": "ac"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "syntax:andand_op#0",
   "formula": "IF(true && false, 1, 2)",
   "dataType": "Double",
@@ -51,7 +51,7 @@
   "expected": "2"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "syntax:oror_op#0",
   "formula": "IF(false || true, 1, 2)",
   "dataType": "Double",
@@ -60,7 +60,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "syntax:eqeq_op#0",
   "formula": "IF(1 == 1, 1, 2)",
   "dataType": "Double",
@@ -69,7 +69,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "syntax:noteq_op#0",
   "formula": "IF(1 != 2, 1, 2)",
   "dataType": "Double",
@@ -78,7 +78,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "syntax:null_prefix_ident#0",
   "formula": "IF(Null_Check__c, 1, 2)",
   "dataType": "Double",
@@ -93,7 +93,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "syntax:comment_basic#0",
   "formula": "1 + /* mid-expression comment */ 2",
   "dataType": "Double",
@@ -102,7 +102,7 @@
   "expected": "3"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "syntax:comment_nested#0",
   "formula": "1 /* a /* b */ + 2",
   "dataType": "Double",
@@ -111,7 +111,7 @@
   "expected": "3"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#0",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -131,7 +131,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#1",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -151,7 +151,7 @@
   "expected": "2006-01-04"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#2",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -171,7 +171,7 @@
   "expected": "2005-01-03"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#3",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -191,7 +191,7 @@
   "expected": "2004-03-03"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#4",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -211,7 +211,7 @@
   "expected": "2000-03-02"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#5",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -231,7 +231,7 @@
   "expected": "2000-03-02"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#6",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -251,7 +251,7 @@
   "expected": "2000-03-02"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#7",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -271,7 +271,7 @@
   "expected": "2109-09-04"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#8",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -291,7 +291,7 @@
   "expected": "2001-02-27"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#9",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -311,7 +311,7 @@
   "expected": "2001-02-26"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#10",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -331,7 +331,7 @@
   "expected": "2000-03-29"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#11",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -351,7 +351,7 @@
   "expected": "1900-01-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#12",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -371,7 +371,7 @@
   "expected": "4000-01-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#13",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -391,7 +391,7 @@
   "expected": "2000-01-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#14",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -411,7 +411,7 @@
   "expected": "3999-01-01"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#0",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -431,7 +431,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#1",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -451,7 +451,7 @@
   "expected": "2006-01-04"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#2",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -471,7 +471,7 @@
   "expected": "2005-01-03"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#3",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -491,7 +491,7 @@
   "expected": "2004-03-03"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#4",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -511,7 +511,7 @@
   "expected": "2000-03-02"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#5",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -531,7 +531,7 @@
   "expected": "2000-03-02"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#6",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -551,7 +551,7 @@
   "expected": "2000-03-02"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#7",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -571,7 +571,7 @@
   "expected": "2109-09-04"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#8",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -591,7 +591,7 @@
   "expected": "2001-02-27"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#9",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -611,7 +611,7 @@
   "expected": "2001-02-26"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#10",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -631,7 +631,7 @@
   "expected": "2000-03-29"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#11",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -651,7 +651,7 @@
   "expected": "1900-01-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#12",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -671,7 +671,7 @@
   "expected": "4000-01-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#13",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -691,7 +691,7 @@
   "expected": "2000-01-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddDate#14",
   "formula": "(customdate1__c+customnumber1__c)",
   "dataType": "DateOnly",
@@ -711,7 +711,7 @@
   "expected": "3999-01-01"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#0",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -726,7 +726,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#1",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -741,7 +741,7 @@
   "expected": "2005-12-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#2",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -756,7 +756,7 @@
   "expected": "2004-12-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#3",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -771,7 +771,7 @@
   "expected": "2004-02-28"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#4",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -786,7 +786,7 @@
   "expected": "2000-02-28"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#5",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -801,7 +801,7 @@
   "expected": "1900-01-01"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#6",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -816,7 +816,7 @@
   "expected": "4000-01-01"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#7",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -831,7 +831,7 @@
   "expected": "2000-01-01"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#8",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -846,7 +846,7 @@
   "expected": "3999-01-01"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#0",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -861,7 +861,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#1",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -876,7 +876,7 @@
   "expected": "2005-12-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#2",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -891,7 +891,7 @@
   "expected": "2004-12-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#3",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -906,7 +906,7 @@
   "expected": "2004-02-28"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#4",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -921,7 +921,7 @@
   "expected": "2000-02-28"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#5",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -936,7 +936,7 @@
   "expected": "1900-01-01"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#6",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -951,7 +951,7 @@
   "expected": "4000-01-01"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#7",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -966,7 +966,7 @@
   "expected": "2000-01-01"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testTextFunctionWithCustomDate#8",
   "formula": "TEXT(customdate1__c)",
   "dataType": "Text",
@@ -981,7 +981,7 @@
   "expected": "3999-01-01"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddConcatSimple#0",
   "formula": "(customtext1__c+customtext2__c)",
   "dataType": "Text",
@@ -1001,7 +1001,7 @@
   "expected": "aaaaaaaa"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddConcatSimple#1",
   "formula": "(customtext1__c+customtext2__c)",
   "dataType": "Text",
@@ -1021,7 +1021,7 @@
   "expected": "aaaabbbb"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddConcatSimple#2",
   "formula": "(customtext1__c+customtext2__c)",
   "dataType": "Text",
@@ -1041,7 +1041,7 @@
   "expected": "aaaa"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddConcatSimple#3",
   "formula": "(customtext1__c+customtext2__c)",
   "dataType": "Text",
@@ -1061,7 +1061,7 @@
   "expected": "bbbb"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddConcatSimple#4",
   "formula": "(customtext1__c+customtext2__c)",
   "dataType": "Text",
@@ -1081,7 +1081,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddConcatSimple#0",
   "formula": "(customtext1__c+customtext2__c)",
   "dataType": "Text",
@@ -1101,7 +1101,7 @@
   "expected": "aaaaaaaa"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddConcatSimple#1",
   "formula": "(customtext1__c+customtext2__c)",
   "dataType": "Text",
@@ -1121,7 +1121,7 @@
   "expected": "aaaabbbb"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddConcatSimple#2",
   "formula": "(customtext1__c+customtext2__c)",
   "dataType": "Text",
@@ -1141,7 +1141,7 @@
   "expected": "aaaa"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddConcatSimple#3",
   "formula": "(customtext1__c+customtext2__c)",
   "dataType": "Text",
@@ -1161,7 +1161,7 @@
   "expected": "bbbb"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testAddConcatSimple#4",
   "formula": "(customtext1__c+customtext2__c)",
   "dataType": "Text",
@@ -1181,7 +1181,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#0",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1196,7 +1196,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#1",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1211,7 +1211,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#2",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1226,7 +1226,7 @@
   "expected": "4"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#3",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1241,7 +1241,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#4",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1256,7 +1256,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#5",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1271,7 +1271,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#6",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1286,7 +1286,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#7",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1301,7 +1301,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#0",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1316,7 +1316,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#1",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1331,7 +1331,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#2",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1346,7 +1346,7 @@
   "expected": "4"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#3",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1361,7 +1361,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#4",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1376,7 +1376,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#5",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1391,7 +1391,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#6",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1406,7 +1406,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testFindOnText#7",
   "formula": "FIND(\"Text\", customText1__c)",
   "dataType": "Double",
@@ -1421,7 +1421,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#0",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1441,7 +1441,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#1",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1461,7 +1461,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#2",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1481,7 +1481,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#3",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1501,7 +1501,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#4",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1521,7 +1521,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#5",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1541,7 +1541,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#6",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1561,7 +1561,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#7",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1581,7 +1581,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#8",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1601,7 +1601,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#9",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1621,7 +1621,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#10",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1641,7 +1641,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#0",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1661,7 +1661,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#1",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1681,7 +1681,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#2",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1701,7 +1701,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#3",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1721,7 +1721,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#4",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1741,7 +1741,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#5",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1761,7 +1761,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#6",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1781,7 +1781,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#7",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1801,7 +1801,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#8",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1821,7 +1821,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#9",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1841,7 +1841,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareGreaterThan#10",
   "formula": "text1__c>text2__c",
   "dataType": "Boolean",
@@ -1861,7 +1861,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#0",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -1881,7 +1881,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#1",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -1901,7 +1901,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#2",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -1921,7 +1921,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#3",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -1941,7 +1941,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#4",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -1961,7 +1961,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#5",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -1981,7 +1981,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#6",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2001,7 +2001,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#7",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2021,7 +2021,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#8",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2041,7 +2041,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#9",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2061,7 +2061,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#10",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2081,7 +2081,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#0",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2101,7 +2101,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#1",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2121,7 +2121,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#2",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2141,7 +2141,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#3",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2161,7 +2161,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#4",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2181,7 +2181,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#5",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2201,7 +2201,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#6",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2221,7 +2221,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#7",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2241,7 +2241,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#8",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2261,7 +2261,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#9",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2281,7 +2281,7 @@
   "expected": "true"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfTextCompareLessEqual#10",
   "formula": "text1__c<=text2__c",
   "dataType": "Boolean",
@@ -2301,7 +2301,7 @@
   "expected": "false"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#0",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2331,7 +2331,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#1",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2361,7 +2361,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#2",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2391,7 +2391,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#3",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2421,7 +2421,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#4",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2451,7 +2451,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#5",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2481,7 +2481,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#6",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2511,7 +2511,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#7",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2541,7 +2541,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#8",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2571,7 +2571,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#9",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2601,7 +2601,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#10",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2631,7 +2631,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#11",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2661,7 +2661,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#12",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2691,7 +2691,7 @@
   "expected": ".123456789"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#13",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2721,7 +2721,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#14",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2751,7 +2751,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#0",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2781,7 +2781,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#1",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2811,7 +2811,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#2",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2841,7 +2841,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#3",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2871,7 +2871,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#4",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2901,7 +2901,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#5",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2931,7 +2931,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#6",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2961,7 +2961,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#7",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -2991,7 +2991,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#8",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -3021,7 +3021,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#9",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -3051,7 +3051,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#10",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -3081,7 +3081,7 @@
   "expected": "300"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#11",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -3111,7 +3111,7 @@
   "expected": "200"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#12",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -3141,7 +3141,7 @@
   "expected": ".123456789"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#13",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -3171,7 +3171,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testIfContainsFunc#14",
   "formula": "IF(CONTAINS(customtext1__c,customtext2__c),ABS(customnumber1__c),FLOOR(customnumber2__c))",
   "dataType": "Double",
@@ -3201,7 +3201,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#0",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3226,7 +3226,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#1",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3251,7 +3251,7 @@
   "expected": "Platinum File"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#2",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3276,7 +3276,7 @@
   "expected": "No match"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#3",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3301,7 +3301,7 @@
   "expected": "Salesforce"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#4",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3326,7 +3326,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#5",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3351,7 +3351,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#6",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3376,7 +3376,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#7",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3401,7 +3401,7 @@
   "expected": "Golden File"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#8",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3426,7 +3426,7 @@
   "expected": "Replace Space"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#9",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3451,7 +3451,7 @@
   "expected": "Replace All z z z"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#10",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3476,7 +3476,7 @@
   "expected": "Replace All zzz"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#0",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3501,7 +3501,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#1",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3526,7 +3526,7 @@
   "expected": "Platinum File"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#2",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3551,7 +3551,7 @@
   "expected": "No match"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#3",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3576,7 +3576,7 @@
   "expected": "Salesforce"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#4",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3601,7 +3601,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#5",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3626,7 +3626,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#6",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3651,7 +3651,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#7",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3676,7 +3676,7 @@
   "expected": "Golden File"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#8",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3701,7 +3701,7 @@
   "expected": "Replace Space"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#9",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3726,7 +3726,7 @@
   "expected": "Replace All z z z"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSimpleSubstitute#10",
   "formula": "SUBSTITUTE(customtext1__c,customtext2__c,customtext3__c)",
   "dataType": "Text",
@@ -3751,7 +3751,7 @@
   "expected": "Replace All zzz"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#0",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3766,7 +3766,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#1",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3781,7 +3781,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#2",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3796,7 +3796,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#3",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3811,7 +3811,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#4",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3826,7 +3826,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#5",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3841,7 +3841,7 @@
   "expected": "_"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#6",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3856,7 +3856,7 @@
   "expected": "€"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#7",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3871,7 +3871,7 @@
   "expected": "@"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#8",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3886,7 +3886,7 @@
   "expected": "⸮"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#9",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3901,7 +3901,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#0",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3916,7 +3916,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#1",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3931,7 +3931,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#2",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3946,7 +3946,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#3",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3961,7 +3961,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#4",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3976,7 +3976,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#5",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -3991,7 +3991,7 @@
   "expected": "_"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#6",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -4006,7 +4006,7 @@
   "expected": "€"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#7",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -4021,7 +4021,7 @@
   "expected": "@"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#8",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -4036,7 +4036,7 @@
   "expected": "⸮"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testChr#9",
   "formula": "CHR(customnumber__c)",
   "dataType": "Text",
@@ -4051,7 +4051,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testNVLWithTextArea#0",
   "formula": "NULLVALUE(customtextarea1__c,customtext1__c)",
   "dataType": "Text",
@@ -4071,7 +4071,7 @@
   "expected": "Has it"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testNVLWithTextArea#1",
   "formula": "NULLVALUE(customtextarea1__c,customtext1__c)",
   "dataType": "Text",
@@ -4091,7 +4091,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testNVLWithTextArea#2",
   "formula": "NULLVALUE(customtextarea1__c,customtext1__c)",
   "dataType": "Text",
@@ -4111,7 +4111,7 @@
   "expected": "Has It"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testNVLWithTextArea#3",
   "formula": "NULLVALUE(customtextarea1__c,customtext1__c)",
   "dataType": "Text",
@@ -4131,7 +4131,7 @@
   "expected": "I"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testNVLWithTextArea#0",
   "formula": "NULLVALUE(customtextarea1__c,customtext1__c)",
   "dataType": "Text",
@@ -4151,7 +4151,7 @@
   "expected": "Has it"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testNVLWithTextArea#1",
   "formula": "NULLVALUE(customtextarea1__c,customtext1__c)",
   "dataType": "Text",
@@ -4171,7 +4171,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testNVLWithTextArea#2",
   "formula": "NULLVALUE(customtextarea1__c,customtext1__c)",
   "dataType": "Text",
@@ -4191,7 +4191,7 @@
   "expected": "Has It"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testNVLWithTextArea#3",
   "formula": "NULLVALUE(customtextarea1__c,customtext1__c)",
   "dataType": "Text",
@@ -4211,7 +4211,7 @@
   "expected": "I"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testISNULLWithTextArea#0",
   "formula": "if(isnull(customtextarea1__c),null,customtext1__c)",
   "dataType": "Text",
@@ -4231,7 +4231,7 @@
   "expected": "Not Null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testISNULLWithTextArea#1",
   "formula": "if(isnull(customtextarea1__c),null,customtext1__c)",
   "dataType": "Text",
@@ -4251,7 +4251,7 @@
   "expected": "Is Null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testISNULLWithTextArea#2",
   "formula": "if(isnull(customtextarea1__c),null,customtext1__c)",
   "dataType": "Text",
@@ -4271,7 +4271,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testISNULLWithTextArea#3",
   "formula": "if(isnull(customtextarea1__c),null,customtext1__c)",
   "dataType": "Text",
@@ -4291,7 +4291,7 @@
   "expected": "Not Null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testISNULLWithTextArea#0",
   "formula": "if(isnull(customtextarea1__c),null,customtext1__c)",
   "dataType": "Text",
@@ -4311,7 +4311,7 @@
   "expected": "Not Null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testISNULLWithTextArea#1",
   "formula": "if(isnull(customtextarea1__c),null,customtext1__c)",
   "dataType": "Text",
@@ -4331,7 +4331,7 @@
   "expected": "Is Null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testISNULLWithTextArea#2",
   "formula": "if(isnull(customtextarea1__c),null,customtext1__c)",
   "dataType": "Text",
@@ -4351,7 +4351,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testISNULLWithTextArea#3",
   "formula": "if(isnull(customtextarea1__c),null,customtext1__c)",
   "dataType": "Text",
@@ -4371,7 +4371,7 @@
   "expected": "Not Null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#0",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4391,7 +4391,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#1",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4411,7 +4411,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#2",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4431,7 +4431,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#3",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4451,7 +4451,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#4",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4471,7 +4471,7 @@
   "expected": "GROSSE"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#5",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4491,7 +4491,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#6",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4511,7 +4511,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#7",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4531,7 +4531,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#8",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4551,7 +4551,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#9",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4571,7 +4571,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#10",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4591,7 +4591,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#11",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4611,7 +4611,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#12",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4631,7 +4631,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#13",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4651,7 +4651,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#14",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4671,7 +4671,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#15",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4691,7 +4691,7 @@
   "expected": "GROSSE"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#16",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4711,7 +4711,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#17",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4731,7 +4731,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#18",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4751,7 +4751,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#19",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4771,7 +4771,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#20",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4791,7 +4791,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#21",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4811,7 +4811,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#22",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4831,7 +4831,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#23",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4851,7 +4851,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#24",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4871,7 +4871,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#25",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4891,7 +4891,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#26",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4911,7 +4911,7 @@
   "expected": "GROSSE"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#27",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4931,7 +4931,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#28",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4951,7 +4951,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#29",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4971,7 +4971,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#30",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -4991,7 +4991,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#31",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5011,7 +5011,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#32",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5031,7 +5031,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#33",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5051,7 +5051,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#34",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5071,7 +5071,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#35",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5091,7 +5091,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#36",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5111,7 +5111,7 @@
   "expected": "GROSSE"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#37",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5131,7 +5131,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#38",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5151,7 +5151,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#39",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5171,7 +5171,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#40",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5191,7 +5191,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#41",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5211,7 +5211,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#42",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5231,7 +5231,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#0",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5251,7 +5251,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#1",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5271,7 +5271,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#2",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5291,7 +5291,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#3",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5311,7 +5311,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#4",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5331,7 +5331,7 @@
   "expected": "GROSSE"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#5",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5351,7 +5351,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#6",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5371,7 +5371,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#7",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5391,7 +5391,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#8",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5411,7 +5411,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#9",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5431,7 +5431,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#10",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5451,7 +5451,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#11",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5471,7 +5471,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#12",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5491,7 +5491,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#13",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5511,7 +5511,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#14",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5531,7 +5531,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#15",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5551,7 +5551,7 @@
   "expected": "GROSSE"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#16",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5571,7 +5571,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#17",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5591,7 +5591,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#18",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5611,7 +5611,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#19",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5631,7 +5631,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#20",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5651,7 +5651,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#21",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5671,7 +5671,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#22",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5691,7 +5691,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#23",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5711,7 +5711,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#24",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5731,7 +5731,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#25",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5751,7 +5751,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#26",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5771,7 +5771,7 @@
   "expected": "GROSSE"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#27",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5791,7 +5791,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#28",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5811,7 +5811,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#29",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5831,7 +5831,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#30",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5851,7 +5851,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#31",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5871,7 +5871,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#32",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5891,7 +5891,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#33",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5911,7 +5911,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#34",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5931,7 +5931,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#35",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5951,7 +5951,7 @@
   "expected": "CASES"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#36",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5971,7 +5971,7 @@
   "expected": "GROSSE"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#37",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -5991,7 +5991,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#38",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6011,7 +6011,7 @@
   "expected": "ÅNGSTROM"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#39",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6031,7 +6031,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#40",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6051,7 +6051,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#41",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6071,7 +6071,7 @@
   "expected": "IDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testUpperLocale#42",
   "formula": "upper(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6091,7 +6091,7 @@
   "expected": "İDEMPOTENT"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#0",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6111,7 +6111,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#1",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6131,7 +6131,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#2",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6151,7 +6151,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#3",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6171,7 +6171,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#4",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6191,7 +6191,7 @@
   "expected": "große"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#5",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6211,7 +6211,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#6",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6231,7 +6231,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#7",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6251,7 +6251,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#8",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6271,7 +6271,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#9",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6291,7 +6291,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#10",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6311,7 +6311,7 @@
   "expected": "i̇dempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#11",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6331,7 +6331,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#12",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6351,7 +6351,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#13",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6371,7 +6371,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#14",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6391,7 +6391,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#15",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6411,7 +6411,7 @@
   "expected": "große"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#16",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6431,7 +6431,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#17",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6451,7 +6451,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#18",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6471,7 +6471,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#19",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6491,7 +6491,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#20",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6511,7 +6511,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#21",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6531,7 +6531,7 @@
   "expected": "i̇dempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#22",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6551,7 +6551,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#23",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6571,7 +6571,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#24",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6591,7 +6591,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#25",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6611,7 +6611,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#26",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6631,7 +6631,7 @@
   "expected": "große"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#27",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6651,7 +6651,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#28",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6671,7 +6671,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#29",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6691,7 +6691,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#30",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6711,7 +6711,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#31",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6731,7 +6731,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#32",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6751,7 +6751,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#33",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6771,7 +6771,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#34",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6791,7 +6791,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#35",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6811,7 +6811,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#36",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6831,7 +6831,7 @@
   "expected": "große"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#37",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6851,7 +6851,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#38",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6871,7 +6871,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#39",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6891,7 +6891,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#40",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6911,7 +6911,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#41",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6931,7 +6931,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#42",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6951,7 +6951,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#0",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6971,7 +6971,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#1",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -6991,7 +6991,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#2",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7011,7 +7011,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#3",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7031,7 +7031,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#4",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7051,7 +7051,7 @@
   "expected": "große"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#5",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7071,7 +7071,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#6",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7091,7 +7091,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#7",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7111,7 +7111,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#8",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7131,7 +7131,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#9",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7151,7 +7151,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#10",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7171,7 +7171,7 @@
   "expected": "i̇dempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#11",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7191,7 +7191,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#12",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7211,7 +7211,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#13",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7231,7 +7231,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#14",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7251,7 +7251,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#15",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7271,7 +7271,7 @@
   "expected": "große"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#16",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7291,7 +7291,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#17",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7311,7 +7311,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#18",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7331,7 +7331,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#19",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7351,7 +7351,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#20",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7371,7 +7371,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#21",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7391,7 +7391,7 @@
   "expected": "i̇dempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#22",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7411,7 +7411,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#23",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7431,7 +7431,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#24",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7451,7 +7451,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#25",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7471,7 +7471,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#26",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7491,7 +7491,7 @@
   "expected": "große"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#27",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7511,7 +7511,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#28",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7531,7 +7531,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#29",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7551,7 +7551,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#30",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7571,7 +7571,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#31",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7591,7 +7591,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#32",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7611,7 +7611,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#33",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7631,7 +7631,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#34",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7651,7 +7651,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#35",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7671,7 +7671,7 @@
   "expected": "cases"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#36",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7691,7 +7691,7 @@
   "expected": "große"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#37",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7711,7 +7711,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#38",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7731,7 +7731,7 @@
   "expected": "ångstrom"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#39",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7751,7 +7751,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#40",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7771,7 +7771,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#41",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7791,7 +7791,7 @@
   "expected": "ıdempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testLowerLocale#42",
   "formula": "lower(customText1__c,customText2__c)",
   "dataType": "Text",
@@ -7811,7 +7811,7 @@
   "expected": "idempotent"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#0",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -7831,7 +7831,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#1",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -7851,7 +7851,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#2",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -7871,7 +7871,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#3",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -7891,7 +7891,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#4",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -7911,7 +7911,7 @@
   "expected": "-1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#5",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -7931,7 +7931,7 @@
   "expected": ".0101010101010101010101010101010101010101"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#6",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -7951,7 +7951,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#7",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -7971,7 +7971,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#8",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -7991,7 +7991,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#9",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8011,7 +8011,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#10",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8031,7 +8031,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#11",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8051,7 +8051,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#12",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8071,7 +8071,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#13",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8091,7 +8091,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#14",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8111,7 +8111,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#15",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8131,7 +8131,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#16",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8151,7 +8151,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#17",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8171,7 +8171,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#18",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8191,7 +8191,7 @@
   "expected": "4.16265990153128261843019338536618499848"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#19",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8211,7 +8211,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#20",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8231,7 +8231,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#0",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8251,7 +8251,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#1",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8271,7 +8271,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#2",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8291,7 +8291,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#3",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8311,7 +8311,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#4",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8331,7 +8331,7 @@
   "expected": "-1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#5",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8351,7 +8351,7 @@
   "expected": ".0101010101010101010101010101010101010101"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#6",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8371,7 +8371,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#7",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8391,7 +8391,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#8",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8411,7 +8411,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#9",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8431,7 +8431,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#10",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8451,7 +8451,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#11",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8471,7 +8471,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#12",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8491,7 +8491,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#13",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8511,7 +8511,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#14",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8531,7 +8531,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#15",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8551,7 +8551,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#16",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8571,7 +8571,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#17",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8591,7 +8591,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#18",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8611,7 +8611,7 @@
   "expected": "4.16265990153128261843019338536618499848"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#19",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8631,7 +8631,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testExponentiationOperator#20",
   "formula": "customNumber1__c ^ customNumber2__c",
   "dataType": "Double",
@@ -8651,7 +8651,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#0",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8676,7 +8676,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#1",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8701,7 +8701,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#2",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8726,7 +8726,7 @@
   "expected": "100"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#3",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8751,7 +8751,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#4",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8776,7 +8776,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#5",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8801,7 +8801,7 @@
   "expected": ".00000001"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#6",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8826,7 +8826,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#7",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8851,7 +8851,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#8",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8876,7 +8876,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#9",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8901,7 +8901,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#10",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8926,7 +8926,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#11",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8951,7 +8951,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#12",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -8976,7 +8976,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#13",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9001,7 +9001,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#14",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9026,7 +9026,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#0",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9051,7 +9051,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#1",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9076,7 +9076,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#2",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9101,7 +9101,7 @@
   "expected": "100"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#3",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9126,7 +9126,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#4",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9151,7 +9151,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#5",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9176,7 +9176,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#6",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9201,7 +9201,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#7",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9226,7 +9226,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#8",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9251,7 +9251,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#9",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9276,7 +9276,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#10",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9301,7 +9301,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#11",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9326,7 +9326,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#12",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9351,7 +9351,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#13",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9376,7 +9376,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testBigDivideWithFunc#14",
   "formula": "( ( (customnumber1__c * customnumber2__c )/(value(text(customnumber2__c )) ^ customnumber2__c ) )*(customnumber3__c ^ customnumber3__c ))",
   "dataType": "Double",
@@ -9401,7 +9401,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSubUnary#0",
   "formula": "-(customnumber1__c)",
   "dataType": "Double",
@@ -9416,7 +9416,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSubUnary#1",
   "formula": "-(customnumber1__c)",
   "dataType": "Double",
@@ -9431,7 +9431,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSubUnary#2",
   "formula": "-(customnumber1__c)",
   "dataType": "Double",
@@ -9446,7 +9446,7 @@
   "expected": "-24"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSubUnary#3",
   "formula": "-(customnumber1__c)",
   "dataType": "Double",
@@ -9461,7 +9461,7 @@
   "expected": "-.99"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSubUnary#4",
   "formula": "-(customnumber1__c)",
   "dataType": "Double",
@@ -9476,7 +9476,7 @@
   "expected": "24"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSubUnary#0",
   "formula": "-(customnumber1__c)",
   "dataType": "Double",
@@ -9491,7 +9491,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSubUnary#1",
   "formula": "-(customnumber1__c)",
   "dataType": "Double",
@@ -9506,7 +9506,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSubUnary#2",
   "formula": "-(customnumber1__c)",
   "dataType": "Double",
@@ -9521,7 +9521,7 @@
   "expected": "-24"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSubUnary#3",
   "formula": "-(customnumber1__c)",
   "dataType": "Double",
@@ -9536,7 +9536,7 @@
   "expected": "-.99"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testSubUnary#4",
   "formula": "-(customnumber1__c)",
   "dataType": "Double",
@@ -9551,7 +9551,7 @@
   "expected": "24"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testOriginDateTime#0",
   "formula": "$System.originDateTime",
   "dataType": "DateTime",
@@ -9560,7 +9560,7 @@
   "expected": "1900-01-01 00:00:00Z"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "corpus:testOriginDateTime#0",
   "formula": "$System.originDateTime",
   "dataType": "DateTime",
@@ -9569,7 +9569,7 @@
   "expected": "1900-01-01 00:00:00Z"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:unary_minus_blank#0",
   "formula": "-customnumber1__c",
   "dataType": "Double",
@@ -9584,7 +9584,7 @@
   "expected": "0"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:unary_minus_blank#0",
   "formula": "-customnumber1__c",
   "dataType": "Double",
@@ -9599,7 +9599,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:blank_mode_canary#0",
   "formula": "IF(customnumber1__c < 5, 1, 2)",
   "dataType": "Double",
@@ -9614,7 +9614,7 @@
   "expected": "1"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:blank_mode_canary#0",
   "formula": "IF(customnumber1__c < 5, 1, 2)",
   "dataType": "Double",
@@ -9629,7 +9629,7 @@
   "expected": "2"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:addmonths_jan31_feb#0",
   "formula": "ADDMONTHS(DATE(2025, 1, 31), 1)",
   "dataType": "DateOnly",
@@ -9638,7 +9638,7 @@
   "expected": "2025-02-28"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:addmonths_jan31_feb_leap#0",
   "formula": "ADDMONTHS(DATE(2024, 1, 31), 1)",
   "dataType": "DateOnly",
@@ -9647,7 +9647,7 @@
   "expected": "2024-02-29"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:addmonths_jan30_feb#0",
   "formula": "ADDMONTHS(DATE(2025, 1, 30), 1)",
   "dataType": "DateOnly",
@@ -9656,7 +9656,7 @@
   "expected": "2025-02-28"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:addmonths_feb28_mar#0",
   "formula": "ADDMONTHS(DATE(2025, 2, 28), 1)",
   "dataType": "DateOnly",
@@ -9665,7 +9665,7 @@
   "expected": "2025-03-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:date_year_4000#0",
   "formula": "DATE(4000, 12, 31)",
   "dataType": "DateOnly",
@@ -9674,7 +9674,7 @@
   "expected": "4000-12-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:date_year_4001#0",
   "formula": "DATE(4001, 1, 1)",
   "dataType": "DateOnly",
@@ -9683,7 +9683,7 @@
   "expected": "4001-01-01"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:date_year_9999#0",
   "formula": "DATE(9999, 12, 31)",
   "dataType": "DateOnly",
@@ -9692,7 +9692,7 @@
   "expected": "9999-12-31"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:divzero_number#0",
   "formula": "1 / 0",
   "dataType": "Double",
@@ -9701,7 +9701,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:divzero_text#0",
   "formula": "TEXT(1 / 0)",
   "dataType": "Text",
@@ -9710,7 +9710,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:divzero_isblank#0",
   "formula": "IF(ISBLANK(1 / 0), \"BLANKRESULT\", \"VALUERESULT\")",
   "dataType": "Text",
@@ -9719,7 +9719,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:divzero_blankvalue#0",
   "formula": "BLANKVALUE(1 / 0, 42)",
   "dataType": "Double",
@@ -9728,7 +9728,7 @@
   "expected": "null"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:mod_zero#0",
   "formula": "MOD(3, 0)",
   "dataType": "Double",
@@ -9737,7 +9737,7 @@
   "expected": "3"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:case_eq_formula_field#0",
   "formula": "IF(\"a\" = \"A\", 1, 2)",
   "dataType": "Double",
@@ -9746,7 +9746,7 @@
   "expected": "2"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:text_third#0",
   "formula": "TEXT(1 / 3)",
   "dataType": "Text",
@@ -9755,7 +9755,7 @@
   "expected": ".3333333333333333333333333333333333333333"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:text_trailing_zeros#0",
   "formula": "TEXT(2.50)",
   "dataType": "Text",
@@ -9764,7 +9764,7 @@
   "expected": "2.5"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:text_percent_field#0",
   "formula": "TEXT(custompercent__c)",
   "dataType": "Text",
@@ -9779,7 +9779,7 @@
   "expected": ".99"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:text_currency_field#0",
   "formula": "TEXT(customcurrency__c)",
   "dataType": "Text",
@@ -9794,7 +9794,7 @@
   "expected": "19.99"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:text_picklist#0",
   "formula": "TEXT(custompick__c)",
   "dataType": "Text",
@@ -9809,7 +9809,7 @@
   "expected": "Alpha"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:text_time#0",
   "formula": "TEXT(TIMEVALUE(\"17:30:45.125\"))",
   "dataType": "Text",
@@ -9818,7 +9818,7 @@
   "expected": "17:30:45.125"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:text_datetime_format#0",
   "formula": "TEXT(customdatetime1__c)",
   "dataType": "Text",
@@ -9833,7 +9833,7 @@
   "expected": "2026-03-08 09:30:00Z"
  },
  {
-  "source": "org:00Dbm00000rUEa5EAG:2026-07-26",
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "name": "semantics:datetime_plus_hour#0",
   "formula": "customdatetime1__c + 1 / 24",
   "dataType": "DateTime",
@@ -9846,5 +9846,191 @@
   ],
   "blankMode": "blank",
   "expected": "2026-03-08 10:30:00Z"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_half_literal#0",
+  "formula": "TEXT(0.5)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0.5"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_neg_half_literal#0",
+  "formula": "TEXT(-0.5)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "-.5"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_quarter_exact#0",
+  "formula": "TEXT(1 / 4)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": ".25"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_int_div#0",
+  "formula": "TEXT(6 / 2)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "3"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_int_literal#0",
+  "formula": "TEXT(3.0)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "3"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_ninth#0",
+  "formula": "TEXT(1 / 9)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": ".1111111111111111111111111111111111111111"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_two_thirds#0",
+  "formula": "TEXT(2 / 3)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": ".6666666666666666666666666666666666666667"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_tiny_div#0",
+  "formula": "TEXT(1 / 100000000)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": ".00000001"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_big_pow#0",
+  "formula": "TEXT(10 ^ 20)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "100000000000000000000"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_field_half#0",
+  "formula": "TEXT(TxHalf__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "TxHalf__c",
+    "type": "Number",
+    "value": "0.5"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": ".5"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_four_thirds#0",
+  "formula": "TEXT(4 / 3)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "1.33333333333333333333333333333333333333"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_kilo_third#0",
+  "formula": "TEXT(1000 / 3)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "333.333333333333333333333333333333333333"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_small_thirds#0",
+  "formula": "TEXT(2 / 30000)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": ".00006666666666666666666666666666666666666667"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_big_thirds#0",
+  "formula": "TEXT(20000 / 3)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "6666.666666666666666666666666666666666667"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:text_chain_add#0",
+  "formula": "TEXT(2 / 3 + 2)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "2.66666666666666666666666666666666666667"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:ff_mfloor#0",
+  "formula": "MFLOOR(1.5)",
+  "dataType": "Double",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "1"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:ff_mceiling#0",
+  "formula": "MCEILING(1.5)",
+  "dataType": "Double",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "2"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:ff_initcap#0",
+  "formula": "INITCAP(\"ab cd\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "Ab Cd"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:ff_reverse#0",
+  "formula": "REVERSE(\"ab\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "ba"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:ff_ascii#0",
+  "formula": "ASCII(\"a\")",
+  "dataType": "Double",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "97"
  }
 ]

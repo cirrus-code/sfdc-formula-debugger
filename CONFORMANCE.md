@@ -142,17 +142,22 @@ is the remaining automation.
 
 ## Status snapshot
 
-Conformance is **~98.9%** over the comparable subset (`src/engine/conformance.test.ts`,
-baseline locked at 0.98). Path so far: WS3 oracle rules 0.74 → 0.86; a
-corpus-driven semantics pass (FLOOR/CEILING toward-zero, zero-mode numeric
-coercion, three-valued blank comparison, blank propagation, DATE bounds) → 0.97;
-a function port (TRUNC, MFLOOR/MCEILING, SUBSTR, INITCAP, REVERSE, ASCII, CHR,
-IFERROR) moved ~740 rows out of "unsupported" into the comparable set; the
-field-valued oracle then settled the numeric model (39-sig-fig internal math
-materialized to 32 places, `+` concatenating text) → 0.99. The remaining ~56
-failures are a diverse long tail — date arithmetic and rendering, context
-globals like `$System.originDateTime`, a few blank-interaction rows, locale-aware
-casing — triaged in VERIFICATION.md's conformance backlog.
+Oracle-tier conformance is **99.3%** (`src/engine/conformance.test.ts`,
+baseline locked at 0.98); **org-tier conformance is 100%** of comparable rows
+(`src/engine/org-conformance.test.ts`) with one quarantined Percent-TEXT row.
+Path so far: WS3 oracle rules 0.74 → 0.86; a corpus-driven semantics pass
+(FLOOR/CEILING toward-zero, zero-mode numeric coercion, three-valued blank
+comparison, blank propagation, DATE bounds) → 0.97; a function port (TRUNC,
+MFLOOR/MCEILING, SUBSTR, INITCAP, REVERSE, ASCII, CHR, IFERROR) moved ~740
+rows out of "unsupported" into the comparable set; the field-valued oracle
+settled the numeric model → 0.99; the real-org passes (wave 1 semantics
+2026-07-26, wave 2 per-context availability + wave-1 riders 2026-07-28)
+settled TEXT() rendering (Oracle-NUMBER-parity digit budget, engine precision
+40), `&` precedence observability, and the per-context availability matrix
+(`corpus/org-availability.json`, enforced by
+`src/registry/org-availability.test.ts`). The remaining oracle-tier failures
+are rows the org has overruled (org wins) plus a small date-rendering tail —
+triaged in VERIFICATION.md's conformance backlog.
 
 ## Licensing
 

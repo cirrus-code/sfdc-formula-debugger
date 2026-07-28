@@ -7,11 +7,14 @@ import type { SfType } from "../registry/index.ts";
  * is a first-class state of every value, not a separate type.
  */
 
-// Round-half-up so ROUND(2.5) = 3. Precision 39 significant figures mirrors
-// Salesforce's internal MathContext(39, HALF_UP): division/multiplication carry
-// 39 sig-figs and are only rounded to 32 decimal places at materialization
-// (see evaluator MAX_SCALE). Verified against the JVM oracle (VERIFICATION.md).
-Decimal.set({ rounding: Decimal.ROUND_HALF_UP, precision: 39 });
+// Round-half-up so ROUND(2.5) = 3. Precision 40 significant figures:
+// the OSS engine computes at MathContext(39, HALF_UP), but the product's own
+// TEXT() renders a 40th digit for sub-1 values (org-verified 2026-07-28,
+// semantics:text_third/text_ninth/text_two_thirds — 40 fraction digits,
+// HALF_UP at the boundary), so internal math must carry it. Values are still
+// rounded to 32 decimal places at materialization (see evaluator MAX_SCALE),
+// which keeps every oracle-verified arithmetic result unchanged.
+Decimal.set({ rounding: Decimal.ROUND_HALF_UP, precision: 40 });
 export { Decimal };
 
 export type BlankMode = "zero" | "blank";
