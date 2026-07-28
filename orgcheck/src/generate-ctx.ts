@@ -67,6 +67,8 @@ const LITERALS: Partial<Record<SfType, { src: string; taint: string[] }>> = {
   Text: { src: '"a"', taint: [] },
   Boolean: { src: "TRUE", taint: [] },
   Date: { src: "DATE(2026, 1, 1)", taint: ["DATE"] },
+  Datetime: { src: 'DATETIMEVALUE("2026-01-01 00:00:00")', taint: ["DATETIMEVALUE"] },
+  Time: { src: 'TIMEVALUE("12:00:00")', taint: ["TIMEVALUE"] },
   Unknown: { src: '"a"', taint: [] },
 };
 
@@ -77,7 +79,10 @@ const CTX_FIELDS: Partial<Record<SfType, string>> = {
   Text: "CtxText__c",
   Boolean: "CtxBool__c",
   Date: "CtxDate__c",
+  Datetime: "CtxDT__c",
+  Time: "CtxTime__c",
   Picklist: "CtxPick__c",
+  Multipicklist: "CtxMulti__c",
   Unknown: "CtxText__c",
 };
 
@@ -185,7 +190,9 @@ type SimpleFieldType =
   | "Checkbox"
   | "Date"
   | "DateTime"
-  | "Picklist";
+  | "Time"
+  | "Picklist"
+  | "MultiselectPicklist";
 
 function fieldChild(
   apiName: string,
@@ -213,10 +220,13 @@ function fieldChild(
     // needs one anyway.
     lines.splice(1, 0, `        <defaultValue>false</defaultValue>`);
   }
-  if (type === "Picklist") {
+  if (type === "Picklist" || type === "MultiselectPicklist") {
     lines.push(
       `        <valueSet>\n            <restricted>true</restricted>\n            <valueSetDefinition>\n                <sorted>false</sorted>\n                <value>\n                    <fullName>a</fullName>\n                    <default>false</default>\n                    <label>a</label>\n                </value>\n                <value>\n                    <fullName>b</fullName>\n                    <default>false</default>\n                    <label>b</label>\n                </value>\n            </valueSetDefinition>\n        </valueSet>`,
     );
+  }
+  if (type === "MultiselectPicklist") {
+    lines.push(`        <visibleLines>3</visibleLines>`);
   }
   return `    <fields>\n${lines.join("\n")}\n    </fields>`;
 }
@@ -346,6 +356,7 @@ const TARGET_FIELDS: Partial<Record<SfType, string>> = {
   Boolean: "TgtBool__c",
   Date: "TgtDate__c",
   Datetime: "TgtDT__c",
+  Time: "TgtTime__c",
 };
 
 function quickActionXml(
@@ -485,7 +496,10 @@ const CTX_FIELD_DEFS: [string, SimpleFieldType][] = [
   ["CtxNum__c", "Number"],
   ["CtxBool__c", "Checkbox"],
   ["CtxDate__c", "Date"],
+  ["CtxDT__c", "DateTime"],
+  ["CtxTime__c", "Time"],
   ["CtxPick__c", "Picklist"],
+  ["CtxMulti__c", "MultiselectPicklist"],
 ];
 const TGT_FIELD_DEFS: [string, SimpleFieldType][] = [
   ["TgtText__c", "Text"],
@@ -493,6 +507,7 @@ const TGT_FIELD_DEFS: [string, SimpleFieldType][] = [
   ["TgtBool__c", "Checkbox"],
   ["TgtDate__c", "Date"],
   ["TgtDT__c", "DateTime"],
+  ["TgtTime__c", "Time"],
 ];
 
 // Probe objects. Chunked per container so per-object caps (100 active VRs, 50
@@ -504,6 +519,8 @@ addObject("FxCtxW1__c", CTX_FIELD_DEFS);
 addObject("FxCtxW2__c", CTX_FIELD_DEFS);
 addObject("FxCtxW3__c", [...CTX_FIELD_DEFS, ...TGT_FIELD_DEFS]);
 addObject("FxCtxW4__c", [...CTX_FIELD_DEFS, ...TGT_FIELD_DEFS]);
+addObject("FxCtxW5__c", CTX_FIELD_DEFS);
+addObject("FxCtxF__c", CTX_FIELD_DEFS);
 addObject("FxCtxD__c", []);
 addObject("FxCtxB__c", CTX_FIELD_DEFS);
 addObject("FxCtxQ__c", [...TGT_FIELD_DEFS, ["LayoutTxt__c", "Text"]]);
@@ -684,6 +701,84 @@ function hostFor(objects: string[], index: number, perObject: number): string {
   return objects[Math.min(Math.floor(index / perObject), objects.length - 1)];
 }
 
+
+// --- formula_field: typed formula CustomFields, field-capable, no wrapper ---
+
+{
+  const container: CtxContainerId = "formula_field";
+  const canary: string[] = [];
+  const matrix: string[] = [];
+  const FF_TYPES: Partial<Record<SfType, string>> = {
+    Text: "Text",
+    Number: "Number",
+    Boolean: "Checkbox",
+    Date: "Date",
+    Datetime: "DateTime",
+    Time: "Time",
+  };
+  for (const p of probeList(container)) {
+    let formula: string;
+    let returns: SfType;
+    let taint: string[] = [];
+    if (p.kind === "canary_ok") {
+      formula = '"ok"';
+      returns = "Text";
+    } else if (p.kind === "canary_bogus") {
+      formula = BOGUS;
+      returns = "Text";
+    } else if (p.kind === "return_type") {
+      formula = '"x"';
+      returns = "Number"; // text formula declared as a Number field
+    } else {
+      const r = resolve(p.inv, "");
+      if ("untestable" in r) {
+        markUntestable(container, p, r.untestable);
+        continue;
+      }
+      formula = r.formula;
+      returns = p.inv.returns;
+      taint = r.taint;
+    }
+    const ffType = FF_TYPES[returns];
+    if (!ffType) {
+      markUntestable(container, p, `no formula-field type for ${returns}`);
+      continue;
+    }
+    const apiName = `FF_${probeName(p.id)}__c`;
+    const label = apiName.replace(/__c$/, "");
+    const typeLines = [
+      `        <fullName>${apiName}</fullName>`,
+      `        <formula>${esc(formula)}</formula>`,
+      `        <formulaTreatBlanksAs>BlankAsBlank</formulaTreatBlanksAs>`,
+      `        <label>${label}</label>`,
+    ];
+    if (ffType === "Number") {
+      typeLines.push(
+        `        <precision>18</precision>`,
+        `        <scale>2</scale>`,
+      );
+    }
+    typeLines.push(`        <type>${ffType}</type>`);
+    const c: CtxComponent = {
+      id: `${container}:${p.id}`,
+      kind: p.kind,
+      container,
+      name: p.name,
+      formula,
+      taint,
+      mdType: "CustomField",
+      fullName: `FxCtxF__c.${apiName}`,
+      file: objectFile("FxCtxF__c"),
+      childXml: `    <fields>\n${typeLines.join("\n")}\n    </fields>`,
+    };
+    addComponent(c);
+    (p.kind === "canary_ok" || p.kind === "canary_bogus" ? canary : matrix).push(
+      c.id,
+    );
+  }
+  pushBatches(container, { canary, matrix });
+}
+
 // --- validation_rule / workflow_rule / approval: boolean containers ---
 
 function booleanContainer(
@@ -744,7 +839,7 @@ booleanContainer(
 
 booleanContainer(
   "workflow_rule",
-  ["FxCtxW1__c", "FxCtxW2__c"],
+  ["FxCtxW1__c", "FxCtxW2__c", "FxCtxW5__c"],
   (host, name, formula, p) => {
     const file = `workflows/${host}.workflow`;
     shells[file] ??=
@@ -898,6 +993,7 @@ approvalContainer("approval_step", ["FxCtxA3__c", "FxCtxA4__c"]);
         Number: "Number",
         Date: "Date",
         Datetime: "DateTime",
+        Time: "Time",
       } as Partial<Record<SfType, SimpleFieldType>>
     )[returns];
     if (!fieldType) {

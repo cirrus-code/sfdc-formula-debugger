@@ -10,7 +10,9 @@ import {
   asText,
   blank,
   bool,
+  dateValue,
   datetimeValue,
+  timeValue,
   Decimal,
   error,
   isError,
@@ -18,6 +20,7 @@ import {
   text,
   UnsupportedError,
   type BlankMode,
+  type DateParts,
   type DatetimeVal,
   type EvalResult,
   type SfValue,
@@ -27,6 +30,8 @@ import {
   SPECIAL_FORMS,
   boolCoerce,
   concatString,
+  dateFromEpoch,
+  epochOfDate,
 } from "./builtins.ts";
 
 export interface EvalEnv {
@@ -254,6 +259,9 @@ function arithmetic(
   ) {
     return blank("Number");
   }
+  if (isDatelike(l) || isDatelike(r)) {
+    return temporalArithmetic(op, l, r, env);
+  }
   const a = toDecimal(l, env);
   const b = toDecimal(r, env);
   // Results carry decimal.js's 39-sig-fig precision (value.ts); they are rounded
@@ -281,6 +289,87 @@ function arithmetic(
   }
 }
 
+const DAY_MS = 86_400_000;
+
+/**
+ * Date/datetime/time arithmetic, corpus-verified (testAddDate, testAddDateTime,
+ * testSubDateTime, testAddTimeValue*, testSubtractTimeValue*,
+ * testSubtractTwoTimeFields):
+ *   date ± n      → date, with n truncated toward zero (28 + 3.5 → Mar 2)
+ *   date − date   → whole days
+ *   datetime ± n  → datetime, n in fractional days at millisecond resolution
+ *   dt − dt       → fractional days (1.375)
+ *   time + n      → time, n in milliseconds, wrapping midnight (+26h ≡ +2h)
+ *   time − n      → time, but out-of-range is a runtime error, not a wrap
+ *   time − time   → milliseconds
+ * Anything else (reversed number-first operands, cross-family mixes) has no
+ * corpus row and stays a simulated error rather than a guess.
+ */
+function temporalArithmetic(
+  op: "+" | "-" | "*" | "/" | "^",
+  l: SfValue,
+  r: SfValue,
+  env: EvalEnv,
+): EvalResult {
+  const unsupportedMix = error(
+    `#Error! (unsupported ${l.type} ${op} ${r.type})`,
+  );
+  if (op !== "+" && op !== "-") {
+    return unsupportedMix;
+  }
+  const sign = op === "+" ? 1 : -1;
+  if (l.type === "Date" && isNumericType(r)) {
+    const days = toDecimal(r, env).truncated().toNumber();
+    return dateValue(dateFromEpoch(epochOfDate(asDate(l)) + sign * days * DAY_MS));
+  }
+  if (l.type === "Date" && r.type === "Date" && op === "-") {
+    return num((epochOfDate(asDate(l)) - epochOfDate(asDate(r))) / DAY_MS);
+  }
+  if (l.type === "Datetime" && isNumericType(r)) {
+    const deltaMs = toDecimal(r, env).times(DAY_MS).toNumber();
+    return datetimeValue(asDatetimeMs(l) + sign * Math.round(deltaMs));
+  }
+  if (l.type === "Datetime" && r.type === "Datetime" && op === "-") {
+    return num(new Decimal(asDatetimeMs(l) - asDatetimeMs(r)).div(DAY_MS));
+  }
+  if (l.type === "Time" && isNumericType(r)) {
+    // Milliseconds; a result past midnight wraps (10:34 + 26h ≡ 12:34,
+    // testAddBigTimeValue) but a negative one is a runtime error
+    // (testSubtractBigTimeValue, testAddHoursWithTwoCustFields).
+    const delta = toDecimal(r, env).truncated().toNumber();
+    const raw = asTimeMs(l) + sign * delta;
+    return raw < 0 ? error("#Error! (time out of range)") : timeValue(raw % DAY_MS);
+  }
+  if (l.type === "Time" && r.type === "Time" && op === "-") {
+    // A negative difference wraps forward a day (testSubtractTwoTimeFields:
+    // earlier − later = 24h − gap, never negative).
+    const diff = asTimeMs(l) - asTimeMs(r);
+    return num(((diff % DAY_MS) + DAY_MS) % DAY_MS);
+  }
+  return unsupportedMix;
+}
+
+function asDate(v: SfValue): DateParts {
+  if (v.type !== "Date") {
+    throw new Error(`Expected a date, got ${v.type}`);
+  }
+  return v.data;
+}
+
+function asDatetimeMs(v: SfValue): number {
+  if (v.type !== "Datetime") {
+    throw new Error(`Expected a datetime, got ${v.type}`);
+  }
+  return v.data.epochMillis;
+}
+
+function asTimeMs(v: SfValue): number {
+  if (v.type !== "Time") {
+    throw new Error(`Expected a time, got ${v.type}`);
+  }
+  return v.data.millisOfDay;
+}
+
 /**
  * Three-valued equality under Salesforce blank semantics. Returns `null` when
  * the result is unknown (a blank numeric operand), which the caller renders as a
@@ -303,7 +392,29 @@ function tryEqual(l: SfValue, r: SfValue): boolean | null {
   if (l.type === "Boolean" && r.type === "Boolean") {
     return l.data === r.data;
   }
+  const lt = temporalMillis(l);
+  const rt = temporalMillis(r);
+  if (lt !== null && rt !== null && l.type === r.type) {
+    return lt === rt;
+  }
   return false;
+}
+
+/** A comparable instant for same-type temporal comparison, or null. */
+function temporalMillis(v: SfValue): number | null {
+  if (v.blank) {
+    return null;
+  }
+  switch (v.type) {
+    case "Date":
+      return epochOfDate(v.data);
+    case "Datetime":
+      return v.data.epochMillis;
+    case "Time":
+      return v.data.millisOfDay;
+    default:
+      return null;
+  }
 }
 
 function isTextType(v: SfValue): boolean {
@@ -338,8 +449,12 @@ function compare(
     return bool(false);
   }
   let cmp: number;
+  const lt = temporalMillis(l);
+  const rt = temporalMillis(r);
   if (isTextType(l) && isTextType(r)) {
     cmp = strcmp(asText(l), asText(r));
+  } else if (lt !== null && rt !== null && l.type === r.type) {
+    cmp = Math.sign(lt - rt);
   } else {
     // Order at the 32-place materialized scale, consistent with equality.
     cmp = toDecimal(materialize(l), env).comparedTo(

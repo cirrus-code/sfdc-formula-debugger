@@ -5,6 +5,8 @@ import { evaluateFormula } from "./evaluator.ts";
 import {
   blank,
   bool,
+  dateValue,
+  datetimeValue,
   Decimal,
   isError,
   text,
@@ -14,6 +16,7 @@ import {
   asText,
   type SfValue,
 } from "./value.ts";
+import { concatString } from "./builtins.ts";
 
 /**
  * Conformance comparison of our evaluator against an oracle corpus row
@@ -132,11 +135,42 @@ function buildField(f: CorpusField): SfValue {
     case "Picklist":
     case "Multipicklist":
       return text(f.value);
+    case "Date":
+    case "Datetime":
+      return buildTemporal(f.type, f.value);
     default:
-      // Date/Datetime/Time input encodings vary across the corpus; these rows
-      // are refused (counted as unsupported) rather than guessed.
       throw new Unsupported(`unbuildable field type ${f.type}`);
   }
+}
+
+/**
+ * Corpus temporal encoding: `Y:M:D[:h:m:s[:GMT|:PST]]` (the corpus contains
+ * the same instant in both PST and GMT spellings, pinning PST at −8h), plus a
+ * literal "No data" sentinel for blank. A Date field fed a full timestamp
+ * truncates to its GMT date. Unknown shapes stay a loud refusal.
+ */
+function buildTemporal(type: "Date" | "Datetime", value: string): SfValue {
+  if (value === "No data") {
+    return blank(type);
+  }
+  const m = value.match(
+    /^(\d{4}):(\d{1,2}):(\d{1,2})(?::(\d{1,2}):(\d{1,2}):(\d{1,2})(?::(GMT|PST))?)?$/,
+  );
+  if (!m) {
+    throw new Unsupported(`unbuildable ${type} encoding ${value}`);
+  }
+  const [y, mo, d, hh, mi, ss] = m.slice(1, 7).map((x) => Number(x ?? 0));
+  const offsetHours = m[7] === "PST" ? 8 : 0;
+  const epoch = Date.UTC(y, mo - 1, d, hh + offsetHours, mi, ss);
+  if (type === "Datetime") {
+    return datetimeValue(epoch);
+  }
+  const g = new Date(epoch);
+  return dateValue({
+    year: g.getUTCFullYear(),
+    month: g.getUTCMonth() + 1,
+    day: g.getUTCDate(),
+  });
 }
 
 function compare(
@@ -191,6 +225,25 @@ function compare(
         status: isText(result) && asText(result) === expected ? "pass" : "fail",
         got: describe(result),
       };
+    case "dateonly":
+    case "datetime":
+    case "timeonly": {
+      // The oracle renders temporals Java-style ("Tue Nov 15 17:00:00 GMT
+      // 2005"); those rows stay incomparable (quarantine, as before). Rows
+      // rendered in our own shapes — ISO dates, GMT "…Z" datetimes,
+      // LocalTime-style times (exactly the org-tier encodings) — compare.
+      if (/^[A-Z][a-z]{2} [A-Z][a-z]{2} /.test(expected)) {
+        return { status: "quarantine" };
+      }
+      const rendered =
+        result.type === "Date" || result.type === "Datetime" || result.type === "Time"
+          ? concatString(result)
+          : null;
+      return {
+        status: rendered === expected ? "pass" : "fail",
+        got: rendered ?? describe(result),
+      };
+    }
     default:
       return { status: "quarantine" };
   }

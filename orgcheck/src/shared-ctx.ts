@@ -7,8 +7,10 @@
 // verdict, so the plan is a list of deployable component fragments rather than
 // formula fields + records.
 
-/** Wave-2 context ids — every registry context except formula_field (wave 1). */
+/** Wave-2 context ids — every registry context (formula_field joined the
+ * matrix once the registry outgrew wave 1's hand-written probes). */
 export type CtxContainerId =
+  | "formula_field"
   | "validation_rule"
   | "workflow_rule"
   | "workflow_field_update"

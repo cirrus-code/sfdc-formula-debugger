@@ -33,12 +33,9 @@ const fnByName = new Map(FUNCTIONS.map((f) => [f.name, f]));
 const ctxById = new Map(CONTEXTS.map((c) => [c.id, c]));
 
 describe("registry availability vs org-verified matrix", () => {
-  it("covers every wave-2 context id", () => {
+  it("covers every context id", () => {
     const probed = new Set(rows.map((r) => r.context));
     for (const ctx of CONTEXTS) {
-      if (ctx.id === "formula_field") {
-        continue; // wave-1 territory (semantics probes, not this matrix)
-      }
       expect(probed, `no availability rows for context ${ctx.id}`).toContain(
         ctx.id,
       );

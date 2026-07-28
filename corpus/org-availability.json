@@ -1,6 +1,1033 @@
 [
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "LN",
+  "formula": "LN(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "LOG",
+  "formula": "LOG(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "EXP",
+  "formula": "EXP(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "SIN",
+  "formula": "SIN(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "COS",
+  "formula": "COS(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "TAN",
+  "formula": "TAN(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ASIN",
+  "formula": "ASIN(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ACOS",
+  "formula": "ACOS(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ATAN",
+  "formula": "ATAN(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ATAN2",
+  "formula": "ATAN2(CtxNum__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "IF",
+  "formula": "IF(CtxBool__c, CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "AND",
+  "formula": "AND(CtxBool__c, CtxBool__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "OR",
+  "formula": "OR(CtxBool__c, CtxBool__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "NOT",
+  "formula": "NOT(CtxBool__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "CASE",
+  "formula": "CASE(CtxNum__c, 1, \"a\", \"b\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ISBLANK",
+  "formula": "ISBLANK(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ISNULL",
+  "formula": "ISNULL(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ISNUMBER",
+  "formula": "ISNUMBER(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ISPICKVAL",
+  "formula": "ISPICKVAL(CtxPick__c, \"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "NULLVALUE",
+  "formula": "NULLVALUE(CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "BLANKVALUE",
+  "formula": "BLANKVALUE(CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "LEN",
+  "formula": "LEN(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "LEFT",
+  "formula": "LEFT(CtxText__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "RIGHT",
+  "formula": "RIGHT(CtxText__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "MID",
+  "formula": "MID(CtxText__c, CtxNum__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "TRIM",
+  "formula": "TRIM(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "UPPER",
+  "formula": "UPPER(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "LOWER",
+  "formula": "LOWER(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "CONTAINS",
+  "formula": "CONTAINS(CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "BEGINS",
+  "formula": "BEGINS(CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "FIND",
+  "formula": "FIND(CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "SUBSTITUTE",
+  "formula": "SUBSTITUTE(CtxText__c, CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "TEXT",
+  "formula": "TEXT(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "VALUE",
+  "formula": "VALUE(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "CONCATENATE",
+  "formula": "CONCATENATE(CtxText__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Unknown function CONCATENATE. Check spelling."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "SUBSTR",
+  "formula": "SUBSTR(CtxText__c, CtxNum__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function SUBSTR may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "INITCAP",
+  "formula": "INITCAP(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "REVERSE",
+  "formula": "REVERSE(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ASCII",
+  "formula": "ASCII(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "CHR",
+  "formula": "CHR(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "IN",
+  "formula": "IN(CtxText__c, \"a\", \"b\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Unknown function IN. Check spelling."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "IFERROR",
+  "formula": "IFERROR(CtxText__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Unknown function IFERROR. Check spelling."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ABS",
+  "formula": "ABS(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ROUND",
+  "formula": "ROUND(CtxNum__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "FLOOR",
+  "formula": "FLOOR(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "CEILING",
+  "formula": "CEILING(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "MOD",
+  "formula": "MOD(CtxNum__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "SQRT",
+  "formula": "SQRT(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "MAX",
+  "formula": "MAX(CtxNum__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "MIN",
+  "formula": "MIN(CtxNum__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "POWER",
+  "formula": "POWER(CtxNum__c, CtxNum__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function POWER may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "TRUNC",
+  "formula": "TRUNC(CtxNum__c, 0)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "MFLOOR",
+  "formula": "MFLOOR(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "MCEILING",
+  "formula": "MCEILING(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "TODAY",
+  "formula": "TODAY()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "NOW",
+  "formula": "NOW()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "DATE",
+  "formula": "DATE(CtxNum__c, CtxNum__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "DATEVALUE",
+  "formula": "DATEVALUE(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "YEAR",
+  "formula": "YEAR(CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "MONTH",
+  "formula": "MONTH(CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "DAY",
+  "formula": "DAY(CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ADDMONTHS",
+  "formula": "ADDMONTHS(CtxDate__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "PRIORVALUE",
+  "formula": "PRIORVALUE(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function PRIORVALUE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ISCHANGED",
+  "formula": "ISCHANGED(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function ISCHANGED may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ISNEW",
+  "formula": "ISNEW()",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function ISNEW may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "VLOOKUP",
+  "formula": "VLOOKUP($ObjectType.FxRt__c.Fields.Gate__c, $ObjectType.FxRt__c.Fields.Name, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "inconclusive",
+  "problem": "Field $ObjectType.FxRt__c.Fields.Gate__c does not exist. Check spelling.",
+  "taint": [
+   "$ObjectType"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "DATETIMEVALUE",
+  "formula": "DATETIMEVALUE(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "TIMEVALUE",
+  "formula": "TIMEVALUE(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "TIMENOW",
+  "formula": "TIMENOW()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "HOUR",
+  "formula": "HOUR(CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "MINUTE",
+  "formula": "MINUTE(CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "SECOND",
+  "formula": "SECOND(CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "MILLISECOND",
+  "formula": "MILLISECOND(CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "WEEKDAY",
+  "formula": "WEEKDAY(CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "DAYOFYEAR",
+  "formula": "DAYOFYEAR(CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ISOWEEK",
+  "formula": "ISOWEEK(CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ISOYEAR",
+  "formula": "ISOYEAR(CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "UNIXTIMESTAMP",
+  "formula": "UNIXTIMESTAMP(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Incorrect argument type for function 'UNIXTIMESTAMP()'."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "FROMUNIXTIME",
+  "formula": "FROMUNIXTIME(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "LPAD",
+  "formula": "LPAD(CtxText__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "RPAD",
+  "formula": "RPAD(CtxText__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "PI",
+  "formula": "PI()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "INCLUDES",
+  "formula": "INCLUDES(CtxMulti__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Incorrect parameter type for function 'INCLUDES()'. Expected Text Literal, received Text"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "REGEX",
+  "formula": "REGEX(CtxText__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function REGEX may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "DISTANCE",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "GEOLOCATION"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "GEOLOCATION",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DISTANCE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "BR",
+  "formula": "BR()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "CASESAFEID",
+  "formula": "CASESAFEID(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "HTMLENCODE",
+  "formula": "HTMLENCODE(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "JSENCODE",
+  "formula": "JSENCODE(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "JSINHTMLENCODE",
+  "formula": "JSINHTMLENCODE(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSINHTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "URLENCODE",
+  "formula": "URLENCODE(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function URLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "HYPERLINK",
+  "formula": "HYPERLINK(CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "IMAGE",
+  "formula": "IMAGE(CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "GETSESSIONID",
+  "formula": "GETSESSIONID()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "CURRENCYRATE",
+  "formula": "CURRENCYRATE(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "ISCLONE",
+  "formula": "ISCLONE()",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function ISCLONE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "FORMATDURATION",
+  "formula": "FORMATDURATION(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "IMAGEPROXYURL",
+  "formula": "IMAGEPROXYURL(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGEPROXYURL may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "JUNCTIONIDLIST",
+  "formula": "JUNCTIONIDLIST(CtxText__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JUNCTIONIDLIST may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "function",
+  "name": "PICKLISTCOUNT",
+  "formula": "PICKLISTCOUNT(CtxMulti__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "global",
+  "name": "$User",
+  "formula": "$User.Alias",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "global",
+  "name": "$Profile",
+  "formula": "$Profile.Name",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "global",
+  "name": "$UserRole",
+  "formula": "$UserRole.Name",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "global",
+  "name": "$Organization",
+  "formula": "$Organization.Name",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "global",
+  "name": "$Setup",
+  "formula": "$Setup.FxSet__c.Val__c",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "global",
+  "name": "$Label",
+  "formula": "$Label.FxLbl",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "global",
+  "name": "$Permission",
+  "formula": "$Permission.FxPerm",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "global",
+  "name": "$CustomMetadata",
+  "formula": "$CustomMetadata.FxMeta__mdt.sample.Val__c",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "global",
+  "name": "$System",
+  "formula": "$System.OriginDateTime",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "formula_field",
+  "kind": "global",
+  "name": "$Api",
+  "formula": "$Api.Session_ID",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "context": "validation_rule",
   "kind": "function",
   "name": "LN",
@@ -600,6 +1627,337 @@
   "taint": [
    "$ObjectType"
   ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "DATETIMEVALUE",
+  "formula": "(DATETIMEVALUE(CtxText__c)) = (DATETIMEVALUE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "TIMEVALUE",
+  "formula": "(TIMEVALUE(CtxText__c)) = (TIMEVALUE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "TIMENOW",
+  "formula": "(TIMENOW()) = (TIMENOW())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "HOUR",
+  "formula": "(HOUR(CtxTime__c)) = (HOUR(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "MINUTE",
+  "formula": "(MINUTE(CtxTime__c)) = (MINUTE(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "SECOND",
+  "formula": "(SECOND(CtxTime__c)) = (SECOND(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "MILLISECOND",
+  "formula": "(MILLISECOND(CtxTime__c)) = (MILLISECOND(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "WEEKDAY",
+  "formula": "(WEEKDAY(CtxDate__c)) = (WEEKDAY(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "DAYOFYEAR",
+  "formula": "(DAYOFYEAR(CtxDate__c)) = (DAYOFYEAR(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "ISOWEEK",
+  "formula": "(ISOWEEK(CtxDate__c)) = (ISOWEEK(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "ISOYEAR",
+  "formula": "(ISOYEAR(CtxDate__c)) = (ISOYEAR(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "UNIXTIMESTAMP",
+  "formula": "(UNIXTIMESTAMP(CtxText__c)) = (UNIXTIMESTAMP(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Incorrect argument type for function 'UNIXTIMESTAMP()'."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "FROMUNIXTIME",
+  "formula": "(FROMUNIXTIME(CtxNum__c)) = (FROMUNIXTIME(CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "LPAD",
+  "formula": "(LPAD(CtxText__c, CtxNum__c)) = (LPAD(CtxText__c, CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "RPAD",
+  "formula": "(RPAD(CtxText__c, CtxNum__c)) = (RPAD(CtxText__c, CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "PI",
+  "formula": "(PI()) = (PI())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "INCLUDES",
+  "formula": "INCLUDES(CtxMulti__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Incorrect parameter type for function 'INCLUDES()'. Expected Text Literal, received Text"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "REGEX",
+  "formula": "REGEX(CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "DISTANCE",
+  "formula": "(DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")) = (DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "GEOLOCATION"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "GEOLOCATION",
+  "formula": "(DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")) = (DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DISTANCE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "BR",
+  "formula": "(BR()) = (BR())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "CASESAFEID",
+  "formula": "(CASESAFEID(CtxText__c)) = (CASESAFEID(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "HTMLENCODE",
+  "formula": "(HTMLENCODE(CtxText__c)) = (HTMLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "JSENCODE",
+  "formula": "(JSENCODE(CtxText__c)) = (JSENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "JSINHTMLENCODE",
+  "formula": "(JSINHTMLENCODE(CtxText__c)) = (JSINHTMLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSINHTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "URLENCODE",
+  "formula": "(URLENCODE(CtxText__c)) = (URLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function URLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "HYPERLINK",
+  "formula": "(HYPERLINK(CtxText__c, CtxText__c)) = (HYPERLINK(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HYPERLINK may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "IMAGE",
+  "formula": "(IMAGE(CtxText__c, CtxText__c)) = (IMAGE(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "GETSESSIONID",
+  "formula": "(GETSESSIONID()) = (GETSESSIONID())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "CURRENCYRATE",
+  "formula": "(CURRENCYRATE(CtxText__c)) = (CURRENCYRATE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "ISCLONE",
+  "formula": "ISCLONE()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "FORMATDURATION",
+  "formula": "(FORMATDURATION(CtxNum__c)) = (FORMATDURATION(CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "IMAGEPROXYURL",
+  "formula": "(IMAGEPROXYURL(CtxText__c)) = (IMAGEPROXYURL(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGEPROXYURL may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "JUNCTIONIDLIST",
+  "formula": "(JUNCTIONIDLIST(CtxText__c, CtxText__c)) = (JUNCTIONIDLIST(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JUNCTIONIDLIST may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "validation_rule",
+  "kind": "function",
+  "name": "PICKLISTCOUNT",
+  "formula": "(PICKLISTCOUNT(CtxMulti__c)) = (PICKLISTCOUNT(CtxMulti__c))",
+  "outcome": "accepted",
+  "verdict": "available"
  },
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
@@ -1301,6 +2659,340 @@
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "context": "workflow_rule",
+  "kind": "function",
+  "name": "DATETIMEVALUE",
+  "formula": "(DATETIMEVALUE(CtxText__c)) = (DATETIMEVALUE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "TIMEVALUE",
+  "formula": "(TIMEVALUE(CtxText__c)) = (TIMEVALUE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "TIMENOW",
+  "formula": "(TIMENOW()) = (TIMENOW())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "HOUR",
+  "formula": "(HOUR(CtxTime__c)) = (HOUR(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "MINUTE",
+  "formula": "(MINUTE(CtxTime__c)) = (MINUTE(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "SECOND",
+  "formula": "(SECOND(CtxTime__c)) = (SECOND(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "MILLISECOND",
+  "formula": "(MILLISECOND(CtxTime__c)) = (MILLISECOND(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "WEEKDAY",
+  "formula": "(WEEKDAY(CtxDate__c)) = (WEEKDAY(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "DAYOFYEAR",
+  "formula": "(DAYOFYEAR(CtxDate__c)) = (DAYOFYEAR(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "ISOWEEK",
+  "formula": "(ISOWEEK(CtxDate__c)) = (ISOWEEK(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "ISOYEAR",
+  "formula": "(ISOYEAR(CtxDate__c)) = (ISOYEAR(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "UNIXTIMESTAMP",
+  "formula": "(UNIXTIMESTAMP(CtxText__c)) = (UNIXTIMESTAMP(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Incorrect argument type for function 'UNIXTIMESTAMP()'."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "FROMUNIXTIME",
+  "formula": "(FROMUNIXTIME(CtxNum__c)) = (FROMUNIXTIME(CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "LPAD",
+  "formula": "(LPAD(CtxText__c, CtxNum__c)) = (LPAD(CtxText__c, CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "RPAD",
+  "formula": "(RPAD(CtxText__c, CtxNum__c)) = (RPAD(CtxText__c, CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "PI",
+  "formula": "(PI()) = (PI())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "INCLUDES",
+  "formula": "INCLUDES(CtxMulti__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Incorrect parameter type for function 'INCLUDES()'. Expected Text Literal, received Text"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "REGEX",
+  "formula": "REGEX(CtxText__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function REGEX may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "DISTANCE",
+  "formula": "(DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")) = (DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "GEOLOCATION"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "GEOLOCATION",
+  "formula": "(DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")) = (DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DISTANCE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "BR",
+  "formula": "(BR()) = (BR())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "CASESAFEID",
+  "formula": "(CASESAFEID(CtxText__c)) = (CASESAFEID(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "HTMLENCODE",
+  "formula": "(HTMLENCODE(CtxText__c)) = (HTMLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "JSENCODE",
+  "formula": "(JSENCODE(CtxText__c)) = (JSENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "JSINHTMLENCODE",
+  "formula": "(JSINHTMLENCODE(CtxText__c)) = (JSINHTMLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSINHTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "URLENCODE",
+  "formula": "(URLENCODE(CtxText__c)) = (URLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function URLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "HYPERLINK",
+  "formula": "(HYPERLINK(CtxText__c, CtxText__c)) = (HYPERLINK(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HYPERLINK may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "IMAGE",
+  "formula": "(IMAGE(CtxText__c, CtxText__c)) = (IMAGE(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "GETSESSIONID",
+  "formula": "(GETSESSIONID()) = (GETSESSIONID())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "CURRENCYRATE",
+  "formula": "(CURRENCYRATE(CtxText__c)) = (CURRENCYRATE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "ISCLONE",
+  "formula": "ISCLONE()",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function ISCLONE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "FORMATDURATION",
+  "formula": "(FORMATDURATION(CtxNum__c)) = (FORMATDURATION(CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "IMAGEPROXYURL",
+  "formula": "(IMAGEPROXYURL(CtxText__c)) = (IMAGEPROXYURL(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGEPROXYURL may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "JUNCTIONIDLIST",
+  "formula": "(JUNCTIONIDLIST(CtxText__c, CtxText__c)) = (JUNCTIONIDLIST(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JUNCTIONIDLIST may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
+  "kind": "function",
+  "name": "PICKLISTCOUNT",
+  "formula": "(PICKLISTCOUNT(CtxMulti__c)) = (PICKLISTCOUNT(CtxMulti__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function PICKLISTCOUNT may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_rule",
   "kind": "global",
   "name": "$User",
   "formula": "($User.Alias) = ($User.Alias)",
@@ -1992,6 +3684,338 @@
   "taint": [
    "$ObjectType"
   ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "DATETIMEVALUE",
+  "formula": "(DATETIMEVALUE(CtxText__c)) = (DATETIMEVALUE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "TIMEVALUE",
+  "formula": "(TIMEVALUE(CtxText__c)) = (TIMEVALUE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "TIMENOW",
+  "formula": "(TIMENOW()) = (TIMENOW())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "HOUR",
+  "formula": "(HOUR(CtxTime__c)) = (HOUR(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "MINUTE",
+  "formula": "(MINUTE(CtxTime__c)) = (MINUTE(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "SECOND",
+  "formula": "(SECOND(CtxTime__c)) = (SECOND(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "MILLISECOND",
+  "formula": "(MILLISECOND(CtxTime__c)) = (MILLISECOND(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "WEEKDAY",
+  "formula": "(WEEKDAY(CtxDate__c)) = (WEEKDAY(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "DAYOFYEAR",
+  "formula": "(DAYOFYEAR(CtxDate__c)) = (DAYOFYEAR(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "ISOWEEK",
+  "formula": "(ISOWEEK(CtxDate__c)) = (ISOWEEK(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "ISOYEAR",
+  "formula": "(ISOYEAR(CtxDate__c)) = (ISOYEAR(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "UNIXTIMESTAMP",
+  "formula": "(UNIXTIMESTAMP(CtxText__c)) = (UNIXTIMESTAMP(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "The approval process contains an invalid formula. Incorrect argument type for function 'UNIXTIMESTAMP()'."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "FROMUNIXTIME",
+  "formula": "(FROMUNIXTIME(CtxNum__c)) = (FROMUNIXTIME(CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "LPAD",
+  "formula": "(LPAD(CtxText__c, CtxNum__c)) = (LPAD(CtxText__c, CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "RPAD",
+  "formula": "(RPAD(CtxText__c, CtxNum__c)) = (RPAD(CtxText__c, CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "PI",
+  "formula": "(PI()) = (PI())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "INCLUDES",
+  "formula": "INCLUDES(CtxMulti__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "The approval process contains an invalid formula. Incorrect parameter type for function 'INCLUDES()'. Expected Text Literal, received Text"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "REGEX",
+  "formula": "REGEX(CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "DISTANCE",
+  "formula": "(DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")) = (DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "GEOLOCATION"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "GEOLOCATION",
+  "formula": "(DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")) = (DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DISTANCE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "BR",
+  "formula": "(BR()) = (BR())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "CASESAFEID",
+  "formula": "(CASESAFEID(CtxText__c)) = (CASESAFEID(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "HTMLENCODE",
+  "formula": "(HTMLENCODE(CtxText__c)) = (HTMLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "The approval process contains an invalid formula. Function HTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "JSENCODE",
+  "formula": "(JSENCODE(CtxText__c)) = (JSENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "The approval process contains an invalid formula. Function JSENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "JSINHTMLENCODE",
+  "formula": "(JSINHTMLENCODE(CtxText__c)) = (JSINHTMLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "The approval process contains an invalid formula. Function JSINHTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "URLENCODE",
+  "formula": "(URLENCODE(CtxText__c)) = (URLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "The approval process contains an invalid formula. Function URLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "HYPERLINK",
+  "formula": "(HYPERLINK(CtxText__c, CtxText__c)) = (HYPERLINK(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "The approval process contains an invalid formula. Function HYPERLINK may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "IMAGE",
+  "formula": "(IMAGE(CtxText__c, CtxText__c)) = (IMAGE(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "The approval process contains an invalid formula. Function IMAGE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "GETSESSIONID",
+  "formula": "(GETSESSIONID()) = (GETSESSIONID())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "CURRENCYRATE",
+  "formula": "(CURRENCYRATE(CtxText__c)) = (CURRENCYRATE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "ISCLONE",
+  "formula": "ISCLONE()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "FORMATDURATION",
+  "formula": "(FORMATDURATION(CtxNum__c)) = (FORMATDURATION(CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "IMAGEPROXYURL",
+  "formula": "(IMAGEPROXYURL(CtxText__c)) = (IMAGEPROXYURL(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "The approval process contains an invalid formula. Function IMAGEPROXYURL may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "JUNCTIONIDLIST",
+  "formula": "(JUNCTIONIDLIST(CtxText__c, CtxText__c)) = (JUNCTIONIDLIST(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "The approval process contains an invalid formula. Function JUNCTIONIDLIST may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_entry",
+  "kind": "function",
+  "name": "PICKLISTCOUNT",
+  "formula": "(PICKLISTCOUNT(CtxMulti__c)) = (PICKLISTCOUNT(CtxMulti__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "The approval process contains an invalid formula. Function PICKLISTCOUNT may not be used in this type of formula"
  },
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
@@ -2691,6 +4715,338 @@
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "context": "approval_step",
+  "kind": "function",
+  "name": "DATETIMEVALUE",
+  "formula": "(DATETIMEVALUE(CtxText__c)) = (DATETIMEVALUE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "TIMEVALUE",
+  "formula": "(TIMEVALUE(CtxText__c)) = (TIMEVALUE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "TIMENOW",
+  "formula": "(TIMENOW()) = (TIMENOW())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "HOUR",
+  "formula": "(HOUR(CtxTime__c)) = (HOUR(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "MINUTE",
+  "formula": "(MINUTE(CtxTime__c)) = (MINUTE(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "SECOND",
+  "formula": "(SECOND(CtxTime__c)) = (SECOND(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "MILLISECOND",
+  "formula": "(MILLISECOND(CtxTime__c)) = (MILLISECOND(CtxTime__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "WEEKDAY",
+  "formula": "(WEEKDAY(CtxDate__c)) = (WEEKDAY(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "DAYOFYEAR",
+  "formula": "(DAYOFYEAR(CtxDate__c)) = (DAYOFYEAR(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "ISOWEEK",
+  "formula": "(ISOWEEK(CtxDate__c)) = (ISOWEEK(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "ISOYEAR",
+  "formula": "(ISOYEAR(CtxDate__c)) = (ISOYEAR(CtxDate__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "UNIXTIMESTAMP",
+  "formula": "(UNIXTIMESTAMP(CtxText__c)) = (UNIXTIMESTAMP(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Approval step Step_1 contains an invalid formula. Incorrect argument type for function 'UNIXTIMESTAMP()'."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "FROMUNIXTIME",
+  "formula": "(FROMUNIXTIME(CtxNum__c)) = (FROMUNIXTIME(CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "LPAD",
+  "formula": "(LPAD(CtxText__c, CtxNum__c)) = (LPAD(CtxText__c, CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "RPAD",
+  "formula": "(RPAD(CtxText__c, CtxNum__c)) = (RPAD(CtxText__c, CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "PI",
+  "formula": "(PI()) = (PI())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "INCLUDES",
+  "formula": "INCLUDES(CtxMulti__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Approval step Step_1 contains an invalid formula. Incorrect parameter type for function 'INCLUDES()'. Expected Text Literal, received Text"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "REGEX",
+  "formula": "REGEX(CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "DISTANCE",
+  "formula": "(DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")) = (DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "GEOLOCATION"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "GEOLOCATION",
+  "formula": "(DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")) = (DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DISTANCE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "BR",
+  "formula": "(BR()) = (BR())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "CASESAFEID",
+  "formula": "(CASESAFEID(CtxText__c)) = (CASESAFEID(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "HTMLENCODE",
+  "formula": "(HTMLENCODE(CtxText__c)) = (HTMLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Approval step Step_1 contains an invalid formula. Function HTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "JSENCODE",
+  "formula": "(JSENCODE(CtxText__c)) = (JSENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Approval step Step_1 contains an invalid formula. Function JSENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "JSINHTMLENCODE",
+  "formula": "(JSINHTMLENCODE(CtxText__c)) = (JSINHTMLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Approval step Step_1 contains an invalid formula. Function JSINHTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "URLENCODE",
+  "formula": "(URLENCODE(CtxText__c)) = (URLENCODE(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Approval step Step_1 contains an invalid formula. Function URLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "HYPERLINK",
+  "formula": "(HYPERLINK(CtxText__c, CtxText__c)) = (HYPERLINK(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Approval step Step_1 contains an invalid formula. Function HYPERLINK may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "IMAGE",
+  "formula": "(IMAGE(CtxText__c, CtxText__c)) = (IMAGE(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Approval step Step_1 contains an invalid formula. Function IMAGE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "GETSESSIONID",
+  "formula": "(GETSESSIONID()) = (GETSESSIONID())",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "CURRENCYRATE",
+  "formula": "(CURRENCYRATE(CtxText__c)) = (CURRENCYRATE(CtxText__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "ISCLONE",
+  "formula": "ISCLONE()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "FORMATDURATION",
+  "formula": "(FORMATDURATION(CtxNum__c)) = (FORMATDURATION(CtxNum__c))",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "IMAGEPROXYURL",
+  "formula": "(IMAGEPROXYURL(CtxText__c)) = (IMAGEPROXYURL(CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Approval step Step_1 contains an invalid formula. Function IMAGEPROXYURL may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "JUNCTIONIDLIST",
+  "formula": "(JUNCTIONIDLIST(CtxText__c, CtxText__c)) = (JUNCTIONIDLIST(CtxText__c, CtxText__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Approval step Step_1 contains an invalid formula. Function JUNCTIONIDLIST may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
+  "kind": "function",
+  "name": "PICKLISTCOUNT",
+  "formula": "(PICKLISTCOUNT(CtxMulti__c)) = (PICKLISTCOUNT(CtxMulti__c))",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Approval step Step_1 contains an invalid formula. Function PICKLISTCOUNT may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "approval_step",
   "kind": "global",
   "name": "$User",
   "formula": "($User.Alias) = ($User.Alias)",
@@ -3382,6 +5738,337 @@
   "taint": [
    "$ObjectType"
   ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "DATETIMEVALUE",
+  "formula": "DATETIMEVALUE(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "TIMEVALUE",
+  "formula": "TIMEVALUE(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "TIMENOW",
+  "formula": "TIMENOW()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "HOUR",
+  "formula": "HOUR(CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "MINUTE",
+  "formula": "MINUTE(CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "SECOND",
+  "formula": "SECOND(CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "MILLISECOND",
+  "formula": "MILLISECOND(CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "WEEKDAY",
+  "formula": "WEEKDAY(CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "DAYOFYEAR",
+  "formula": "DAYOFYEAR(CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "ISOWEEK",
+  "formula": "ISOWEEK(CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "ISOYEAR",
+  "formula": "ISOYEAR(CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "UNIXTIMESTAMP",
+  "formula": "UNIXTIMESTAMP(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Incorrect argument type for function 'UNIXTIMESTAMP()'."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "FROMUNIXTIME",
+  "formula": "FROMUNIXTIME(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "LPAD",
+  "formula": "LPAD(CtxText__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "RPAD",
+  "formula": "RPAD(CtxText__c, CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "PI",
+  "formula": "PI()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "INCLUDES",
+  "formula": "INCLUDES(CtxMulti__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Incorrect parameter type for function 'INCLUDES()'. Expected Text Literal, received Text"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "REGEX",
+  "formula": "REGEX(CtxText__c, CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "DISTANCE",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "GEOLOCATION"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "GEOLOCATION",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DISTANCE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "BR",
+  "formula": "BR()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "CASESAFEID",
+  "formula": "CASESAFEID(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "HTMLENCODE",
+  "formula": "HTMLENCODE(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "JSENCODE",
+  "formula": "JSENCODE(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "JSINHTMLENCODE",
+  "formula": "JSINHTMLENCODE(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSINHTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "URLENCODE",
+  "formula": "URLENCODE(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function URLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "HYPERLINK",
+  "formula": "HYPERLINK(CtxText__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HYPERLINK may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "IMAGE",
+  "formula": "IMAGE(CtxText__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "GETSESSIONID",
+  "formula": "GETSESSIONID()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "CURRENCYRATE",
+  "formula": "CURRENCYRATE(CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "ISCLONE",
+  "formula": "ISCLONE()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "FORMATDURATION",
+  "formula": "FORMATDURATION(CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "IMAGEPROXYURL",
+  "formula": "IMAGEPROXYURL(CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGEPROXYURL may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "JUNCTIONIDLIST",
+  "formula": "JUNCTIONIDLIST(CtxText__c, CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JUNCTIONIDLIST may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "workflow_field_update",
+  "kind": "function",
+  "name": "PICKLISTCOUNT",
+  "formula": "PICKLISTCOUNT(CtxMulti__c)",
+  "outcome": "accepted",
+  "verdict": "available"
  },
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
@@ -4097,6 +6784,349 @@
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "context": "default_value",
+  "kind": "function",
+  "name": "DATETIMEVALUE",
+  "formula": "DATETIMEVALUE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "TIMEVALUE",
+  "formula": "TIMEVALUE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "TIMENOW",
+  "formula": "TIMENOW()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "HOUR",
+  "formula": "HOUR(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "MINUTE",
+  "formula": "MINUTE(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "SECOND",
+  "formula": "SECOND(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "MILLISECOND",
+  "formula": "MILLISECOND(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "WEEKDAY",
+  "formula": "WEEKDAY(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "DAYOFYEAR",
+  "formula": "DAYOFYEAR(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "ISOWEEK",
+  "formula": "ISOWEEK(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "ISOYEAR",
+  "formula": "ISOYEAR(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "UNIXTIMESTAMP",
+  "formula": "UNIXTIMESTAMP(\"a\")",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Incorrect argument type for function 'UNIXTIMESTAMP()'."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "FROMUNIXTIME",
+  "formula": "FROMUNIXTIME(1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "LPAD",
+  "formula": "LPAD(\"a\", 1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "RPAD",
+  "formula": "RPAD(\"a\", 1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "PI",
+  "formula": "PI()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "REGEX",
+  "formula": "IF(REGEX(\"a\", \"a\"), \"y\", \"n\")",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "IF"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "DISTANCE",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "GEOLOCATION"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "GEOLOCATION",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DISTANCE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "BR",
+  "formula": "BR()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "CASESAFEID",
+  "formula": "CASESAFEID(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "HTMLENCODE",
+  "formula": "HTMLENCODE(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "JSENCODE",
+  "formula": "JSENCODE(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "JSINHTMLENCODE",
+  "formula": "JSINHTMLENCODE(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSINHTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "URLENCODE",
+  "formula": "URLENCODE(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function URLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "HYPERLINK",
+  "formula": "HYPERLINK(\"a\", \"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HYPERLINK may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "IMAGE",
+  "formula": "IMAGE(\"a\", \"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "GETSESSIONID",
+  "formula": "GETSESSIONID()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "CURRENCYRATE",
+  "formula": "CURRENCYRATE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "ISCLONE",
+  "formula": "IF(ISCLONE(), \"y\", \"n\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function ISCLONE may not be used in this type of formula",
+  "taint": [
+   "IF"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "FORMATDURATION",
+  "formula": "FORMATDURATION(1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "IMAGEPROXYURL",
+  "formula": "IMAGEPROXYURL(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGEPROXYURL may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "JUNCTIONIDLIST",
+  "formula": "JUNCTIONIDLIST(\"a\", \"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JUNCTIONIDLIST may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
   "kind": "global",
   "name": "$User",
   "formula": "$User.Alias",
@@ -4776,6 +7806,320 @@
   "taint": [
    "$ObjectType"
   ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "DATETIMEVALUE",
+  "formula": "DATETIMEVALUE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "HOUR",
+  "formula": "HOUR(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "MINUTE",
+  "formula": "MINUTE(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "SECOND",
+  "formula": "SECOND(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "MILLISECOND",
+  "formula": "MILLISECOND(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "WEEKDAY",
+  "formula": "WEEKDAY(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "DAYOFYEAR",
+  "formula": "DAYOFYEAR(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "ISOWEEK",
+  "formula": "ISOWEEK(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "ISOYEAR",
+  "formula": "ISOYEAR(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "UNIXTIMESTAMP",
+  "formula": "UNIXTIMESTAMP(\"a\")",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "field integrity exception: unknown (The formula expression is invalid: Incorrect argument type for function 'UNIXTIMESTAMP()'. )"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "FROMUNIXTIME",
+  "formula": "FROMUNIXTIME(1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "LPAD",
+  "formula": "LPAD(\"a\", 1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "RPAD",
+  "formula": "RPAD(\"a\", 1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "PI",
+  "formula": "PI()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "REGEX",
+  "formula": "REGEX(\"a\", \"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "DISTANCE",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "GEOLOCATION"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "GEOLOCATION",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DISTANCE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "BR",
+  "formula": "BR()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "CASESAFEID",
+  "formula": "CASESAFEID(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "HTMLENCODE",
+  "formula": "HTMLENCODE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "JSENCODE",
+  "formula": "JSENCODE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "JSINHTMLENCODE",
+  "formula": "JSINHTMLENCODE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "URLENCODE",
+  "formula": "URLENCODE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "HYPERLINK",
+  "formula": "HYPERLINK(\"a\", \"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "IMAGE",
+  "formula": "IMAGE(\"a\", \"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "field integrity exception: unknown (The formula expression is invalid: Function IMAGE may not be used in this type of formula)"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "GETSESSIONID",
+  "formula": "GETSESSIONID()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "CURRENCYRATE",
+  "formula": "CURRENCYRATE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "ISCLONE",
+  "formula": "ISCLONE()",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "field integrity exception: unknown (The formula expression is invalid: Function ISCLONE may not be used in this type of formula)"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "FORMATDURATION",
+  "formula": "FORMATDURATION(1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "IMAGEPROXYURL",
+  "formula": "IMAGEPROXYURL(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "field integrity exception: unknown (The formula expression is invalid: Function IMAGEPROXYURL may not be used in this type of formula)"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "JUNCTIONIDLIST",
+  "formula": "JUNCTIONIDLIST(\"a\", \"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "field integrity exception: unknown (The formula expression is invalid: Function JUNCTIONIDLIST may not be used in this type of formula)"
  },
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
@@ -5464,6 +8808,343 @@
   "taint": [
    "$ObjectType"
   ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "DATETIMEVALUE",
+  "formula": "DATETIMEVALUE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "TIMEVALUE",
+  "formula": "TIMEVALUE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "TIMENOW",
+  "formula": "TIMENOW()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "HOUR",
+  "formula": "HOUR(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "MINUTE",
+  "formula": "MINUTE(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "SECOND",
+  "formula": "SECOND(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "MILLISECOND",
+  "formula": "MILLISECOND(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "TIMEVALUE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "WEEKDAY",
+  "formula": "WEEKDAY(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "DAYOFYEAR",
+  "formula": "DAYOFYEAR(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "ISOWEEK",
+  "formula": "ISOWEEK(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "ISOYEAR",
+  "formula": "ISOYEAR(DATE(2026, 1, 1))",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DATE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "UNIXTIMESTAMP",
+  "formula": "UNIXTIMESTAMP(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Formula result is data type (Text), incompatible with expected data type (Number)."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "FROMUNIXTIME",
+  "formula": "FROMUNIXTIME(1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "LPAD",
+  "formula": "LPAD(\"a\", 1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "RPAD",
+  "formula": "RPAD(\"a\", 1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "PI",
+  "formula": "PI()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "REGEX",
+  "formula": "REGEX(\"a\", \"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "DISTANCE",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "GEOLOCATION"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "GEOLOCATION",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")",
+  "outcome": "accepted",
+  "verdict": "available",
+  "taint": [
+   "DISTANCE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "BR",
+  "formula": "BR()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "CASESAFEID",
+  "formula": "CASESAFEID(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "HTMLENCODE",
+  "formula": "HTMLENCODE(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "JSENCODE",
+  "formula": "JSENCODE(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "JSINHTMLENCODE",
+  "formula": "JSINHTMLENCODE(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JSINHTMLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "URLENCODE",
+  "formula": "URLENCODE(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function URLENCODE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "HYPERLINK",
+  "formula": "HYPERLINK(\"a\", \"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HYPERLINK may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "IMAGE",
+  "formula": "IMAGE(\"a\", \"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "GETSESSIONID",
+  "formula": "GETSESSIONID()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "CURRENCYRATE",
+  "formula": "CURRENCYRATE(\"a\")",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "ISCLONE",
+  "formula": "ISCLONE()",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Formula result is data type (Text), incompatible with expected data type (true or false)."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "FORMATDURATION",
+  "formula": "FORMATDURATION(1)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "IMAGEPROXYURL",
+  "formula": "IMAGEPROXYURL(\"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGEPROXYURL may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "JUNCTIONIDLIST",
+  "formula": "JUNCTIONIDLIST(\"a\", \"a\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JUNCTIONIDLIST may not be used in this type of formula"
  },
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
@@ -6165,6 +9846,338 @@
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "context": "custom_button_link",
+  "kind": "function",
+  "name": "DATETIMEVALUE",
+  "formula": "DATETIMEVALUE(FxCtxB__c.CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "TIMEVALUE",
+  "formula": "TIMEVALUE(FxCtxB__c.CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "TIMENOW",
+  "formula": "TIMENOW()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "HOUR",
+  "formula": "HOUR(FxCtxB__c.CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "MINUTE",
+  "formula": "MINUTE(FxCtxB__c.CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "SECOND",
+  "formula": "SECOND(FxCtxB__c.CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "MILLISECOND",
+  "formula": "MILLISECOND(FxCtxB__c.CtxTime__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "WEEKDAY",
+  "formula": "WEEKDAY(FxCtxB__c.CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "DAYOFYEAR",
+  "formula": "DAYOFYEAR(FxCtxB__c.CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "ISOWEEK",
+  "formula": "ISOWEEK(FxCtxB__c.CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "ISOYEAR",
+  "formula": "ISOYEAR(FxCtxB__c.CtxDate__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "UNIXTIMESTAMP",
+  "formula": "UNIXTIMESTAMP(FxCtxB__c.CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Incorrect argument type for function 'UNIXTIMESTAMP()'."
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "FROMUNIXTIME",
+  "formula": "FROMUNIXTIME(FxCtxB__c.CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "LPAD",
+  "formula": "LPAD(FxCtxB__c.CtxText__c, FxCtxB__c.CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "RPAD",
+  "formula": "RPAD(FxCtxB__c.CtxText__c, FxCtxB__c.CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "PI",
+  "formula": "PI()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "INCLUDES",
+  "formula": "INCLUDES(FxCtxB__c.CtxMulti__c, FxCtxB__c.CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "available",
+  "problem": "Incorrect parameter type for function 'INCLUDES()'. Expected Text Literal, received Text"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "REGEX",
+  "formula": "REGEX(FxCtxB__c.CtxText__c, FxCtxB__c.CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function REGEX may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "DISTANCE",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")",
+  "outcome": "rejected",
+  "verdict": "inconclusive",
+  "problem": "Function GEOLOCATION may not be used in this type of formula",
+  "taint": [
+   "GEOLOCATION"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "GEOLOCATION",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function GEOLOCATION may not be used in this type of formula",
+  "taint": [
+   "DISTANCE"
+  ]
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "BR",
+  "formula": "BR()",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function BR may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "CASESAFEID",
+  "formula": "CASESAFEID(FxCtxB__c.CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "HTMLENCODE",
+  "formula": "HTMLENCODE(FxCtxB__c.CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "JSENCODE",
+  "formula": "JSENCODE(FxCtxB__c.CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "JSINHTMLENCODE",
+  "formula": "JSINHTMLENCODE(FxCtxB__c.CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "URLENCODE",
+  "formula": "URLENCODE(FxCtxB__c.CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "HYPERLINK",
+  "formula": "HYPERLINK(FxCtxB__c.CtxText__c, FxCtxB__c.CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function HYPERLINK may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "IMAGE",
+  "formula": "IMAGE(FxCtxB__c.CtxText__c, FxCtxB__c.CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "GETSESSIONID",
+  "formula": "GETSESSIONID()",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "CURRENCYRATE",
+  "formula": "CURRENCYRATE(FxCtxB__c.CtxText__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "ISCLONE",
+  "formula": "ISCLONE()",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function ISCLONE may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "FORMATDURATION",
+  "formula": "FORMATDURATION(FxCtxB__c.CtxNum__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "IMAGEPROXYURL",
+  "formula": "IMAGEPROXYURL(FxCtxB__c.CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function IMAGEPROXYURL may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "JUNCTIONIDLIST",
+  "formula": "JUNCTIONIDLIST(FxCtxB__c.CtxText__c, FxCtxB__c.CtxText__c)",
+  "outcome": "rejected",
+  "verdict": "unavailable",
+  "problem": "Function JUNCTIONIDLIST may not be used in this type of formula"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
+  "kind": "function",
+  "name": "PICKLISTCOUNT",
+  "formula": "PICKLISTCOUNT(FxCtxB__c.CtxMulti__c)",
+  "outcome": "accepted",
+  "verdict": "available"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "custom_button_link",
   "kind": "global",
   "name": "$User",
   "formula": "$User.Alias",
@@ -6901,6 +10914,366 @@
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "context": "email_template",
+  "kind": "function",
+  "name": "DATETIMEVALUE",
+  "formula": "DATETIMEVALUE(\"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "TIMEVALUE",
+  "formula": "TIMEVALUE(\"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "TIMENOW",
+  "formula": "TIMENOW()",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "HOUR",
+  "formula": "HOUR(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "taint": [
+   "TIMEVALUE"
+  ],
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "MINUTE",
+  "formula": "MINUTE(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "taint": [
+   "TIMEVALUE"
+  ],
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "SECOND",
+  "formula": "SECOND(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "taint": [
+   "TIMEVALUE"
+  ],
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "MILLISECOND",
+  "formula": "MILLISECOND(TIMEVALUE(\"12:00:00\"))",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "taint": [
+   "TIMEVALUE"
+  ],
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "WEEKDAY",
+  "formula": "WEEKDAY(DATE(2026, 1, 1))",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "taint": [
+   "DATE"
+  ],
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "DAYOFYEAR",
+  "formula": "DAYOFYEAR(DATE(2026, 1, 1))",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "taint": [
+   "DATE"
+  ],
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "ISOWEEK",
+  "formula": "ISOWEEK(DATE(2026, 1, 1))",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "taint": [
+   "DATE"
+  ],
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "ISOYEAR",
+  "formula": "ISOYEAR(DATE(2026, 1, 1))",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "taint": [
+   "DATE"
+  ],
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "UNIXTIMESTAMP",
+  "formula": "UNIXTIMESTAMP(\"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "FROMUNIXTIME",
+  "formula": "FROMUNIXTIME(1)",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "LPAD",
+  "formula": "LPAD(\"a\", 1)",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "RPAD",
+  "formula": "RPAD(\"a\", 1)",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "PI",
+  "formula": "PI()",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "REGEX",
+  "formula": "REGEX(\"a\", \"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "DISTANCE",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "taint": [
+   "GEOLOCATION"
+  ],
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "GEOLOCATION",
+  "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "taint": [
+   "DISTANCE"
+  ],
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "BR",
+  "formula": "BR()",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "CASESAFEID",
+  "formula": "CASESAFEID(\"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "HTMLENCODE",
+  "formula": "HTMLENCODE(\"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "JSENCODE",
+  "formula": "JSENCODE(\"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "JSINHTMLENCODE",
+  "formula": "JSINHTMLENCODE(\"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "URLENCODE",
+  "formula": "URLENCODE(\"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "HYPERLINK",
+  "formula": "HYPERLINK(\"a\", \"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "IMAGE",
+  "formula": "IMAGE(\"a\", \"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "GETSESSIONID",
+  "formula": "GETSESSIONID()",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "CURRENCYRATE",
+  "formula": "CURRENCYRATE(\"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "ISCLONE",
+  "formula": "ISCLONE()",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "FORMATDURATION",
+  "formula": "FORMATDURATION(1)",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "IMAGEPROXYURL",
+  "formula": "IMAGEPROXYURL(\"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "JUNCTIONIDLIST",
+  "formula": "JUNCTIONIDLIST(\"a\", \"a\")",
+  "outcome": "skipped",
+  "verdict": "inconclusive",
+  "reason": "container does NOT compile-check formulas (bogus function deployed clean) — acceptances are meaningless"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
   "kind": "global",
   "name": "$User",
   "formula": "$User.Alias",
@@ -7030,6 +11403,26 @@
  },
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "INCLUDES",
+  "formula": "",
+  "outcome": "untestable",
+  "verdict": "inconclusive",
+  "reason": "no literal constructor for Multipicklist argument in a field-less container"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "default_value",
+  "kind": "function",
+  "name": "PICKLISTCOUNT",
+  "formula": "",
+  "outcome": "untestable",
+  "verdict": "inconclusive",
+  "reason": "no literal constructor for Multipicklist argument in a field-less container"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "context": "flow_formula",
   "kind": "function",
   "name": "ISPICKVAL",
@@ -7057,6 +11450,46 @@
   "outcome": "untestable",
   "verdict": "inconclusive",
   "reason": "needs a real field reference (Text) and this container cannot reference fields"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "TIMEVALUE",
+  "formula": "",
+  "outcome": "untestable",
+  "verdict": "inconclusive",
+  "reason": "no flow dataType for Time"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "TIMENOW",
+  "formula": "",
+  "outcome": "untestable",
+  "verdict": "inconclusive",
+  "reason": "no flow dataType for Time"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "INCLUDES",
+  "formula": "",
+  "outcome": "untestable",
+  "verdict": "inconclusive",
+  "reason": "no literal constructor for Multipicklist argument in a field-less container"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "flow_formula",
+  "kind": "function",
+  "name": "PICKLISTCOUNT",
+  "formula": "",
+  "outcome": "untestable",
+  "verdict": "inconclusive",
+  "reason": "no literal constructor for Multipicklist argument in a field-less container"
  },
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
@@ -7090,6 +11523,26 @@
  },
  {
   "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "INCLUDES",
+  "formula": "",
+  "outcome": "untestable",
+  "verdict": "inconclusive",
+  "reason": "no literal constructor for Multipicklist argument in a field-less container"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "quick_action",
+  "kind": "function",
+  "name": "PICKLISTCOUNT",
+  "formula": "",
+  "outcome": "untestable",
+  "verdict": "inconclusive",
+  "reason": "no literal constructor for Multipicklist argument in a field-less container"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
   "context": "email_template",
   "kind": "function",
   "name": "ISPICKVAL",
@@ -7117,5 +11570,25 @@
   "outcome": "untestable",
   "verdict": "inconclusive",
   "reason": "needs a real field reference (Text) and this container cannot reference fields"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "INCLUDES",
+  "formula": "",
+  "outcome": "untestable",
+  "verdict": "inconclusive",
+  "reason": "no literal constructor for Multipicklist argument in a field-less container"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "context": "email_template",
+  "kind": "function",
+  "name": "PICKLISTCOUNT",
+  "formula": "",
+  "outcome": "untestable",
+  "verdict": "inconclusive",
+  "reason": "no literal constructor for Multipicklist argument in a field-less container"
  }
 ]

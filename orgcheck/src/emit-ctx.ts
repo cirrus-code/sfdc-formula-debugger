@@ -67,7 +67,11 @@ function classifyRejection(
   if (!problem) {
     return "inconclusive";
   }
-  if (/Incorrect (parameter type|number of parameters) for function/i.test(problem)) {
+  if (
+    /Incorrect (parameter type|argument type|number of parameters) for function/i.test(
+      problem,
+    )
+  ) {
     return "available";
   }
   const bare = name.replace(/^\$/, "").toUpperCase();

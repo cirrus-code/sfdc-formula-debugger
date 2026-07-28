@@ -107,7 +107,7 @@ process — and the per-component deploy accept/reject, with its message, is
 the verdict:
 
 ```
-src/registry/functions.ts (the one registry, 66 fns) + probes/contexts.json
+src/registry/functions.ts (the one registry, 101 fns) + probes/contexts.json
         ──generate-ctx──▶ ctx-plan.json (metadata fragments + batches) + data-ctx.apex
         ──collect-ctx──▶ canary-gated staged deploys + DML runtime probes
                           → results/ctx-run-<date>.json

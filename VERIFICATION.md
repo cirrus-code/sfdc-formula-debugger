@@ -259,6 +259,63 @@ golden tests in `evaluator.test.ts`:
   → March 2) and **errors outside a supported year range** (`DATE(10000, …)` →
   error).
 
+## Function port, round 2 (registry coverage — 2026-07-28)
+
+The registry grew 66 → 101 functions after auditing against the official
+function reference (all additions doc-confirmed; the wave-2 matrix probes
+their per-context availability). Corpus-backed and simulated:
+
+- ✅ **`DATETIMEVALUE`** (lenient digit widths, strict ranges, GMT; invalid
+  text is a runtime error — testDateTimeValue*, testTimeValueWithValidInValid).
+- ✅ **`TIMEVALUE`** (of datetime or `HH:MM:SS.mmm` text), **`TIMENOW`**,
+  **`HOUR`/`MINUTE`/`SECOND`/`MILLISECOND`** (0-based, corpus-verified).
+- ✅ **`WEEKDAY`** (1 = Sunday), **`DAYOFYEAR`**, **`ISOWEEK`/`ISOYEAR`**
+  (ISO-8601 Thursday rule), **`UNIXTIMESTAMP`** (dates count midnight GMT; a
+  Time counts seconds since midnight), **`FROMUNIXTIME`**.
+- ✅ **`LPAD`/`RPAD`** (length ≤ 0 → null, truncation, pad-string cycling cut
+  mid-repeat — testLpad*/testRpad*).
+- ✅ **`PI`** (Java Math.PI double, `ROUND(PI(), 12)` corpus-verified).
+
+Temporal semantics unlocked with them (conformance comparable set grew
+5,032 → 6,081 rows; oracle tier 99.3%, org tier 100%):
+
+- ✅ **Date arithmetic**: `date ± n` truncates the fractional day toward zero
+  (28 + 3.5 → Mar 2); `date − date` → whole days; `datetime ± n` in
+  fractional days at millisecond resolution; `datetime − datetime` →
+  fractional days (1.375). Temporal ordering/equality (`date > date`,
+  CASE over dates) compare by instant.
+- ✅ **Time arithmetic**: `time ± n` in milliseconds — a result past midnight
+  wraps (+26h ≡ +2h) but a negative one is a runtime error;
+  `time − time` → milliseconds, wrapping forward a day when negative
+  (testSubtractTwoTimeFields: earlier − later = 24h − gap).
+- ✅ **`ADDMONTHS` end-of-month rule was latent-broken**: the org-verified
+  Feb 28 + 1 = Mar 31 behavior was documented and quarantine-masked but never
+  implemented; the new temporal comparison exposed and fixed it.
+- ✅ **`TEXT(time)`** always renders full `HH:MM:SS.mmm` (oracle-verified,
+  "00:00:00.000"), while the bare TimeOnly channel renders LocalTime-style
+  (drops zero seconds/millis) — two channels, two shapes, both encoded.
+- ✅ **`SUBSTR` with a negative length** → null (testSubstr3).
+
+Registered but refusing simulation until golden rows exist (or forever, for
+org-state/rendering values): `INCLUDES`, `PICKLISTCOUNT`, `REGEX` (Java
+dialect not client-reproducible), `DISTANCE`/`GEOLOCATION`, `BR`,
+`CASESAFEID`, `HTMLENCODE`/`JSENCODE`/`JSINHTMLENCODE`/`URLENCODE`,
+`HYPERLINK`, `IMAGE`, `IMAGEPROXYURL`, `FORMATDURATION`, `JUNCTIONIDLIST`,
+`GETSESSIONID`, `CURRENCYRATE`, `ISCLONE`.
+
+Their per-context availability is org-verified (the wave-2 matrix now
+includes a `formula_field` container, so FF availability is probed uniformly
+too). Highlights encoded in `functions.ts`: **`REGEX` is not available in
+formula fields** (validation rules and most others accept it); the **encode
+family** (`HTMLENCODE`/`JSENCODE`/`JSINHTMLENCODE`/`URLENCODE`) lives only in
+flows and custom buttons; **`HYPERLINK`** only in formula fields and flows,
+**`IMAGE`** only in formula fields; **`BR`** everywhere except buttons;
+**`IMAGEPROXYURL`/`JUNCTIONIDLIST`** were rejected by every verifiable
+context (email templates are their only plausible, unverifiable home);
+**`ISCLONE`** matches the change-tracking contexts; **`UNIXTIMESTAMP`** is
+rejected only by quick actions; **`DISTANCE`/`GEOLOCATION`** everywhere
+except buttons.
+
 ## Function port (unsupported → simulated)
 
 Ported and corpus-verified (golden tests in `evaluator.test.ts`):
@@ -307,15 +364,16 @@ intermediates against the real engine and settled the numeric-scale question:
 
 ## Conformance backlog (remaining gap to 100%)
 
-`src/engine/conformance.test.ts` (oracle tier) sits at 99.3% (33 failures);
-`src/engine/org-conformance.test.ts` (org tier) is at 100% with a single
-quarantined row (`semantics:text_percent_field`). Remaining items, each
-needing its own verification before a fix:
+`src/engine/conformance.test.ts` (oracle tier) sits at 99.3% over 6,081
+comparable rows (42 failures — the org-overruled clusters plus the
+TEXT-of-blank-date tail); `src/engine/org-conformance.test.ts` (org tier) is
+at 100% of 517 comparable rows with a single quarantined row
+(`semantics:text_percent_field`). Remaining items, each needing its own
+verification before a fix:
 
-- 🔬 **Date arithmetic** — full `date + number` evaluation (should yield a
-  date). The blank case is org-verified and fixed (blank date operand → null
-  in both modes, `testAddDate#0`); Java datetime rendering in the oracle stays
-  quarantined, and `TEXT(datetime)` now renders the documented GMT
+- ✅ **Date arithmetic** — implemented and corpus-verified (function-port-2
+  section above); Java-style datetime renderings in the oracle remain
+  incomparable (quarantined), and `TEXT(datetime)` renders the documented GMT
   `YYYY-MM-DD HH:MM:SSZ` shape (org-verified via `corpus:testOriginDateTime`).
 - ✅ **`$System.originDateTime`** simulates as its fixed value,
   1900-01-01 00:00 GMT (org-verified).
@@ -366,7 +424,10 @@ needing its own verification before a fix:
   non-GMT org TZ; ISPICKVAL/picklist coercion value probes.
 - Runtime observation channels for non-VR contexts (flow interviews,
   workflow field-update execution).
-- The registry lacks entries for some product functions the corpus exercises
-  (e.g. `TIMEVALUE`, `DATETIMEVALUE`, `DATE`-adjacent helpers like `WEEKDAY`,
-  `HYPERLINK`, `REGEX`, `DISTANCE`) — audit registry coverage against the
-  product's full function list and probe availability for additions.
+- ~~Registry function coverage~~ — closed 2026-07-28: audited against the
+  official reference (101 functions registered; 35 added, of which 16
+  corpus-backed and simulated — see the function-port-2 section). Remaining
+  gaps here: golden rows for the refuse-list functions whose semantics are
+  client-reproducible in principle (`CASESAFEID`, the encode family, `BR`,
+  `INCLUDES`, `PICKLISTCOUNT`, `FORMATDURATION`) so they can graduate to
+  simulated.

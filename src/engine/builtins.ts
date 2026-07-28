@@ -7,6 +7,7 @@ import {
   bool,
   dateValue,
   datetimeValue,
+  timeValue,
   Decimal,
   error,
   isError,
@@ -122,6 +123,7 @@ export function concatString(v: SfValue): string {
       );
     }
     case "Time":
+      return formatTime(v.data.millisOfDay);
     case "Unknown":
       return "";
     default:
@@ -159,13 +161,33 @@ function isValidDate(p: DateParts): boolean {
   );
 }
 
+// LocalTime-style: seconds appear only when seconds or millis are nonzero,
+// millis only when nonzero — matches every corpus TimeOnly rendering
+// ("00:00", "00:00:09", "10:40:55.666") and the org-verified
+// TEXT(TIMEVALUE("17:30:45.125")) = "17:30:45.125".
+export function formatTime(millisOfDay: number): string {
+  const ms = millisOfDay % 1000;
+  const s = Math.floor(millisOfDay / 1000) % 60;
+  const mi = Math.floor(millisOfDay / 60_000) % 60;
+  const hh = Math.floor(millisOfDay / 3_600_000);
+  const p = (n: number) => String(n).padStart(2, "0");
+  let out = `${p(hh)}:${p(mi)}`;
+  if (s > 0 || ms > 0) {
+    out += `:${p(s)}`;
+  }
+  if (ms > 0) {
+    out += `.${String(ms).padStart(3, "0")}`;
+  }
+  return out;
+}
+
 function formatDate(p: DateParts): string {
   const mm = String(p.month).padStart(2, "0");
   const dd = String(p.day).padStart(2, "0");
   return `${p.year}-${mm}-${dd}`;
 }
 
-function dateFromEpoch(ms: number): DateParts {
+export function dateFromEpoch(ms: number): DateParts {
   const d = new Date(ms);
   return {
     year: d.getUTCFullYear(),
@@ -225,9 +247,10 @@ export const BUILTINS: Record<string, Builtin> = {
   SUBSTR: ([a, start, len]) => {
     const s = dstr(a!);
     // start ≤ 1 (including 0) reads from the beginning; a negative start counts
-    // from the end; an out-of-range start yields blank.
+    // from the end; an out-of-range start or a negative length yields blank
+    // (testSubstr3).
     const from = substrStart(toInt(start!), s.length);
-    if (from < 0 || from >= s.length) {
+    if (from < 0 || from >= s.length || (len !== undefined && toInt(len) < 0)) {
       return blank("Text");
     }
     return textOrBlank(
@@ -253,6 +276,11 @@ export const BUILTINS: Record<string, Builtin> = {
       ? num(new Decimal(s))
       : error("#Error! (VALUE: not a number)");
   },
+  // Padded length ≤ 0 is null; a shorter target truncates; the pad string
+  // cycles and is cut mid-repeat (corpus: testLpad/testRpad/testLpad2/
+  // testRpad2, e.g. rpad("string", 11, "abc") = "stringabcab").
+  LPAD: ([t, len, pad]) => padTo(t!, len!, pad, "left"),
+  RPAD: ([t, len, pad]) => padTo(t!, len!, pad, "right"),
 
   // Math
   ABS: ([a]) => num(dnum(a!).abs()),
@@ -268,6 +296,9 @@ export const BUILTINS: Record<string, Builtin> = {
     // the JVM oracle raises a runtime error here, but the org outranks it.
     return num(d.isZero() ? dnum(a!) : dnum(a!).mod(d));
   },
+  // Java Math.PI's double value; ROUND(PI(), 12) = 3.141592653590 is
+  // corpus-verified (testPi).
+  PI: () => num(new Decimal("3.141592653589793")),
   SQRT: ([a]) => {
     const d = dnum(a!);
     // Salesforce computes SQRT at double precision (SQRT(2) = 1.4142135623730951).
@@ -299,6 +330,86 @@ export const BUILTINS: Record<string, Builtin> = {
       : error("#Error! (invalid date)");
   },
   DATEVALUE: ([a]) => parseDate(dstr(a!)),
+  // Lenient digit widths, strict ranges (corpus: testDateTimeValueWith*,
+  // testTimeValueWithValidInValid — "2011-1-9 1:2:3" parses, month 13 or
+  // hour 24 is an error). Seconds optional; the value is GMT.
+  DATETIMEVALUE: ([a]) => {
+    const m = dstr(a!)
+      .trim()
+      .match(/^(\d{4})-(\d{1,2})-(\d{1,2}) (\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
+    if (!m) {
+      return error("#Error! (DATETIMEVALUE: invalid date/time text)");
+    }
+    const [y, mo, d, hh, mi, ss] = m.slice(1).map((x) => Number(x ?? 0));
+    if (!isValidDate({ year: y, month: mo, day: d }) || hh > 23 || mi > 59 || ss > 59) {
+      return error("#Error! (DATETIMEVALUE: invalid date/time text)");
+    }
+    return datetimeValue(Date.UTC(y, mo - 1, d, hh, mi, ss));
+  },
+  TIMEVALUE: ([a]) => {
+    if (a!.type === "Datetime" && !a!.blank) {
+      const ms = a!.data.epochMillis;
+      return timeValue(((ms % 86_400_000) + 86_400_000) % 86_400_000);
+    }
+    const m = dstr(a!)
+      .trim()
+      .match(/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?(?:\.(\d{1,3}))?$/);
+    if (!m) {
+      return error("#Error! (TIMEVALUE: invalid time text)");
+    }
+    const [hh, mi, ss] = m.slice(1, 4).map((x) => Number(x ?? 0));
+    const millis = Number((m[4] ?? "0").padEnd(3, "0"));
+    if (hh > 23 || mi > 59 || ss > 59) {
+      return error("#Error! (TIMEVALUE: invalid time text)");
+    }
+    return timeValue(((hh * 60 + mi) * 60 + ss) * 1000 + millis);
+  },
+  TIMENOW: (_args, env) =>
+    env.now
+      ? timeValue(
+          ((env.now.epochMillis % 86_400_000) + 86_400_000) % 86_400_000,
+        )
+      : error("#Error! (no clock)"),
+  HOUR: ([a]) => timeField(a!, (ms) => Math.floor(ms / 3_600_000)),
+  MINUTE: ([a]) => timeField(a!, (ms) => Math.floor(ms / 60_000) % 60),
+  SECOND: ([a]) => timeField(a!, (ms) => Math.floor(ms / 1000) % 60),
+  MILLISECOND: ([a]) => timeField(a!, (ms) => ms % 1000),
+  // 1 = Sunday … 7 = Saturday (corpus: 2005-12-31, a Saturday, is 7).
+  WEEKDAY: ([a]) => dateField(a!, (p) => utcDate(p).getUTCDay() + 1),
+  DAYOFYEAR: ([a]) =>
+    dateField(
+      a!,
+      (p) => (epochOfDate(p) - Date.UTC(p.year, 0, 1)) / 86_400_000 + 1,
+    ),
+  // ISO-8601: the week containing the date's Thursday; week 1 holds Jan 4.
+  ISOWEEK: ([a]) =>
+    dateField(a!, (p) => {
+      const t = isoThursday(p);
+      return (
+        Math.floor(
+          (t.getTime() - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86_400_000 / 7,
+        ) + 1
+      );
+    }),
+  ISOYEAR: ([a]) => dateField(a!, (p) => isoThursday(p).getUTCFullYear()),
+  UNIXTIMESTAMP: ([a]) => {
+    if (a!.blank) {
+      return blank("Number");
+    }
+    if (a!.type === "Datetime") {
+      return num(Math.floor(a!.data.epochMillis / 1000));
+    }
+    // A Time input counts seconds since midnight (testUnixTimestampWithTime).
+    if (a!.type === "Time") {
+      return num(Math.floor(a!.data.millisOfDay / 1000));
+    }
+    const p = datePartsOf(a!);
+    return p
+      ? num(epochOfDate(p) / 1000)
+      : error("#Error! (UNIXTIMESTAMP: not a date)");
+  },
+  FROMUNIXTIME: ([a]) =>
+    datetimeValue(Math.round(dnum(a!).times(1000).toNumber())),
   YEAR: ([a]) => dateField(a!, (p) => p.year),
   MONTH: ([a]) => dateField(a!, (p) => p.month),
   DAY: ([a]) => dateField(a!, (p) => p.day),
@@ -357,6 +468,17 @@ export const SPECIAL_FORMS: Record<string, SpecialForm> = {
     // the ×100 result convention is still quarantined (VERIFICATION.md).
     if (v.type === "Number" || v.type === "Currency") {
       return text(renderProductNumber(v.data, args[0]!.kind === "NumberLit"));
+    }
+    if (v.type === "Time") {
+      // TEXT(time) always renders the full HH:MM:SS.mmm (oracle-verified,
+      // testTextTimeValue*: "00:00:00.000"), unlike the bare TimeOnly
+      // rendering which drops zero seconds/millis.
+      const ms = v.data.millisOfDay;
+      const p2 = (n: number) => String(n).padStart(2, "0");
+      return text(
+        `${p2(Math.floor(ms / 3_600_000))}:${p2(Math.floor(ms / 60_000) % 60)}:` +
+          `${p2(Math.floor(ms / 1000) % 60)}.${String(ms % 1000).padStart(3, "0")}`,
+      );
     }
     return text(concatString(v));
   },
@@ -489,6 +611,15 @@ function caseEqual(a: SfValue, b: SfValue): boolean {
   if (!a.blank && !b.blank && a.type === "Boolean" && b.type === "Boolean") {
     return a.data === b.data;
   }
+  if (a.type === "Date" && b.type === "Date") {
+    return epochOfDate(a.data) === epochOfDate(b.data);
+  }
+  if (a.type === "Datetime" && b.type === "Datetime") {
+    return a.data.epochMillis === b.data.epochMillis;
+  }
+  if (a.type === "Time" && b.type === "Time") {
+    return a.data.millisOfDay === b.data.millisOfDay;
+  }
   if (
     (a.type === "Number" || a.type === "Currency" || a.type === "Percent") &&
     !b.blank
@@ -511,6 +642,53 @@ function datePartsOf(v: SfValue): DateParts | null {
   return null;
 }
 
+export function epochOfDate(p: DateParts): number {
+  return Date.UTC(p.year, p.month - 1, p.day);
+}
+
+function utcDate(p: DateParts): Date {
+  return new Date(epochOfDate(p));
+}
+
+/** The Thursday of the ISO-8601 week containing `p` — its year and ordinal
+ * position determine ISOYEAR and ISOWEEK. */
+function isoThursday(p: DateParts): Date {
+  const t = utcDate(p);
+  t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+  return t;
+}
+
+function timeField(v: SfValue, pick: (millisOfDay: number) => number): EvalResult {
+  if (v.blank || v.type !== "Time") {
+    return error("#Error! (expected a Time value)");
+  }
+  return num(pick(v.data.millisOfDay));
+}
+
+function padTo(
+  t: SfValue,
+  len: SfValue,
+  pad: SfValue | undefined,
+  side: "left" | "right",
+): EvalResult {
+  const s = dstr(t);
+  const n = toInt(len);
+  if (n <= 0) {
+    return blank("Text");
+  }
+  if (s.length >= n) {
+    return text(s.slice(0, n));
+  }
+  const p = pad === undefined ? " " : dstr(pad);
+  if (p === "") {
+    // Unverified edge (no corpus row): an empty pad string cannot pad, so the
+    // text is returned as-is rather than guessing at an error.
+    return text(s);
+  }
+  const fill = p.repeat(Math.ceil((n - s.length) / p.length)).slice(0, n - s.length);
+  return text(side === "left" ? fill + s : s + fill);
+}
+
 function dateField(v: SfValue, pick: (p: DateParts) => number): EvalResult {
   const p = datePartsOf(v);
   return p ? num(pick(p)) : error("#Error! (expected a date)");
@@ -530,8 +708,13 @@ function parseDate(s: string): EvalResult {
 function addMonths(p: DateParts, n: number): DateParts {
   const total = p.year * 12 + (p.month - 1) + n;
   const year = Math.floor(total / 12);
-  const month = (total % 12) + 1;
-  // Clamp the day to the target month's length (Salesforce month-end behavior).
-  const day = Math.min(p.day, daysInMonth(year, month));
+  const month = ((total % 12) + 12) % 12 + 1;
+  // Org-verified (semantics:addmonths_*): the LAST day of a month maps to the
+  // last day of the target month (Feb 28 + 1 = Mar 31), while any other
+  // overflow merely clamps (Jan 30 + 1 = Feb 28).
+  const day =
+    p.day === daysInMonth(p.year, p.month)
+      ? daysInMonth(year, month)
+      : Math.min(p.day, daysInMonth(year, month));
   return { year, month, day };
 }
