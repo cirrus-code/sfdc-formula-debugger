@@ -11,3 +11,4 @@ data-*.apex
 # Wave-2 generated plan + runtime data (regenerate with `pnpm generate-ctx`).
 ctx-plan.json
 data-ctx.apex
+flows-run.apex
