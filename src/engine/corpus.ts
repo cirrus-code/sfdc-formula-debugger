@@ -44,8 +44,13 @@ export function sfDataTypeToType(dataType: string): SfType {
       return "Percent";
     case "boolean":
       return "Boolean";
+    // A Long Text Area is a Text value, blank included: the org reads
+    // ISNULL(blank text area) as false and NULLVALUE over it as no
+    // substitution, the same as Text (corpus:testISNULLWithTextArea#1,
+    // corpus:testNVLWithTextArea#1, probed against a real Long Text Area).
     case "text":
     case "string":
+    case "textarea":
       return "Text";
     case "id":
       return "Id";

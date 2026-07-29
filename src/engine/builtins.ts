@@ -318,6 +318,16 @@ export const BUILTINS: Record<string, Builtin> = {
         dhms(Math.floor(Math.abs(a!.data.epochMillis - b.data.epochMillis) / 1000)),
       );
     }
+    // A blank operand of a Time/Datetime pair arrives typeless (a blank
+    // TIMEVALUE is blank("Unknown")), so it misses the pair branches above;
+    // the pair still nulls (corpus: testFormatDurationTime, blank timeString).
+    if (
+      (a!.type === "Time" || a!.type === "Datetime") &&
+      b !== undefined &&
+      b.blank
+    ) {
+      return blank("Text");
+    }
     if (a!.blank) {
       return blank("Text");
     }
@@ -585,8 +595,12 @@ export const SPECIAL_FORMS: Record<string, SpecialForm> = {
     if (isError(v)) {
       return v;
     }
+    // A blank argument renders blank, not an empty string: the oracle reads
+    // TEXT(blank date) back as null (testTextFunctionWithCustomDate), and the
+    // distinction is load-bearing for callers that reject "" —
+    // VALUE(TEXT(blank)) nulls instead of erroring (testBigDivideWithFunc).
     if (v.blank) {
-      return text("");
+      return blank("Text");
     }
     // Numeric types get the product renderer on the pre-materialization
     // value. A Percent renders its internal ÷100 value — TEXT(99% field) is
@@ -730,11 +744,22 @@ function isParsableNumber(s: string): boolean {
   }
 }
 
+/**
+ * CASE branch selection follows the `=` operator's blank semantics: text
+ * coerces a blank to "" (so a blank subject matches an empty-string `when`),
+ * while any other blank operand leaves the comparison unknown, which selects
+ * no branch — a blank subject falls through to the else value (corpus:
+ * testAbsUsesCase and its Sqrt/Floor/Ceiling twins, where a blank Date subject
+ * does not match a blank Date `when`).
+ */
 function caseEqual(a: SfValue, b: SfValue): boolean {
-  if (a.blank || b.blank) {
-    return a.blank && b.blank;
+  if (isTextType(a) && isTextType(b)) {
+    return concatString(a) === concatString(b);
   }
-  if (!a.blank && !b.blank && a.type === "Boolean" && b.type === "Boolean") {
+  if (a.blank || b.blank) {
+    return false;
+  }
+  if (a.type === "Boolean" && b.type === "Boolean") {
     return a.data === b.data;
   }
   if (a.type === "Date" && b.type === "Date") {
@@ -746,10 +771,7 @@ function caseEqual(a: SfValue, b: SfValue): boolean {
   if (a.type === "Time" && b.type === "Time") {
     return a.data.millisOfDay === b.data.millisOfDay;
   }
-  if (
-    (a.type === "Number" || a.type === "Currency" || a.type === "Percent") &&
-    !b.blank
-  ) {
+  if (a.type === "Number" || a.type === "Currency" || a.type === "Percent") {
     return asDecimal(a).equals(dnum(b));
   }
   return concatString(a) === concatString(b);
