@@ -22,22 +22,10 @@ const rows: CorpusRow[] = JSON.parse(
   readFileSync("corpus/org-verified.json", "utf8"),
 );
 
-// The `^` operator's overflow boundary is genuinely open: 10^60 computes,
-// 10^80 is a runtime error, yet (10^60)*(10^60) = 10^120 computes — the cap
-// is ^-specific (exponent- or result-based, undetermined) and NOT a value-
-// domain overflow. Quarantined pending a wave-4 bisect; our evaluator
-// currently computes large powers rather than guessing a boundary.
-const NUMERIC_RENDERING_QUARANTINE = new Set<string>([
-  "semantics:overflow_pow_isblank#0",
-  "semantics:overflow_pow_text#0",
-  "semantics:overflow_pow_edge#0",
-  "semantics:overflow_b80#0",
-  "semantics:overflow_b90#0",
-  "semantics:overflow_b98#0",
-  "semantics:overflow_b99#0",
-  "semantics:overflow_b100#0",
-  "semantics:overflow_b110#0",
-]);
+// Escape hatch for org rows whose rendering rule is not pinned down yet:
+// quarantined rows count toward neither pass nor fail. Currently empty — the
+// wave-4 `^` bisect settled every previously quarantined row.
+const NUMERIC_RENDERING_QUARANTINE = new Set<string>([]);
 
 describe("conformance: org-verified corpus (real-org tier)", () => {
   const tally: Record<RowStatus, number> = {

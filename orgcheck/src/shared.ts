@@ -49,6 +49,10 @@ export interface Probe {
    * save/evaluate outcome is the verdict, but the value must not be emitted
    * into the committed corpus. */
   readonly envSpecific?: boolean;
+  /** True: harness-plumbing probe (limits, cross-probe field references) —
+   * the deploy/readback outcome is the verdict; the row is not an evaluable
+   * semantics fact and must stay out of the corpus. */
+  readonly noCorpus?: boolean;
   readonly fields?: Readonly<Record<string, FieldSpec>>;
   /** Map from observed result → what that result means. */
   readonly interpret?: Readonly<Record<string, string>>;
@@ -104,6 +108,7 @@ export interface PlanFormulaField {
   readonly twinOf?: string;
   readonly expectSaveError?: boolean | "maybe";
   readonly envSpecific?: boolean;
+  readonly noCorpus?: boolean;
   readonly interpret?: Readonly<Record<string, string>>;
   /** Org field name (lowercased) → original corpus field name. Corpus-ref
    * inputs are namespaced per test so each org field needs only one type and

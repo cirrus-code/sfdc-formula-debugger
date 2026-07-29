@@ -165,6 +165,7 @@ function addFormulaField(
   interpret: Readonly<Record<string, string>> | undefined,
   fieldAliases?: Readonly<Record<string, string>>,
   envSpecific?: boolean,
+  noCorpus?: boolean,
 ): void {
   // API name from the bare id (source prefix and corpus "test" prefix add no
   // information and blow the 40-char CustomField limit).
@@ -183,6 +184,7 @@ function addFormulaField(
     returns,
     expectSaveError,
     envSpecific,
+    noCorpus,
     interpret,
     fieldAliases,
     rows,
@@ -236,6 +238,7 @@ function expandProbe(source: string, probe: Probe): void {
       probe.interpret,
       undefined,
       probe.envSpecific,
+      probe.noCorpus,
     );
   }
 }

@@ -54,11 +54,18 @@ export function runRow(row: CorpusRow, opts: RunOptions = {}): RowOutcome {
     const fields = new Map<string, SfValue>(
       row.fields.map((f) => [f.name, buildField(f)]),
     );
-    const result = evaluateFormula(ast, {
+    const raw = evaluateFormula(ast, {
       fields,
       blankMode: row.blankMode,
       now: { epochMillis: 0 },
     });
+    // The corpus rows read back stored formula-field values, and the product
+    // truncates Text formula OUTPUT at 1,300 characters (org-verified,
+    // semantics:csize_base) — a storage boundary, not expression semantics.
+    const result =
+      !isError(raw) && isText(raw) && !raw.blank && asText(raw).length > 1300
+        ? text(asText(raw).slice(0, 1300))
+        : raw;
     // Org-tier numeric expectations come from the TEXT() twin channel
     // (orgcheck reads TEXT(expr) for exact rendering), which sees the
     // pre-materialization value at the product's full digit budget. When the

@@ -17,6 +17,7 @@ import { childSortKey } from "./shared-ctx.ts";
 import type {
   CtxComponent,
   CtxContainerStatus,
+  CtxFieldUpdateResult,
   CtxFlowValueResult,
   CtxPlan,
   CtxProbeResult,
@@ -326,20 +327,13 @@ for (const batch of plan.batches) {
 
 const runtime: CtxRuntimeResult[] = [];
 
-if (!skipRuntime && (!only || only === "runtime")) {
-  const runtimeRulesLive = plan.batches
-    .find((b) => b.id === "runtime")!
-    .componentIds.every((id) =>
-      probeResults.some((r) => r.id === id && r.outcome === "accepted"),
-    );
-  if (!runtimeRulesLive) {
-    console.warn(
-      "runtime: some runtime rules failed to deploy — probes on those objects will misreport; continuing with the rest",
-    );
-  }
-
-  // Same FLS lesson as wave 1: API-deployed fields are invisible to the CLI
-  // user's anonymous Apex without an explicit grant.
+// Same FLS lesson as wave 1: API-deployed fields are invisible to the CLI
+// user's anonymous Apex without an explicit grant — needed by every
+// record-touching channel (VR runtime, field-update runtime).
+if (
+  !skipRuntime &&
+  (!only || only === "runtime" || only === "wfu_runtime")
+) {
   const PERMSET = "FxCtx_Access";
   const permDir = join(ROOT, "results", "ctx-permset-pkg");
   rmSync(permDir, { recursive: true, force: true });
@@ -386,6 +380,19 @@ if (!skipRuntime && (!only || only === "runtime")) {
   );
   if (assignFailures.length > 0) {
     throw new Error(`permset assignment failed: ${JSON.stringify(assignFailures)}`);
+  }
+}
+
+if (!skipRuntime && (!only || only === "runtime")) {
+  const runtimeRulesLive = plan.batches
+    .find((b) => b.id === "runtime")!
+    .componentIds.every((id) =>
+      probeResults.some((r) => r.id === id && r.outcome === "accepted"),
+    );
+  if (!runtimeRulesLive) {
+    console.warn(
+      "runtime: some runtime rules failed to deploy — probes on those objects will misreport; continuing with the rest",
+    );
   }
 
   console.log("runtime: inserting probe records…");
@@ -492,6 +499,81 @@ if (!skipRuntime && (!only || only === "flow_values")) {
   }
 }
 
+// ---- field-update runtime probes: insert gated records, read targets back ----
+
+const fieldUpdates: CtxFieldUpdateResult[] = [];
+
+if (!skipRuntime && (!only || only === "wfu_runtime")) {
+  const anyWfuLive = plan.fieldUpdateProbes.some((fu) =>
+    probeResults.some(
+      (r) => r.id === `wfuruntime:${fu.id}:rule` && r.outcome === "accepted",
+    ),
+  );
+  if (plan.fieldUpdateProbes.length > 0 && anyWfuLive) {
+    console.log("wfu runtime: inserting gated records…");
+    const run = sfJson(["apex", "run", "--file", "wfu-run.apex", "-o", org]);
+    if (!run.result?.success) {
+      console.warn(
+        `wfu-run.apex failed: ${run.result?.compileProblem || run.result?.exceptionMessage || "unknown"}`,
+      );
+    }
+    const raw: string = run.result?.logs ?? "";
+    const logs = raw.replace(/&#(\d+);/g, (_, n) =>
+      String.fromCharCode(Number(n)),
+    );
+    const insertOutcome = new Map<
+      string,
+      { saved: boolean; message?: string }
+    >();
+    for (const m of logs.matchAll(
+      /CTXRESULT\|([^|]+)\|(WFUSAVED|WFUERR)\|([^\n]*)/g,
+    )) {
+      const [, id, kind, payload] = m;
+      insertOutcome.set(id, {
+        saved: kind === "WFUSAVED",
+        message: kind === "WFUERR" ? payload.trim() : undefined,
+      });
+    }
+    // Field updates run in the same transaction, so the written values are
+    // visible immediately.
+    const soql = sfJson([
+      "data",
+      "query",
+      "-q",
+      "SELECT Gate__c, TgtText__c, TgtNum__c FROM FxWfu__c",
+      "-o",
+      org,
+    ]);
+    const byGate = new Map<string, Record<string, unknown>>();
+    for (const rec of soql.result?.records ?? []) {
+      byGate.set(rec.Gate__c as string, rec);
+    }
+    for (const fu of plan.fieldUpdateProbes) {
+      const ins = insertOutcome.get(fu.id);
+      if (!ins) {
+        fieldUpdates.push({ id: fu.id, outcome: "NOT_RUN" });
+        continue;
+      }
+      if (!ins.saved) {
+        fieldUpdates.push({
+          id: fu.id,
+          outcome: "BLOCKED",
+          message: ins.message,
+        });
+        continue;
+      }
+      const rec = byGate.get(fu.id);
+      const col = fu.target === "Number" ? "TgtNum__c" : "TgtText__c";
+      const v = rec?.[col];
+      fieldUpdates.push({
+        id: fu.id,
+        outcome: "WROTE",
+        value: v === null || v === undefined ? null : String(v),
+      });
+    }
+  }
+}
+
 // ---- org identity + write ----
 
 const display = sfJson(["org", "display", "-o", org]).result ?? {};
@@ -520,6 +602,7 @@ const results: CtxResults = {
   untestable: plan.untestable,
   runtime,
   flowValues,
+  fieldUpdates,
 };
 const stamp = results.collectedAt.slice(0, 10);
 // A partial (--only) run must never clobber a full run's results.
@@ -545,4 +628,9 @@ for (const rt of plan.runtimeProbes) {
 }
 for (const fv of flowValues) {
   console.log(`\n${fv.id}: ${fv.outcome} — ${(fv.value ?? "").slice(0, 160)}`);
+}
+for (const fu of fieldUpdates) {
+  console.log(
+    `\n${fu.id}: ${fu.outcome} — ${fu.outcome === "BLOCKED" ? (fu.message ?? "") : JSON.stringify(fu.value)}`,
+  );
 }

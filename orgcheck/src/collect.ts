@@ -375,6 +375,7 @@ const probes = plan.formulaFields
       question: ff.question,
       expectSaveError: ff.expectSaveError,
       envSpecific: ff.envSpecific,
+      noCorpus: ff.noCorpus,
       interpret: ff.interpret,
       fieldAliases: ff.fieldAliases,
       deployed: status.deployed,

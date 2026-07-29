@@ -17,6 +17,22 @@ if (!resultsPath) {
 const results = JSON.parse(readFileSync(join(ROOT, resultsPath), "utf8"));
 const source = `org:${results.org.id}:${results.collectedAt.slice(0, 10)}`;
 
+// The emission flags (envSpecific/noCorpus) are editorial policy, not
+// observations: consult the current plan so a flag added after a collect run
+// still governs emission without re-collecting from the org.
+const plan = JSON.parse(readFileSync(join(ROOT, "plan.json"), "utf8")) as {
+  formulaFields: {
+    probeId: string;
+    envSpecific?: boolean;
+    noCorpus?: boolean;
+  }[];
+};
+const planSkips = new Set(
+  plan.formulaFields
+    .filter((f) => f.envSpecific || f.noCorpus)
+    .map((f) => f.probeId),
+);
+
 interface ResultRow {
   recordKey: string;
   fields: { name: string; type: string; value: string | null }[];
@@ -70,9 +86,10 @@ for (const p of results.probes) {
   if (!p.deployed) {
     continue;
   }
-  // Env-specific observations (session ids…) prove save/evaluate outcomes but
-  // must never land in the committed corpus.
-  if (p.envSpecific) {
+  // Env-specific observations (session ids…) and harness-plumbing probes
+  // (limits, cross-probe references) prove their outcomes but are not
+  // evaluable semantics rows — keep them out of the committed corpus.
+  if (p.envSpecific || p.noCorpus || planSkips.has(p.probeId)) {
     continue;
   }
   for (const [i, row] of (p.rows as ResultRow[]).entries()) {

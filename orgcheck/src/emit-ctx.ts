@@ -211,3 +211,12 @@ if ((results.flowValues ?? []).length > 0) {
     console.log(`${fv.id}: ${fv.outcome} — ${(fv.value ?? "").slice(0, 200)}`);
   }
 }
+
+if ((results.fieldUpdates ?? []).length > 0) {
+  console.log("\n--- field-update runtime probes ---");
+  for (const fu of results.fieldUpdates) {
+    console.log(
+      `${fu.id}: ${fu.outcome} — ${fu.outcome === "BLOCKED" ? (fu.message ?? "") : JSON.stringify(fu.value)}`,
+    );
+  }
+}

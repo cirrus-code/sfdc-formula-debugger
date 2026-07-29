@@ -30,7 +30,8 @@ export type CtxComponentKind =
   | "function" // one registry function's availability probe
   | "global" // one $Global's availability probe
   | "runtime_rule" // active gated VR for the DML-triggered runtime pass
-  | "flow_value"; // Active flow whose interview output is a value probe
+  | "flow_value" // Active flow whose interview output is a value probe
+  | "wfu_runtime"; // active gated workflow rule + field update (value channel)
 
 /** One deployable metadata component (or a child fragment of a shared file). */
 export interface CtxComponent {
@@ -75,8 +76,23 @@ export interface CtxUntestable {
 export interface CtxBatch {
   readonly id: string; // "support" | "runtime" | "flow_values" | "<container>:canary" | "<container>:matrix"
   readonly container?: CtxContainerId;
-  readonly phase: "support" | "canary" | "matrix" | "runtime" | "flow_values";
+  readonly phase:
+    | "support"
+    | "canary"
+    | "matrix"
+    | "runtime"
+    | "flow_values"
+    | "wfu_runtime";
   readonly componentIds: readonly string[];
+}
+
+/** A gated active workflow rule + field update whose written value is the
+ * observation (the runtime channel for the workflow_field_update context). */
+export interface CtxFieldUpdateProbe {
+  readonly id: string;
+  readonly target: "Text" | "Number";
+  readonly formula: string;
+  readonly question: string;
 }
 
 /** A flow whose formula VALUE is read back by running the interview. */
@@ -105,6 +121,7 @@ export interface CtxPlan {
   readonly untestable: readonly CtxUntestable[];
   readonly runtimeProbes: readonly CtxRuntimeProbe[];
   readonly flowValueProbes: readonly CtxFlowValueProbe[];
+  readonly fieldUpdateProbes: readonly CtxFieldUpdateProbe[];
   /** Objects the runtime pass inserts into (permission-set + readback scope):
    * object api name → editable input field api names. */
   readonly runtimeObjects: Readonly<Record<string, readonly string[]>>;
@@ -155,6 +172,15 @@ export interface CtxFlowValueResult {
   readonly value?: string;
 }
 
+export interface CtxFieldUpdateResult {
+  readonly id: string;
+  /** WROTE = record saved, target readable (possibly null); BLOCKED = the
+   * insert itself failed; NOT_RUN = rule/update never deployed. */
+  readonly outcome: "WROTE" | "BLOCKED" | "NOT_RUN";
+  readonly value?: string | null;
+  readonly message?: string;
+}
+
 export interface CtxResults {
   readonly collectedAt: string;
   readonly org: Readonly<Record<string, unknown>>;
@@ -163,4 +189,5 @@ export interface CtxResults {
   readonly untestable: readonly CtxUntestable[];
   readonly runtime: readonly CtxRuntimeResult[];
   readonly flowValues: readonly CtxFlowValueResult[];
+  readonly fieldUpdates: readonly CtxFieldUpdateResult[];
 }

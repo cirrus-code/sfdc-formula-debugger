@@ -106,12 +106,26 @@ Findings encoded in `functions.ts`/`contexts.ts`:
   VRs behave as *blank* mode — `blankNumber < 5` and `blankNumber = 0` are
   both false, blank text still equals `""`, ISBLANK(blank) is true. There is
   no "treat blanks as zeroes" in the VR context; `blankModeToggle: false` with
-  blank-mode semantics is correct config. Other contexts' runtime blank
-  behavior remains deploy-unobservable (no runtime channel yet).
-- ❓ **Source character limits.** `charLimit: 3900` on formula/validation is
-  the formula-definition length, not the compiled size (which cannot be
-  computed client-side; the linter must say so). Compiled-size exploration is
-  still open.
+  blank-mode semantics is correct config. Workflow field updates likewise
+  runtime-verified as blank mode (wave 4, `wfu_blank_add`: `blank + 5` writes
+  null). Approval contexts' runtime blank behavior remains unprobed.
+- ✅ **Source character limit org-verified**: a 3,916-char formula-field
+  source rejects with "Formula is too long (3,916 characters).  Maximum
+  length is 3,900 characters" (probe `syntax:srclen_over`; ~3,790 chars
+  saves). `charLimit: 3900` is exact for the definition length. The
+  **compiled-size limit is 15,000 characters**, enforced at deploy: the
+  ≈18.4k inline chain rejects with "Compiled formula is too big to execute
+  (18,444 characters). Maximum size is 15,000 characters" (probe
+  `semantics:csize_l4`; `csize_l6` likewise), while the ≈6.9k and ≈9k chains
+  save (`csize_3x`, `csize_l3`). The folklore ~5k compiled cap is wrong —
+  the real ceiling is 15k, and referenced formula fields DO inline into it.
+  The linter's approximate wording stays: the exact compiled size is still
+  not computable client-side, only the limit it is measured against is now
+  known.
+- ✅ **Text formula output truncates at 1,300 characters** — a 2,300-char
+  literal Text formula reads back exactly 1,300 chars (probes
+  `semantics:csize_base/2x/3x` all cap there). A display/storage-boundary
+  rule, not an expression-level one.
 
 Runtime error semantics in validation rules (isolated single-record objects,
 `Database.insert(allOrNone=false)`, debug-channel observation):
@@ -354,14 +368,35 @@ formerly-refusing functions, now simulated with golden coverage:
   confirmed for a real prefix (`001…` → `…AAA`) but the function *validates*
   its input against the org's key-prefix registry (a 15-char non-ID passes
   through unchanged, `casesafeid_mixed`) — org state a client cannot know.
-- 🔬 **`^` has an overflow cap that is NOT value overflow**: `10^60`
-  computes, `10^80` is a runtime error, yet `(10^60)*(10^60)` = 10^120
-  computes fine. The boundary and its basis (exponent vs result magnitude)
-  need a wave-4 bisect; the affected rows are quarantined.
+- ✅ **`^` fully bisected (wave 4)**: results carry decimal **scale 40** —
+  `99^-1` renders exactly 40 decimal places, and `10^-80` / `0.5^200`
+  collapse to 0 even though the same values reached through `/` keep full
+  scale (`owc_99_neg1`, `owm_neg_exp`, `owc_half_pow` vs `owc_div_1e80`).
+  Positive exponents cap on **result magnitude at 1e64**: `10^64` computes;
+  `10^65`, `2^213` (≈1.3e64) and `9^68` error (`owb`/`owb2`/`owc` bisects).
+  The cap is `^`-only (`(10^60)*(10^60)*(10^60)` = 1e180 computes) and does
+  not apply to negative exponents (`10^-80` evaluates even though its 10^80
+  reciprocal would error). Within the cap an **integer base runs through an
+  IEEE double**: `TEXT(2^100)` renders the double's 17-digit repr, not the
+  exact 31-digit integer, and `3^40` reads back one ulp below the correctly
+  rounded double — so the evaluator returns integer-base results only when
+  the exact value survives a double round-trip unchanged, and refuses
+  otherwise (rule 1). Fractional bases stay exact decimal (`1.00596^240`
+  renders 39 exact digits). The numeric-rendering quarantine is now empty.
 - Flow-context runtime facts: **div-by-zero yields null in a running flow**
   (vs `#Error!` in formula fields and a blocked save in validation rules),
   and **flow formulas reject string literals containing backslashes** at
   deploy (a syntax error there, legal text in formula fields).
+- ✅ **Workflow-field-update runtime facts** (wave 4; gated active workflow
+  rule + field update, `wfu_*` probes, DML + SOQL readback): **div-by-zero
+  in an executing field-update formula blocks the entire save**
+  (`CANNOT_INSERT_UPDATE_ACTIVATE_ENTITY: A workflow or approval field
+  update caused an error when saving this record… Division by zero`) — the
+  fourth distinct per-context runtime error behavior (formula fields render
+  `#Error!`, validation rules block naming the rule, flows yield null).
+  Field-update formulas execute in **blank mode** (`blank + 5` writes null,
+  not 5), blank text still equals `""` (`wfu_blank_text` → EMPTY_EQ), and
+  text `=` stays case-sensitive (`wfu_case_eq` → SENSITIVE).
 
 ## Function port (unsupported → simulated)
 
@@ -440,17 +475,24 @@ verification before a fix:
 - ✅ **Case sensitivity of text `=` / `<>`** — oracle-verified case-sensitive,
   and re-confirmed per context: formula fields (wave 1) and validation rules
   at runtime (wave 2, `rt_case_eq`) agree.
-- ✅ **Div-by-zero surfacing per context** — formula fields produce a real
-  `#Error!` (wave 1); validation rules block the save with a system error
-  naming the rule (wave 2, `err_divzero`). Overflow surfacing and the
-  remaining contexts' runtime behavior stay open (no runtime channel for
-  workflow/approval/flow yet).
+- ✅ **Div-by-zero surfacing per context** — four distinct behaviors, all
+  runtime-verified: formula fields produce a real `#Error!` (wave 1);
+  validation rules block the save with a system error naming the rule
+  (wave 2, `err_divzero`); flows yield null (wave 3); workflow field updates
+  block the save with `CANNOT_INSERT_UPDATE_ACTIVATE_ENTITY` (wave 4,
+  `wfu_divzero`). `^` overflow surfacing settled in wave 4 (result > 1e64
+  errors). Approval contexts remain runtime-unprobed.
 - ✅ **Blank propagation through arithmetic/comparison under both blank modes** —
   corpus-verified (semantics-pass section above); validation rules
   additionally runtime-verified as blank-mode (wave-2 `rt_blank_*` probes).
-- 🔬 **Date/datetime arithmetic edge cases** (month-end `ADDMONTHS`,
-  DST-adjacent datetime math, `TEXT()` output formats per type) — partly in the
-  conformance backlog; datetime rendering is quarantined.
+- ✅ **Date/datetime arithmetic edge cases** — month-end `ADDMONTHS`
+  org-verified and implemented; **DST closed by analysis**: the verification
+  org runs on America/Los_Angeles (DST-observing), and
+  `semantics:datetime_plus_hour` shows `2026-03-08 09:30Z + 1/24 =
+  10:30:00Z` — one clean UTC hour across the US spring-forward instant, with
+  every `TEXT(datetime)` rendering GMT regardless of org TZ. Datetime math is
+  UTC-based, unaffected by org timezone. Only the oracle's Java-style
+  datetime renderings remain incomparable (quarantined).
 - 🔬 **Numeric precision/scale limits** — internal model resolved and refined:
   40-sig-fig carry, 32-place materialization, Oracle-NUMBER-parity TEXT
   rendering (org-pass sections above); rounding at display boundaries per
@@ -461,21 +503,28 @@ verification before a fix:
   contexts are Tier 1 now). `email_template` is structurally unverifiable at
   deploy (no compile check) and stays Tier 2 best-effort.
 
-## Open follow-ups (wave 4 candidates)
+## Open follow-ups
 
 Wave 3 (2026-07-28) closed: FF short-circuit ✅, Percent TEXT ✅,
 ISPICKVAL/INCLUDES coercion ✅, flow-interview runtime channel ✅ (built —
 `flowValueProbes` in `orgcheck/probes/contexts.json`), and the refuse-list
-graduations above. Still open:
+graduations above.
 
-- **`^` overflow bisect** — pin the boundary in (60, 80] for `10^N` and
-  whether it is exponent- or magnitude-based (a non-10 base discriminates);
-  also the value domain's own ceiling (≥ 1e120 works via `*`).
+Wave 4 (2026-07-29) closed: `^` overflow bisect ✅ (scale 40, 1e64 result
+cap, integer-base double path — see the org-pass section), source/compiled
+size limits ✅ (3,900 source / 15,000 compiled, exact), Text output
+truncation at 1,300 chars ✅, WFU runtime channel ✅ (`wfu_*` probes: blocked
+save on div-by-zero, blank mode, case-sensitive `=`), DST closed by analysis
+(datetimes are GMT instants; the org applies no zone arithmetic a client
+must reproduce). Still open:
+
 - `CASESAFEID` — refusal is likely permanent (org-state prefix validation),
   but a UI-side note could explain the suffix algorithm.
-- Compiled-size limits; DST probes under a non-GMT org TZ.
-- Runtime observation for workflow field-update execution (the last context
-  with no value channel).
+- `0.5^200` reads back `0`, consistent with the scale-40 rule; more
+  fractional-base/large-exponent pairs (e.g. `1.1^900`) would confirm the
+  rule is scale-40 rounding rather than a separate underflow-to-zero.
+- `0 ^ negative` — unprobed; the evaluator refuses rather than pick an
+  error shape.
 - ~~Registry function coverage~~ — closed 2026-07-28: audited against the
   official reference (101 functions registered; 35 added, of which 16
   corpus-backed and simulated — see the function-port-2 section). Remaining

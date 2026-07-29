@@ -10395,5 +10395,230 @@
   "fields": [],
   "blankMode": "blank",
   "expected": "97"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owb_65#0",
+  "formula": "TEXT(10 ^ 65)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owb_70#0",
+  "formula": "TEXT(10 ^ 70)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owb_72#0",
+  "formula": "TEXT(10 ^ 72)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owb_74#0",
+  "formula": "TEXT(10 ^ 74)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owb_76#0",
+  "formula": "TEXT(10 ^ 76)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owb_78#0",
+  "formula": "TEXT(10 ^ 78)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owb_79#0",
+  "formula": "TEXT(10 ^ 79)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owm_pow_of_pow#0",
+  "formula": "TEXT((10 ^ 40) ^ 2)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owm_2_100#0",
+  "formula": "TEXT(2 ^ 100)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "1267650600228229400000000000000"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owm_2_250#0",
+  "formula": "TEXT(2 ^ 250)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owm_3_160#0",
+  "formula": "TEXT(3 ^ 160)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owm_neg_exp#0",
+  "formula": "TEXT(10 ^ -80)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owm_mult_chain#0",
+  "formula": "TEXT((10 ^ 60) * (10 ^ 60) * (10 ^ 60))",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:csize_base#0",
+  "formula": "\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owb2_61#0",
+  "formula": "TEXT(10 ^ 61)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "10000000000000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owb2_62#0",
+  "formula": "TEXT(10 ^ 62)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "100000000000000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owb2_63#0",
+  "formula": "TEXT(10 ^ 63)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "1000000000000000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owb2_64#0",
+  "formula": "TEXT(10 ^ 64)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "10000000000000000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owc_3_40#0",
+  "formula": "TEXT(3 ^ 40)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "12157665459056928800"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owc_99_neg1#0",
+  "formula": "TEXT(99 ^ -1)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": ".0101010101010101010101010101010101010101"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owc_2_213#0",
+  "formula": "TEXT(2 ^ 213)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owc_2_216#0",
+  "formula": "TEXT(2 ^ 216)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owc_9_68#0",
+  "formula": "TEXT(9 ^ 68)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owc_div_1e80#0",
+  "formula": "TEXT(1 / (10 ^ 40) / (10 ^ 40))",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": ".00000000000000000000000000000000000000000000000000000000000000000000000000000001"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-28",
+  "name": "semantics:owc_half_pow#0",
+  "formula": "TEXT(0.5 ^ 200)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0"
  }
 ]

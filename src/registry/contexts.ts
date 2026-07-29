@@ -60,6 +60,8 @@ export const CONTEXTS: readonly FormulaContext[] = [
     // $Api org-verified here (semantics:ff_api_global saves and evaluates).
     globals: [...CORE_WITH_CMT, API_GLOBAL],
     blankModeToggle: true,
+    // Org-verified exact: 3,916 chars rejects with "Maximum length is 3,900
+    // characters" (syntax:srclen_over).
     charLimit: 3900,
   },
   {

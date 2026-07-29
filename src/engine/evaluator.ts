@@ -284,10 +284,52 @@ function arithmetic(
       if (!b.isInteger()) {
         return error("#Error! (^ requires an integer exponent)");
       }
-      return num(a.pow(b));
+      return powProduct(a, b);
     default:
       return assertNever(op);
   }
+}
+
+/**
+ * `^` per the org (wave-4 probes). Results carry decimal scale 40: 99^-1
+ * renders exactly 40 decimal places (owc_99_neg1), and 10^-80 and 0.5^200
+ * collapse to 0 (owm_neg_exp, owc_half_pow) even though the same values
+ * reached through `/` keep their full scale (owc_div_1e80). Negative
+ * exponents have no magnitude cap and never take the double path below
+ * (10^-80 evaluates; its 10^80 reciprocal would error). Positive exponents
+ * error above 1e64: 10^64 computes, 10^65 / 2^213 / 9^68 error (owb, owb2,
+ * owc bisects). Within the cap an INTEGER base runs through an IEEE double
+ * org-side — TEXT(2^100) renders the double's 17-digit repr, and 3^40 came
+ * back one ulp below the correctly rounded double — so when the exact value
+ * survives a double round-trip unchanged we return it, and otherwise refuse
+ * rather than guess the org's final-ulp digits. Fractional bases stay
+ * decimal (1.00596^240 renders 39 exact digits, testExponentiationOperator#18).
+ */
+const POW_CAP = new Decimal("1e64");
+const POW_SCALE = 40;
+
+function powProduct(a: Decimal, b: Decimal): EvalResult {
+  const exact = a
+    .pow(b)
+    .toDecimalPlaces(POW_SCALE, Decimal.ROUND_HALF_UP);
+  if (!exact.isFinite()) {
+    // decimal.js yields ±Infinity for 0 ^ negative; the org's outcome for
+    // that edge is unverified, so refuse rather than pick an error shape.
+    throw new UnsupportedError("^");
+  }
+  if (b.isNegative()) {
+    return num(exact);
+  }
+  if (exact.abs().greaterThan(POW_CAP)) {
+    return error("#Error! (^ result exceeds 1e64)");
+  }
+  if (a.isInteger()) {
+    const viaDouble = new Decimal(exact.toNumber());
+    if (!viaDouble.equals(exact)) {
+      throw new UnsupportedError("^");
+    }
+  }
+  return num(exact);
 }
 
 const DAY_MS = 86_400_000;

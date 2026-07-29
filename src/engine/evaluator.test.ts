@@ -361,6 +361,50 @@ describe("engine: ported functions (corpus-verified)", () => {
   });
 });
 
+describe("engine: ^ semantics (org-verified, wave-4 bisect)", () => {
+  it("computes exact integer powers up to the 1e64 result cap", () => {
+    expect(s("TEXT(10 ^ 64)")).toBe(`1${"0".repeat(64)}`);
+    expect(s("TEXT(10 ^ 61)")).toBe(`1${"0".repeat(61)}`);
+  });
+
+  it("errors above the cap — a result-magnitude rule specific to ^", () => {
+    expect(isError(ev("10 ^ 65"))).toBe(true);
+    expect(isError(ev("2 ^ 213"))).toBe(true);
+    expect(isError(ev("(10 ^ 40) ^ 2"))).toBe(true);
+    // The same magnitudes via * compute fine (owm_mult_chain).
+    expect(s("TEXT((10 ^ 60) * (10 ^ 60) * (10 ^ 60))")).toBe(
+      `1${"0".repeat(180)}`,
+    );
+  });
+
+  it("negative exponents compute at scale 40, uncapped", () => {
+    expect(s("TEXT(99 ^ -1)")).toBe(
+      ".0101010101010101010101010101010101010101",
+    );
+    // 1e-80 collapses to 0 at scale 40 — via `/` it would keep full scale.
+    expect(s("TEXT(10 ^ -80)")).toBe("0");
+    expect(s("TEXT(1 / (10 ^ 40) / (10 ^ 40))")).toBe(
+      `.${"0".repeat(79)}1`,
+    );
+  });
+
+  it("fractional-base results collapse at scale 40 too", () => {
+    expect(s("TEXT(0.5 ^ 200)")).toBe("0");
+  });
+
+  it("refuses integer-base results the org routes through an IEEE double", () => {
+    // TEXT(2^100) org-renders the double's 17-digit repr, and 3^40 one ulp
+    // below the correctly rounded double — final-ulp digits we cannot
+    // faithfully reproduce, so both refuse rather than guess.
+    expect(() => ev("3 ^ 40")).toThrow(UnsupportedError);
+    expect(() => ev("2 ^ 100")).toThrow(UnsupportedError);
+  });
+
+  it("refuses 0 ^ negative (unprobed org edge)", () => {
+    expect(() => ev("0 ^ -1")).toThrow(UnsupportedError);
+  });
+});
+
 describe("engine: simulation boundary (refuse, never guess)", () => {
   it("refuses non-simulatable functions with UnsupportedError", () => {
     expect(() => ev("PRIORVALUE(Amount)")).toThrow(UnsupportedError);

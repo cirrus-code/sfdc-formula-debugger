@@ -103,6 +103,39 @@
     }
   ],
 
+  "fieldUpdateProbes": [
+    {
+      "id": "wfu_canary",
+      "target": "Text",
+      "formula": "\"ok:\" & Gate__c",
+      "question": "Channel canary: a gated rule's field update must write into the record before readback."
+    },
+    {
+      "id": "wfu_divzero",
+      "target": "Number",
+      "formula": "1 / 0",
+      "question": "Wave-4: div-by-zero in an executing field update — blocked save, silent skip, or null write? (FF: #Error!; VR: blocked save; flow: null.)"
+    },
+    {
+      "id": "wfu_blank_add",
+      "target": "Number",
+      "formula": "BlankN__c + 5",
+      "question": "Wave-4: which blank mode does a field-update formula execute under — blank+5 = 5 (zero mode) or null (blank mode)?"
+    },
+    {
+      "id": "wfu_blank_text",
+      "target": "Text",
+      "formula": "IF(BlankT__c = \"\", \"EMPTY_EQ\", \"NOT_EQ\")",
+      "question": "Wave-4: blank text = \"\" inside an executing field update (FF and VR: true)."
+    },
+    {
+      "id": "wfu_case_eq",
+      "target": "Text",
+      "formula": "IF(\"a\" = \"A\", \"INSENSITIVE\", \"SENSITIVE\")",
+      "question": "Wave-4: text = case sensitivity at field-update runtime."
+    }
+  ],
+
   "runtimeProbes": [
     {
       "id": "rt_canary_fired",
