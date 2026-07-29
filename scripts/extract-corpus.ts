@@ -47,8 +47,23 @@ function decodeEntities(s: string): string {
     .replace(/&amp;/g, "&");
 }
 
+/**
+ * Comma-separated values use whitespace two ways: same-line spaces and
+ * wrapped newline+tab runs are FORMATTING (date lists, wrapped
+ * expectations), but a whitespace-only value with no line break is DATA —
+ * a literal space ("Replace Space, ,No" carries a single-space search
+ * term; CHR's whitespace expectations arrive the same way, already folded
+ * to spaces by XML attribute normalization). A blanket trim() destroyed
+ * the data case.
+ */
 function splitValues(raw: string): string[] {
-  return raw.split(",").map((v) => decodeEntities(v.trim()));
+  return raw.split(",").map((v) => {
+    const trimmed = v.trim();
+    if (trimmed === "" && v !== "" && !/[\r\n]/.test(v)) {
+      return " ";
+    }
+    return decodeEntities(trimmed);
+  });
 }
 
 const xml = readFileSync(SOURCE, "utf8");

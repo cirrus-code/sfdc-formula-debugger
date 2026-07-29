@@ -40,6 +40,10 @@
               nodejs_26
               pnpm
               prettier
+              # The WS4 differential fuzzer (oracle/fuzz) drives the JVM oracle
+              # from node in one process; without a JDK here it needs FUZZ_JAVA
+              # pointed at the .#oracle shell.
+              jdk21
             ];
 
             PLAYWRIGHT_BROWSERS_PATH = browsers;

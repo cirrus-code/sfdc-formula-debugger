@@ -94,13 +94,34 @@ function commonPrefixLength(a: string, b: string): number {
   return i;
 }
 
-/** Same text except for a longer/shorter run of trailing digits. */
+/**
+ * Same text except for a differing run of digits — a longer/shorter or
+ * last-digit-rounded rendering of the same embedded number. The differing
+ * run may sit mid-string (a rendered number concatenated with more text),
+ * so a common suffix is stripped before the digit check; requiring one
+ * side's run to be a short stub keeps genuine arithmetic disagreements out.
+ */
 function sameButForDigitTail(a: string, b: string): boolean {
   if (a === b) {
     return true;
   }
   const n = commonPrefixLength(a, b);
-  return n >= 6 && /^\d*$/.test(a.slice(n)) && /^\d*$/.test(b.slice(n));
+  let s = 0;
+  while (
+    s < a.length - n &&
+    s < b.length - n &&
+    a[a.length - 1 - s] === b[b.length - 1 - s]
+  ) {
+    s += 1;
+  }
+  const midA = a.slice(n, a.length - s);
+  const midB = b.slice(n, b.length - s);
+  return (
+    n >= 6 &&
+    /^\d*$/.test(midA) &&
+    /^\d*$/.test(midB) &&
+    Math.min(midA.length, midB.length) <= 2
+  );
 }
 
 /**

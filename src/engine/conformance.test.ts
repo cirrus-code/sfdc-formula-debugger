@@ -10,9 +10,10 @@ import { runRow, type RowStatus } from "./conformance.ts";
  * that should only ever move up.
  */
 
-// Locked baseline: raise as the evaluator improves, never lower silently. The
-// gap to 100% is the triaged discrepancy backlog in VERIFICATION.md.
-const BASELINE = 0.999;
+// Locked baseline: every comparable row passes. A future failing row must be
+// triaged — fixed, org-overruled with evidence, or quarantined as
+// incomparable — never absorbed by lowering this.
+const BASELINE = 1;
 
 const rows: CorpusRow[] = JSON.parse(
   readFileSync("corpus/salesforce-v2.json", "utf8"),
@@ -45,11 +46,6 @@ function rowKey(row: CorpusRow, seen: Map<string, number>): string {
  *  - testSimpleSubstitute#6/#7 and #14/#15: SUBSTITUTE with a blank search
  *    term is a no-op, not null (corpus:testSimpleSubstitute#3 reads back
  *    "Salesforce", #7 reads back "Golden File").
- *  - testSimpleSubstitute#16/#17: the same no-op rule
- *    (corpus:testSimpleSubstitute#8 reads back "Replace Space"). The oracle's
- *    "ReplaceNoSpace" answers a different input than the row encodes: the XML
- *    search term is a literal space (formulaTestV2.xml:14248) that the
- *    extractor's per-value trim() turned into a blank.
  *  - testIfTextCompareGreaterThan#16/#17 and testIfTextCompareLessEqual#16/#17:
  *    "Left" vs "Left". The oracle's answers make text ordering irreflexive;
  *    the org's do not (corpus:testIfTextCompareGreaterThan#8 is false,
@@ -66,8 +62,6 @@ const ORG_OVERRULED = new Set<string>([
   "testSimpleSubstitute#7",
   "testSimpleSubstitute#14",
   "testSimpleSubstitute#15",
-  "testSimpleSubstitute#16",
-  "testSimpleSubstitute#17",
   "testIfTextCompareGreaterThan#16",
   "testIfTextCompareGreaterThan#17",
   "testIfTextCompareLessEqual#16",
@@ -98,6 +92,23 @@ const ORG_OVERRULED = new Set<string>([
   "testLowerLocale#23",
   "testLowerLocale#44",
   "testLowerLocale#45",
+  // The JVM oracle can hold an EMPTY-STRING field distinct from null
+  // (ISNULL('') is false there; NULLVALUE returns the '' itself). The
+  // product has no such state: whitespace-only text saves as null (wave 1)
+  // and every empty text result is blank (pw8_be_*), so these rows encode
+  // an unreachable field state.
+  "testNVLWithPhone#6",
+  "testNVLWithPhone#7",
+  "testNVLWithEmail#4",
+  "testNVLWithEmail#5",
+  "testNVLWithUrl#4",
+  "testNVLWithUrl#5",
+  "testISNULLWithPhone#6",
+  "testISNULLWithPhone#7",
+  "testISNULLWithEmail#4",
+  "testISNULLWithEmail#5",
+  "testISNULLWithUrl#4",
+  "testISNULLWithUrl#5",
 ]);
 
 /**
@@ -105,12 +116,14 @@ const ORG_OVERRULED = new Set<string>([
  * nothing to compare against — the same "incomparable, so neither pass nor
  * fail" treatment the comparator applies to Java-rendered temporals.
  *
- * CHR(9), CHR(13) and CHR(32) each carry a single space as their expectation
- * in formulaTestV2.xml (XML attribute-value normalization folds tab and CR to
- * a space, so all three rows are byte-identical), which the extractor's
- * per-value trim() then empties. The org twin cannot arbitrate either:
- * whitespace-only text is trimmed away at save, so corpus:testChr#2/#3/#4 all
- * read back null.
+ * XML attribute-value normalization folds tab and CR to a space before the
+ * extractor ever runs, so CHR(9) and CHR(13) carry a space expectation that
+ * is provably not what Java produced (#5/#7); their zero-path twins and
+ * CHR(32)'s sat on wrapped lines whose whitespace reads as formatting, so
+ * those expectations are empty outright (#4/#6/#8). Only CHR(32)'s
+ * blank-path row survived with a truthful expectation and is compared. The
+ * org twin cannot arbitrate the rest: whitespace-only text is trimmed away
+ * at save, so corpus:testChr#2/#3/#4 all read back null.
  */
 const EXPECTATION_QUARANTINE = new Set<string>([
   "testChr#4",
@@ -118,7 +131,6 @@ const EXPECTATION_QUARANTINE = new Set<string>([
   "testChr#6",
   "testChr#7",
   "testChr#8",
-  "testChr#9",
 ]);
 
 describe("conformance: Salesforce formula-engine corpus", () => {

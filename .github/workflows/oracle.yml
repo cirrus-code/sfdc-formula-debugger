@@ -1,10 +1,11 @@
 name: Oracle harness
 
-# The JVM conformance oracle (CONFORMANCE.md WS3) is offline infrastructure, NOT
-# part of the app build or the fast CI loop. This scheduled/manual job builds
-# Salesforce's formula-engine and the harness and runs the example probes — a
-# canary that the oracle still builds, so corpus regeneration stays possible.
-# It never gates app CI and the product never depends on a JVM.
+# The JVM conformance oracle (CONFORMANCE.md WS3-WS5) is offline
+# infrastructure, NOT part of the app build or the fast CI loop. This
+# scheduled/manual workflow keeps the oracle side honest: the harness still
+# builds, the committed oracle corpus still matches the extractor's output
+# (drift opens a PR), and a differential fuzz pass (WS4) hunts for evaluator
+# discrepancies. It never gates app CI and the product never depends on a JVM.
 
 on:
   workflow_dispatch:
@@ -28,3 +29,85 @@ jobs:
 
       - name: Build formula-engine + harness, run smoke probes
         run: nix develop .#oracle --command bash oracle/ci-smoke.sh
+
+      - name: Save oracle build for the fuzz job
+        uses: actions/upload-artifact@v6
+        with:
+          name: oracle-target
+          path: oracle/target
+          retention-days: 1
+
+  # WS5: the committed corpus must be exactly what the extractor emits from
+  # the vendored XML. Drift (an extractor change merged without regeneration,
+  # or an updated vendored oracle) opens a PR rather than rotting silently.
+  corpus-drift:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Regenerate the oracle corpus
+        run: |
+          nix develop --command bash -c '
+            pnpm install --frozen-lockfile
+            node --experimental-strip-types scripts/extract-corpus.ts'
+
+      - name: Open a drift PR if the corpus changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          add-paths: corpus/salesforce-v2.json
+          branch: corpus-drift
+          commit-message: "Regenerate the oracle corpus (extractor drift)"
+          title: "Oracle corpus drift"
+          body: >
+            `scripts/extract-corpus.ts` no longer reproduces the committed
+            `corpus/salesforce-v2.json`. This PR carries the regenerated
+            corpus; the conformance suites must be re-run and any new
+            failures triaged (fixed, org-overruled with evidence, or
+            quarantined) before merging.
+
+  # WS4: a differential fuzz pass against the JVM oracle. The job fails when
+  # the suspected-our-bug bucket is non-empty so the weekly run turns red;
+  # the full report is an artifact either way.
+  fuzz:
+    runs-on: ubuntu-latest
+    needs: build-oracle
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Restore oracle build
+        uses: actions/download-artifact@v7
+        with:
+          name: oracle-target
+          path: oracle/target
+
+      - name: Run the differential fuzzer
+        env:
+          FUZZ_SEED: ${{ github.run_number }}
+        run: |
+          nix develop --command bash -c '
+            pnpm install --frozen-lockfile
+            node oracle/fuzz/run.mjs --seed "$FUZZ_SEED" \
+              --count 3000 --out fuzz-report.md'
+
+      - name: Publish the report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: fuzz-report
+          path: fuzz-report.md
+
+      - name: Fail on suspected evaluator bugs
+        run: |
+          bugs=$(grep -oP '\| \(a\) suspected our-bug \| *\K\d+' fuzz-report.md)
+          echo "suspected our-bug findings: ${bugs:-unparsed}"
+          cat fuzz-report.md >> "$GITHUB_STEP_SUMMARY" || true
+          test "${bugs:-1}" -eq 0
