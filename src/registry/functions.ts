@@ -1,4 +1,5 @@
 import type {
+  Arity,
   ContextId,
   FunctionSpec,
   ParamSpec,
@@ -81,6 +82,26 @@ const ALL_BUT_BUTTON: readonly ContextId[] = [
   "quick_action",
   "email_template",
 ];
+
+// Org-verified (VERIFICATION.md, wave-2 pass): TRUNC's single-argument form
+// only saves in formula fields; every other Tier 1 (compile-checked) context
+// requires both arguments. email_template is Tier 2 (deploy never compile-
+// checks it) so it's left out — the checker treats Tier 2 as best-effort.
+const TRUNC_TWO_ARG_CONTEXTS: readonly ContextId[] = [
+  "validation_rule",
+  "flow_formula",
+  "default_value",
+  "workflow_rule",
+  "workflow_field_update",
+  "approval_entry",
+  "approval_step",
+  "custom_button_link",
+  "quick_action",
+];
+const TRUNC_CONTEXT_ARITY: Partial<Readonly<Record<ContextId, Arity>>> =
+  Object.fromEntries(
+    TRUNC_TWO_ARG_CONTEXTS.map((id) => [id, { min: 2, max: 2 }]),
+  );
 
 // Transcendental math: real Salesforce functions, but NOT simulatable — they
 // compute as non-correctly-rounded doubles (Java StrictMath) whose last ULP a
@@ -542,6 +563,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     params: [req("number", "Number"), opt("num_digits", "Number")],
     returnType: fixed("Number"),
     contexts: "all",
+    contextArity: TRUNC_CONTEXT_ARITY,
     simulatable: true,
     docsUrl: DOCS,
     summary: "Truncates a number to a number of digits (toward zero).",
@@ -935,6 +957,13 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     simulatable: false,
     docsUrl: DOCS,
     summary: "Converts a 15-character ID to its case-safe 18-character form.",
+    lintNotes: [
+      {
+        id: "casesafeid-unsupported-simulation",
+        message:
+          "Simulation refuses: Salesforce checks the input against the org's live key-prefix registry (which object/record type it names), and that registry is org state a client can't see, so the input's validity is never guessed. The 15-to-18 suffix itself is a public, deterministic algorithm: split the id into three 5-character chunks, and for each chunk build a 5-bit mask (one bit per character, set when that character is an uppercase letter), then look up the mask in the alphabet A-Z0-5 to get that chunk's extra suffix character.",
+      },
+    ],
   },
   {
     name: "HTMLENCODE",

@@ -46,6 +46,12 @@ export interface LintNote {
   readonly message: string;
 }
 
+export interface Arity {
+  readonly min: number;
+  /** Number.POSITIVE_INFINITY when the function is variadic. */
+  readonly max: number;
+}
+
 export interface FunctionSpec {
   /** Canonical uppercase name. */
   readonly name: string;
@@ -59,6 +65,14 @@ export interface FunctionSpec {
   /** Short hover text. */
   readonly summary: string;
   readonly lintNotes?: readonly LintNote[];
+  /**
+   * Per-context argument-count override: contexts listed here require the
+   * given range instead of the arity derived from `params`. Contexts absent
+   * from this map fall back to the derived arity. Only populate from an
+   * org-verified fact (e.g. TRUNC's single-argument form is
+   * formula-field-only) — never a guess.
+   */
+  readonly contextArity?: Partial<Readonly<Record<ContextId, Arity>>>;
 }
 
 export interface GlobalSpec {
@@ -66,6 +80,23 @@ export interface GlobalSpec {
   /** Whether this global's fields can be user-filled in simulation. */
   readonly simulatable: boolean;
 }
+
+/**
+ * How a simulated runtime error (the evaluator's `#Error!` outcome) actually
+ * manifests once Salesforce runs the formula for real in this context:
+ * - "error_value": the field displays the literal `#Error!` value.
+ * - "blocks_save": the containing record save is rejected outright.
+ * - "blocks_submit": the record saves, but submitting it for approval fails.
+ * - "null_result": no fault occurs — the formula resolves to blank and
+ *   execution continues.
+ * Leave unset where this is unverified; the UI must show nothing beyond the
+ * generic `#Error!` outcome in that case.
+ */
+export type RuntimeErrorBehavior =
+  | "error_value"
+  | "blocks_save"
+  | "blocks_submit"
+  | "null_result";
 
 export interface FormulaContext {
   readonly id: ContextId;
@@ -77,4 +108,9 @@ export interface FormulaContext {
   readonly blankModeToggle: boolean;
   readonly charLimit?: number;
   readonly notes?: string;
+  readonly runtimeErrorBehavior?: RuntimeErrorBehavior;
+  /** English detail sentence for runtimeErrorBehavior; translated via the
+   * contextRuntimeErrorNotes sparse overlay (i18n/README.md). Required
+   * whenever runtimeErrorBehavior is set. */
+  readonly runtimeErrorNote?: string;
 }

@@ -30,10 +30,11 @@ of importing the registry.
    Do **not** use `as const` in pack files (it narrows values to English
    literal types and would force every locale to repeat them).
 
-2. Registry prose (function summaries, lint notes, context labels/notes) is
-   translated via the pack's sparse `registry` overlay (`RegistryOverlay` in
-   `types.ts`), keyed by function name / note id / context id. Untranslated
-   entries fall back to the registry's English.
+2. Registry prose (function summaries, lint notes, context labels/notes,
+   context runtime-error notes) is translated via the pack's sparse
+   `registry` overlay (`RegistryOverlay` in `types.ts`), keyed by function
+   name / note id / context id. Untranslated entries fall back to the
+   registry's English.
 
 3. Install it at boot, before first render (e.g. from `navigator.language`
    or a `?lang=` param), in `main.tsx`:

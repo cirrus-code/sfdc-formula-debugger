@@ -71,3 +71,10 @@ export function localizedContextNote(
 ): string {
   return active.registry.contextNotes?.[contextId] ?? english;
 }
+
+export function localizedContextRuntimeErrorNote(
+  contextId: string,
+  english: string,
+): string {
+  return active.registry.contextRuntimeErrorNotes?.[contextId] ?? english;
+}

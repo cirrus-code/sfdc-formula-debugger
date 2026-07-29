@@ -237,7 +237,12 @@ class Checker {
   }
 
   private checkArity(node: FunctionCall, spec: FunctionSpec): void {
-    const { min, max } = functionArity(spec);
+    // Tier 2 contexts aren't compile-checked at deploy, so a per-context
+    // arity override can't be org-verified there either — fall back to the
+    // base arity, the same best-effort treatment checkAvailability gives them.
+    const { min, max } = this.tier2
+      ? functionArity(spec)
+      : functionArity(spec, this.contextId);
     const n = node.args.length;
     if (n < min || n > max) {
       this.report(

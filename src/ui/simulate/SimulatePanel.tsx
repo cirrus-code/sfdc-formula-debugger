@@ -9,7 +9,7 @@ import {
   type SfValue,
 } from "../../engine/index.ts";
 import type { SfType } from "../../registry/index.ts";
-import { t } from "../../i18n/index.ts";
+import { localizedContextRuntimeErrorNote, t } from "../../i18n/index.ts";
 import { palette, syntax, font } from "../../theme/theme.ts";
 import { Panel } from "../Panel.tsx";
 import { buildFieldValue, FIELD_TYPES, renderResult } from "./fieldValue.ts";
@@ -23,6 +23,11 @@ interface FieldInput {
 interface SimulatePanelProps {
   readonly ast: Expr;
   readonly blankToggle: boolean;
+  /** Current formula context id, for localizing runtimeErrorNote. */
+  readonly contextId: string;
+  /** Registry's English runtimeErrorNote for the current context, if its
+   * runtime-error behavior has been org-verified (see FormulaContext). */
+  readonly runtimeErrorNote?: string | undefined;
   /** Decoded permalink state to seed the form with (untrusted; sanitized here). */
   readonly initialSim?:
     | {
@@ -53,6 +58,8 @@ function seedInputs(
 export function SimulatePanel({
   ast,
   blankToggle,
+  contextId,
+  runtimeErrorNote,
   initialSim,
   onShare,
 }: SimulatePanelProps) {
@@ -208,6 +215,24 @@ export function SimulatePanel({
           <ShareButton onShare={() => onShare({ ...inputs }, blankMode)} />
         ) : null}
       </ResultBar>
+
+      {outcome.result === "#Error!" && runtimeErrorNote ? (
+        <p
+          style={{
+            padding: "0 1rem 0.7rem",
+            margin: 0,
+            display: "flex",
+            gap: "0.4rem",
+            color: palette.textMuted,
+            fontSize: "0.78rem",
+          }}
+        >
+          <span aria-hidden>↳</span>
+          <span>
+            {localizedContextRuntimeErrorNote(contextId, runtimeErrorNote)}
+          </span>
+        </p>
+      ) : null}
     </Panel>
   );
 }

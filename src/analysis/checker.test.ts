@@ -40,6 +40,25 @@ describe("checker: function validation", () => {
   });
 });
 
+describe("checker: per-context arity (org-verified: TRUNC)", () => {
+  it("accepts single-argument TRUNC in formula fields", () => {
+    expect(codes("TRUNC(1.5)", "formula_field")).not.toContain("wrong-arity");
+  });
+
+  it("requires both TRUNC arguments outside formula fields", () => {
+    expect(codes("TRUNC(1.5)", "validation_rule")).toContain("wrong-arity");
+    expect(codes("TRUNC(1.5, 0)", "validation_rule")).not.toContain(
+      "wrong-arity",
+    );
+  });
+
+  it("does not enforce the override in Tier 2 (deploy-unverifiable) contexts", () => {
+    expect(codes("TRUNC(1.5)", "email_template")).not.toContain(
+      "wrong-arity",
+    );
+  });
+});
+
 describe("checker: operators", () => {
   it("flags multiplying a string literal", () => {
     expect(codes('"a" * 2')).toContain("operator-type-mismatch");

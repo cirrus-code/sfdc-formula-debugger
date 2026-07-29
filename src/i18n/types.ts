@@ -13,4 +13,6 @@ export interface RegistryOverlay {
   readonly contextLabels?: Readonly<Record<string, string>>;
   /** Keyed by formula-context id. */
   readonly contextNotes?: Readonly<Record<string, string>>;
+  /** Keyed by formula-context id. */
+  readonly contextRuntimeErrorNotes?: Readonly<Record<string, string>>;
 }

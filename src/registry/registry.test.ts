@@ -85,6 +85,48 @@ describe("registry: function table consistency", () => {
     });
     expect(functionArity(getFunction("FIND")!)).toEqual({ min: 2, max: 3 });
   });
+
+  it("applies a function's contextArity override only for its listed contexts (org-verified: TRUNC)", () => {
+    const trunc = getFunction("TRUNC")!;
+    expect(functionArity(trunc)).toEqual({ min: 1, max: 2 });
+    expect(functionArity(trunc, "formula_field")).toEqual({ min: 1, max: 2 });
+    expect(functionArity(trunc, "validation_rule")).toEqual({
+      min: 2,
+      max: 2,
+    });
+  });
+
+  it("references only declared context ids in contextArity overrides", () => {
+    for (const f of FUNCTIONS) {
+      if (!f.contextArity) {
+        continue;
+      }
+      for (const id of Object.keys(f.contextArity)) {
+        expect(
+          CONTEXT_IDS.has(id),
+          `${f.name} contextArity references unknown context '${id}'`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("keeps contextArity overrides internally consistent (0 <= min <= max)", () => {
+    for (const f of FUNCTIONS) {
+      if (!f.contextArity) {
+        continue;
+      }
+      for (const [id, arity] of Object.entries(f.contextArity)) {
+        expect(
+          arity!.min,
+          `${f.name}/${id}: min must be >= 0`,
+        ).toBeGreaterThanOrEqual(0);
+        expect(
+          arity!.max,
+          `${f.name}/${id}: max must be >= min`,
+        ).toBeGreaterThanOrEqual(arity!.min);
+      }
+    }
+  });
 });
 
 describe("registry: context configs", () => {
@@ -106,5 +148,33 @@ describe("registry: context configs", () => {
   it("resolves functions case-insensitively", () => {
     expect(getFunction("if")).toBe(getFunction("IF"));
     expect(getFunction("Today")?.name).toBe("TODAY");
+  });
+
+  it("declares runtimeErrorBehavior only where org-verified, each with a note", () => {
+    const RUNTIME_ERROR_VERIFIED = new Set([
+      "formula_field",
+      "validation_rule",
+      "workflow_field_update",
+      "flow_formula",
+      "approval_entry",
+      "approval_step",
+    ]);
+    for (const c of CONTEXTS) {
+      if (RUNTIME_ERROR_VERIFIED.has(c.id)) {
+        expect(
+          c.runtimeErrorBehavior,
+          `${c.id} needs an org-verified runtimeErrorBehavior`,
+        ).toBeDefined();
+        expect(
+          c.runtimeErrorNote,
+          `${c.id} needs a runtimeErrorNote alongside its runtimeErrorBehavior`,
+        ).toBeTruthy();
+      } else {
+        expect(
+          c.runtimeErrorBehavior,
+          `${c.id}: runtime-error surfacing is unverified, so runtimeErrorBehavior must stay unset`,
+        ).toBeUndefined();
+      }
+    }
   });
 });

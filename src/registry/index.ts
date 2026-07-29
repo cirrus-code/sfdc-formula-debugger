@@ -9,7 +9,7 @@
  */
 export * from "./types.ts";
 
-import type { FunctionSpec } from "./types.ts";
+import type { Arity, ContextId, FunctionSpec } from "./types.ts";
 import { FUNCTIONS } from "./functions.ts";
 import { CONTEXTS } from "./contexts.ts";
 
@@ -30,17 +30,21 @@ export function getContext(id: string): (typeof CONTEXTS)[number] | undefined {
   return CONTEXTS.find((c) => c.id === id);
 }
 
-export interface Arity {
-  readonly min: number;
-  /** Number.POSITIVE_INFINITY when the function is variadic. */
-  readonly max: number;
-}
-
 /**
  * Accepted argument-count range for a function. A trailing variadic param means
  * unbounded max; a non-optional variadic requires at least one such argument.
+ *
+ * When `contextId` is given and the spec has an org-verified `contextArity`
+ * override for it, the override wins over the arity derived from `params`.
  */
-export function functionArity(spec: FunctionSpec): Arity {
+export function functionArity(
+  spec: FunctionSpec,
+  contextId?: ContextId,
+): Arity {
+  const override = contextId ? spec.contextArity?.[contextId] : undefined;
+  if (override) {
+    return override;
+  }
   let min = 0;
   let max = 0;
   let variadic = false;

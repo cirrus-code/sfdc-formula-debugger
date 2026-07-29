@@ -175,6 +175,8 @@ export function App() {
             <SimulatePanel
               ast={ast}
               blankToggle={context?.blankModeToggle ?? false}
+              contextId={contextId}
+              runtimeErrorNote={context?.runtimeErrorNote}
               initialSim={
                 restored
                   ? { fields: restored.fields, blankMode: restored.blankMode }
