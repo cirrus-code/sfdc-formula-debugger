@@ -15,6 +15,9 @@ import {
 import { dirname, join } from "node:path";
 import { childSortKey } from "./shared-ctx.ts";
 import type {
+  CtxApprovalChannel,
+  CtxApprovalDeployPass,
+  CtxApprovalResult,
   CtxComponent,
   CtxContainerStatus,
   CtxFieldUpdateResult,
@@ -272,6 +275,9 @@ for (const batch of plan.batches) {
   if (only && !batch.id.startsWith(only)) {
     continue;
   }
+  if (batch.phase === "approval_runtime") {
+    continue; // deployed below, where the create and update passes are distinguished
+  }
   if (batch.phase === "matrix") {
     const reason = gateFailed.get(batch.container!);
     if (reason) {
@@ -332,7 +338,10 @@ const runtime: CtxRuntimeResult[] = [];
 // record-touching channel (VR runtime, field-update runtime).
 if (
   !skipRuntime &&
-  (!only || only === "runtime" || only === "wfu_runtime")
+  (!only ||
+    only === "runtime" ||
+    only === "wfu_runtime" ||
+    only.startsWith("approval_runtime"))
 ) {
   const PERMSET = "FxCtx_Access";
   const permDir = join(ROOT, "results", "ctx-permset-pkg");
@@ -574,6 +583,209 @@ if (!skipRuntime && (!only || only === "wfu_runtime")) {
   }
 }
 
+// ---- approval runtime probes: ACTIVE processes, submit-for-approval verdicts ----
+
+const approvals: CtxApprovalResult[] = [];
+let approvalChannel: CtxApprovalChannel | undefined;
+
+if (
+  !skipRuntime &&
+  plan.approvalProbes.length > 0 &&
+  (!only || only.startsWith("approval_runtime"))
+) {
+  const approver: string | undefined = sfJson([
+    "org",
+    "display",
+    "-o",
+    org,
+  ]).result?.username;
+  if (!approver) {
+    throw new Error("cannot resolve the org username for the approval approver");
+  }
+  // An approval step will not activate without a real approver, but the plan
+  // must stay org-independent, so the placeholder is resolved only here.
+  for (const c of plan.components) {
+    if (c.kind === "approval_runtime" && c.xml?.includes("%APPROVER%")) {
+      byId.set(c.id, { ...c, xml: c.xml.replace(/%APPROVER%/g, approver) });
+    }
+  }
+
+  const passes: CtxApprovalDeployPass[] = [];
+  function approvalPass(
+    batchId: string,
+    pass: CtxApprovalDeployPass["pass"],
+    record: boolean,
+  ): DeployOutcome | null {
+    const batch = plan.batches.find((b) => b.id === batchId);
+    if (!batch || batch.componentIds.length === 0) {
+      return null;
+    }
+    let outcome: DeployOutcome;
+    try {
+      outcome = deployRounds(`${batchId} (${pass})`, [...batch.componentIds]);
+    } catch (e) {
+      // A whole-package rejection is a documented dead end, not a reason to
+      // lose the rest of the run's results.
+      console.warn(`${batchId} (${pass}) deploy aborted: ${(e as Error).message}`);
+      passes.push({
+        pass,
+        accepted: [],
+        rejected: Object.fromEntries(
+          batch.componentIds.map((id) => [id, `deploy aborted: ${(e as Error).message}`]),
+        ),
+      });
+      return null;
+    }
+    passes.push({
+      pass,
+      accepted: [...outcome.deployed],
+      rejected: Object.fromEntries(outcome.rejected),
+    });
+    if (record) {
+      for (const id of batch.componentIds) {
+        const c = byId.get(id)!;
+        if (outcome.deployed.has(id)) {
+          recordOutcome(c, "accepted");
+        } else {
+          recordOutcome(c, "rejected", outcome.rejected.get(id));
+        }
+      }
+    }
+    return outcome;
+  }
+
+  const canary = approvalPass("approval_runtime:canary", "create", true);
+  const okDeployed = canary?.deployed.has("approvalcanary:ok") ?? false;
+  const bogusEntry = canary?.rejected.has("approvalcanary:bogus_entry") ?? false;
+  const bogusStep = canary?.rejected.has("approvalcanary:bogus_step") ?? false;
+  const verifiable = okDeployed && (bogusEntry || bogusStep);
+  let rejectedCriteria = "step criteria was";
+  if (bogusEntry && bogusStep) {
+    rejectedCriteria = "entry and step criteria were";
+  } else if (bogusEntry) {
+    rejectedCriteria = "entry criteria was";
+  }
+  let detail = `canaries behaved: an active process deployed and the bogus-function ${rejectedCriteria} rejected`;
+  if (!okDeployed) {
+    detail = `channel unusable: the ok-canary approval process did not deploy — ${
+      canary?.rejected.get("approvalcanary:ok") ?? "batch aborted"
+    }`;
+  } else if (!bogusEntry && !bogusStep) {
+    detail =
+      "approval processes do NOT compile-check criteria formulas on the create path (both bogus-function canaries deployed clean) — acceptances are meaningless";
+  }
+  console.log(`approval_runtime: ${verifiable ? "VERIFIABLE" : "GATE FAILED"} — ${detail}`);
+
+  approvalPass("approval_runtime:probes", "create", true);
+  // Some containers validate formulas on metadata UPDATE but not CREATE (and
+  // vice versa); redeploying the identical components exercises the other path.
+  approvalPass("approval_runtime:probes", "update", false);
+  approvalPass("approval_runtime:update", "update_flip", true);
+
+  approvalChannel = { verifiable, detail, passes };
+
+  const anyLive = plan.approvalProbes.some((p) =>
+    probeResults.some(
+      (r) => r.id === `approvalruntime:${p.id}` && r.outcome === "accepted",
+    ),
+  );
+  if (anyLive) {
+    console.log("approval runtime: submitting probe records…");
+    const run = sfJson(["apex", "run", "--file", "approvals-run.apex", "-o", org]);
+    if (!run.result?.success) {
+      console.warn(
+        `approvals-run.apex failed: ${run.result?.compileProblem || run.result?.exceptionMessage || "unknown"}`,
+      );
+    }
+    const raw: string = run.result?.logs ?? "";
+    writeFileSync(join(ROOT, "results", "ctx-approval-log.txt"), raw);
+    // Only the marker's own pipes need decoding — the payload rode in as base64
+    // precisely so the org's error text could not be mangled in transit.
+    const logs = raw.replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)));
+    const seen = new Map<string, string[]>();
+    for (const m of logs.matchAll(/APPRV64\|([A-Za-z0-9+/=]+)/g)) {
+      const fields = Buffer.from(m[1], "base64").toString("utf8").split("|");
+      seen.set(fields[0], fields);
+    }
+
+    // Independent corroboration of the in-transaction ProcessResult: the
+    // process definition's developer name carries the probe id.
+    const instances =
+      sfJson([
+        "data",
+        "query",
+        "-q",
+        "SELECT Id, Status, ProcessDefinition.DeveloperName FROM ProcessInstance ORDER BY CreatedDate DESC LIMIT 500",
+        "-o",
+        org,
+      ]).result?.records ?? [];
+    const workitems =
+      sfJson([
+        "data",
+        "query",
+        "-q",
+        "SELECT ProcessInstanceId FROM ProcessInstanceWorkitem LIMIT 1000",
+        "-o",
+        org,
+      ]).result?.records ?? [];
+    const wiCount = new Map<string, number>();
+    for (const w of workitems) {
+      const k = w.ProcessInstanceId as string;
+      wiCount.set(k, (wiCount.get(k) ?? 0) + 1);
+    }
+    const newestByDef = new Map<string, { status: string; workitems: number }>();
+    for (const inst of instances) {
+      const def = inst.ProcessDefinition?.DeveloperName as string | undefined;
+      if (!def || newestByDef.has(def)) {
+        continue; // ordered newest-first, so the first row wins
+      }
+      newestByDef.set(def, {
+        status: inst.Status as string,
+        workitems: wiCount.get(inst.Id as string) ?? 0,
+      });
+    }
+
+    for (const p of plan.approvalProbes) {
+      const down = probeResults.find(
+        (r) => r.id === `approvalruntime:${p.id}` && r.outcome !== "accepted",
+      );
+      if (down) {
+        approvals.push({
+          id: p.id,
+          context: p.context,
+          outcome: "NOT_RUN",
+          message: `process not deployed: ${down.problem ?? "unknown"}`,
+        });
+        continue;
+      }
+      const f = seen.get(p.id);
+      if (!f) {
+        approvals.push({ id: p.id, context: p.context, outcome: "NOT_RUN" });
+        continue;
+      }
+      const [, rawOutcome, status, wi, ...rest] = f;
+      const message = rest.join("|").trim();
+      // The org reports a false entry criteria as "no applicable process"; that
+      // is a verdict, not a channel failure, so it gets its own outcome.
+      const outcome: CtxApprovalResult["outcome"] =
+        rawOutcome === "REFUSED" && /NO_APPLICABLE_PROCESS/i.test(message)
+          ? "NO_PROCESS"
+          : (rawOutcome as CtxApprovalResult["outcome"]);
+      const soql = newestByDef.get(`APR_${p.id.replace(/[^A-Za-z0-9]+/g, "_")}`);
+      approvals.push({
+        id: p.id,
+        context: p.context,
+        outcome,
+        instanceStatus: status || undefined,
+        workitems: Number(wi),
+        message: message || undefined,
+        instanceStatusSoql: soql?.status,
+        workitemsSoql: soql?.workitems,
+      });
+    }
+  }
+}
+
 // ---- org identity + write ----
 
 const display = sfJson(["org", "display", "-o", org]).result ?? {};
@@ -603,6 +815,8 @@ const results: CtxResults = {
   runtime,
   flowValues,
   fieldUpdates,
+  approvals,
+  approvalChannel,
 };
 const stamp = results.collectedAt.slice(0, 10);
 // A partial (--only) run must never clobber a full run's results.
@@ -632,5 +846,17 @@ for (const fv of flowValues) {
 for (const fu of fieldUpdates) {
   console.log(
     `\n${fu.id}: ${fu.outcome} — ${fu.outcome === "BLOCKED" ? (fu.message ?? "") : JSON.stringify(fu.value)}`,
+  );
+}
+for (const p of plan.approvalProbes) {
+  const a = approvals.find((x) => x.id === p.id);
+  if (!a || a.outcome === "NOT_RUN") {
+    continue;
+  }
+  console.log(
+    `\n${a.id} [${a.context}]: ${a.outcome} status=${a.instanceStatus ?? "-"} workitems=${a.workitems ?? "-"}` +
+      ` (soql: ${a.instanceStatusSoql ?? "-"}/${a.workitemsSoql ?? "-"})` +
+      `${a.message ? `\n  raw: ${a.message.slice(0, 200)}` : ""}` +
+      `\n  ⇒ ${p.interpret[a.outcome] ?? "(no interpretation)"}`,
   );
 }

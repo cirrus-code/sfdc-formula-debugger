@@ -19,6 +19,7 @@ import { dirname, join } from "node:path";
 import { FUNCTIONS } from "../../src/registry/functions.ts";
 import type { FunctionSpec, SfType } from "../../src/registry/types.ts";
 import type {
+  CtxApprovalProbe,
   CtxBatch,
   CtxComponent,
   CtxContainerId,
@@ -49,6 +50,7 @@ interface Manifest {
   runtimeProbes: CtxRuntimeProbe[];
   flowValueProbes: CtxFlowValueProbe[];
   fieldUpdateProbes: CtxFieldUpdateProbe[];
+  approvalRuntimeProbes: CtxApprovalProbe[];
 }
 const manifest: Manifest = JSON.parse(
   readFileSync(join(ROOT, "probes", "contexts.json"), "utf8"),
@@ -453,6 +455,55 @@ ${stepCriteria}        <label>Step 1</label>
 `;
 }
 
+/** ACTIVE variant of approvalXml for the runtime channel: a real approver is
+ * required before the org will activate, and a step that carries criteria needs
+ * an explicit ifCriteriaNotMet so "criteria false" has an observable landing
+ * place (final approval, no work item) distinct from an error. %APPROVER% is
+ * resolved to the running org's username at deploy time — the plan itself stays
+ * org-independent. */
+function activeApprovalXml(
+  name: string,
+  entryFormula: string,
+  stepFormula: string | null,
+): string {
+  const stepBody = stepFormula
+    ? `        <entryCriteria>\n            <formula>${esc(stepFormula)}</formula>\n        </entryCriteria>\n        <ifCriteriaNotMet>ApproveRecord</ifCriteriaNotMet>\n`
+    : "";
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<ApprovalProcess xmlns="http://soap.sforce.com/2006/04/metadata">
+    <active>true</active>
+    <allowRecall>true</allowRecall>
+    <allowedSubmitters>
+        <type>owner</type>
+    </allowedSubmitters>
+    <approvalStep>
+        <allowDelegate>false</allowDelegate>
+        <assignedApprover>
+            <approver>
+                <name>%APPROVER%</name>
+                <type>user</type>
+            </approver>
+            <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
+        </assignedApprover>
+${stepBody}        <label>Step 1</label>
+        <name>Step_1</name>
+        <rejectBehavior>
+            <type>RejectRequest</type>
+        </rejectBehavior>
+    </approvalStep>
+    <enableMobileDeviceAccess>false</enableMobileDeviceAccess>
+    <entryCriteria>
+        <formula>${esc(entryFormula)}</formula>
+    </entryCriteria>
+    <finalApprovalRecordLock>false</finalApprovalRecordLock>
+    <finalRejectionRecordLock>false</finalRejectionRecordLock>
+    <label>${name}</label>
+    <recordEditability>AdminOnly</recordEditability>
+    <showApprovalHistory>false</showApprovalHistory>
+</ApprovalProcess>
+`;
+}
+
 // ---- plan assembly ----
 
 const components: CtxComponent[] = [];
@@ -544,6 +595,25 @@ addObject("FxWfu__c", [
   ["TgtText__c", "Text"],
   ["TgtNum__c", "Number"],
 ]);
+// Approval runtime channel. Gated probes share an object because at most one
+// active process's entry criteria can match a given record, but a criteria that
+// may throw gets an object to itself: entry criteria are evaluated against every
+// submission on the object, so one erroring process would otherwise decide every
+// other probe's verdict on that object.
+const APPROVAL_FIELD_DEFS: [string, SimpleFieldType][] = [
+  ["Gate__c", "Text"],
+  ["BlankN__c", "Number"],
+  ["BlankT__c", "Text"],
+];
+const APPROVAL_CANARY_OBJECT = "FxApC__c";
+const approvalObjects = [
+  APPROVAL_CANARY_OBJECT,
+  ...new Set(manifest.approvalRuntimeProbes.map((p) => p.object)),
+];
+for (const o of approvalObjects) {
+  addObject(o, APPROVAL_FIELD_DEFS);
+}
+
 addObject("FxErr1__c", []);
 addObject("FxErr2__c", []);
 addObject("FxErr3__c", []);
@@ -1298,6 +1368,98 @@ const wfuIds: string[] = [];
   }
 }
 
+// ---- approval runtime probes: ACTIVE approval processes, submit-time verdicts ----
+
+const approvalCanaryIds: string[] = [];
+const approvalProbeIds: string[] = [];
+const approvalUpdateIds: string[] = [];
+{
+  function addApproval(
+    id: string,
+    object: string,
+    name: string,
+    entry: string,
+    step: string | null,
+    into: string[],
+  ): void {
+    addComponent({
+      id,
+      kind: "approval_runtime",
+      formula: step ?? entry,
+      mdType: "ApprovalProcess",
+      fullName: `${object}.${name}`,
+      file: `approvalProcesses/${object}.${name}.approvalProcess`,
+      xml: activeApprovalXml(name, entry, step),
+    });
+    into.push(id);
+  }
+
+  const O = APPROVAL_CANARY_OBJECT;
+  addApproval(
+    "approvalcanary:ok",
+    O,
+    "APR_canary_ok",
+    'Gate__c = "canary_ok"',
+    null,
+    approvalCanaryIds,
+  );
+  addApproval(
+    "approvalcanary:bogus_entry",
+    O,
+    "APR_canary_bogus_entry",
+    BOGUS,
+    null,
+    approvalCanaryIds,
+  );
+  addApproval(
+    "approvalcanary:bogus_step",
+    O,
+    "APR_canary_bogus_step",
+    'Gate__c = "canary_bogus_step"',
+    BOGUS,
+    approvalCanaryIds,
+  );
+  // The create-vs-update trap (flows and web links validate formulas on one
+  // path only): this fullName lands valid in the canary batch, then the update
+  // batch redeploys the same name with an unknown function. A clean update
+  // deploy means the update path skips formula validation.
+  addApproval(
+    "approvalcanary:flip_ok",
+    O,
+    "APR_canary_flip",
+    'Gate__c = "canary_flip"',
+    null,
+    approvalCanaryIds,
+  );
+  addApproval(
+    "approvalupdate:flip_bogus",
+    O,
+    "APR_canary_flip",
+    BOGUS,
+    null,
+    approvalUpdateIds,
+  );
+
+  for (const p of manifest.approvalRuntimeProbes) {
+    const gateExpr = p.gate ? `Gate__c = "${p.gate}"` : null;
+    let entry: string;
+    if (p.context === "approval_entry") {
+      entry = gateExpr ? `AND(${gateExpr}, ${p.formula})` : p.formula;
+    } else {
+      entry = gateExpr ?? "1 = 1";
+    }
+    const step = p.context === "approval_step" ? p.formula : null;
+    addApproval(
+      `approvalruntime:${p.id}`,
+      p.object,
+      `APR_${probeName(p.id)}`,
+      entry,
+      step,
+      approvalProbeIds,
+    );
+  }
+}
+
 // ---- flow value probes: Active flows whose interview output is read back ----
 
 const flowValueIds: string[] = [];
@@ -1331,6 +1493,21 @@ batches.push({
   componentIds: flowValueIds,
 });
 batches.push({ id: "wfu_runtime", phase: "wfu_runtime", componentIds: wfuIds });
+batches.push({
+  id: "approval_runtime:canary",
+  phase: "approval_runtime",
+  componentIds: approvalCanaryIds,
+});
+batches.push({
+  id: "approval_runtime:probes",
+  phase: "approval_runtime",
+  componentIds: approvalProbeIds,
+});
+batches.push({
+  id: "approval_runtime:update",
+  phase: "approval_runtime",
+  componentIds: approvalUpdateIds,
+});
 
 // ---- data-ctx.apex ----
 
@@ -1429,6 +1606,57 @@ function wfuRunApex(): string {
   return lines.join("\n") + "\n";
 }
 
+// ---- approvals-run.apex: submit one gated record per approval probe ----
+
+function approvalRunApex(): string {
+  const lines: string[] = [
+    "// Generated by generate-ctx.ts — approval-process runtime probes.",
+    "// One record per probe, then Approval.process(); the outcome is reported as",
+    "//   APPRV64|<base64 of id|outcome|instanceStatus|workitems|message>",
+    "// Base64 because the debug channel entity-encodes pipes and quotes, which",
+    "// would corrupt the delimiter and the org's own error text.",
+  ];
+  for (const o of new Set(manifest.approvalRuntimeProbes.map((p) => p.object))) {
+    // Records locked by a pending approval refuse to delete; leftovers are
+    // harmless because every verdict comes from this run's own submit result.
+    lines.push(`Database.delete([SELECT Id FROM ${o} LIMIT 10000], false);`);
+  }
+  for (const p of manifest.approvalRuntimeProbes) {
+    const ctor = p.gate ? `Gate__c = '${p.gate}'` : "";
+    lines.push(
+      "{",
+      `    String pid = '${p.id}';`,
+      "    try {",
+      `        ${p.object} r = new ${p.object}(${ctor});`,
+      "        insert r;",
+      "        try {",
+      "            Approval.ProcessSubmitRequest rq = new Approval.ProcessSubmitRequest();",
+      "            rq.setObjectId(r.Id);",
+      "            Approval.ProcessResult pr = Approval.process(rq, false);",
+      "            String em = '';",
+      "            if (pr.getErrors() != null) {",
+      "                for (Database.Error er : pr.getErrors()) {",
+      "                    em += er.getStatusCode() + ': ' + er.getMessage() + ' ;; ';",
+      "                }",
+      "            }",
+      "            List<Id> wis = pr.getNewWorkitemIds();",
+      "            String pay = pid + '|' + (pr.isSuccess() ? 'SUBMITTED' : 'REFUSED') + '|'",
+      "                + pr.getInstanceStatus() + '|' + (wis == null ? -1 : wis.size()) + '|' + em;",
+      "            System.debug('APPRV64|' + EncodingUtil.base64Encode(Blob.valueOf(pay.left(600))));",
+      "        } catch (Exception ex) {",
+      "            String pay = pid + '|EXCEPTION||-1|' + ex.getTypeName() + ': ' + ex.getMessage();",
+      "            System.debug('APPRV64|' + EncodingUtil.base64Encode(Blob.valueOf(pay.left(600))));",
+      "        }",
+      "    } catch (Exception ins) {",
+      "        String pay = pid + '|INSERT_FAILED||-1|' + ins.getTypeName() + ': ' + ins.getMessage();",
+      "        System.debug('APPRV64|' + EncodingUtil.base64Encode(Blob.valueOf(pay.left(600))));",
+      "    }",
+      "}",
+    );
+  }
+  return lines.join("\n") + "\n";
+}
+
 // ---- write ----
 
 const plan: CtxPlan = {
@@ -1439,6 +1667,7 @@ const plan: CtxPlan = {
   runtimeProbes: manifest.runtimeProbes,
   flowValueProbes: manifest.flowValueProbes,
   fieldUpdateProbes: manifest.fieldUpdateProbes,
+  approvalProbes: manifest.approvalRuntimeProbes,
   runtimeObjects: {
     FxRt__c: ["Gate__c", "BlankN__c", "BlankT__c"],
     FxWfu__c: ["Gate__c", "BlankN__c", "BlankT__c", "TgtText__c", "TgtNum__c"],
@@ -1446,12 +1675,16 @@ const plan: CtxPlan = {
     FxErr2__c: [],
     FxErr3__c: [],
     FxErr4__c: [],
+    ...Object.fromEntries(
+      approvalObjects.map((o) => [o, APPROVAL_FIELD_DEFS.map(([f]) => f)]),
+    ),
   },
 };
 writeFileSync(join(ROOT, "ctx-plan.json"), JSON.stringify(plan, null, 1));
 writeFileSync(join(ROOT, "data-ctx.apex"), apexLines());
 writeFileSync(join(ROOT, "flows-run.apex"), flowRunApex());
 writeFileSync(join(ROOT, "wfu-run.apex"), wfuRunApex());
+writeFileSync(join(ROOT, "approvals-run.apex"), approvalRunApex());
 
 const byKind = new Map<string, number>();
 for (const c of components) {

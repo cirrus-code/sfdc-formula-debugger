@@ -108,7 +108,8 @@ Findings encoded in `functions.ts`/`contexts.ts`:
   no "treat blanks as zeroes" in the VR context; `blankModeToggle: false` with
   blank-mode semantics is correct config. Workflow field updates likewise
   runtime-verified as blank mode (wave 4, `wfu_blank_add`: `blank + 5` writes
-  null). Approval contexts' runtime blank behavior remains unprobed.
+  null), and both approval contexts too (wave 6, `ae_blank_add` /
+  `ae_blank_add_null` complementary pair).
 - ✅ **Source character limit org-verified**: a 3,916-char formula-field
   source rejects with "Formula is too long (3,916 characters).  Maximum
   length is 3,900 characters" (probe `syntax:srclen_over`; ~3,790 chars
@@ -416,6 +417,26 @@ formerly-refusing functions, now simulated with golden coverage:
   Field-update formulas execute in **blank mode** (`blank + 5` writes null,
   not 5), blank text still equals `""` (`wfu_blank_text` → EMPTY_EQ), and
   text `=` stays case-sensitive (`wfu_case_eq` → SENSITIVE).
+- ✅ **Approval-process runtime facts** (wave 6; 19 gated ACTIVE approval
+  processes, `Approval.process()` submits from anonymous Apex with a
+  criteria-false control, SOQL-corroborated via
+  `ProcessInstance`/`ProcessInstanceWorkitem`; `ae_*` entry-criteria and
+  `as_*` step-criteria probes): **div-by-zero in entry OR step criteria
+  blocks the SUBMIT, not the save** — the record inserts fine, then
+  `Approval.process()` fails with `CANNOT_INSERT_UPDATE_ACTIVATE_ENTITY:
+  The formula in the "…" rule or process is invalid due to the following:
+  <br/>Division by zero` (a literal `<br/>` in the message, which names the
+  process but not the step). This is the FIFTH distinct per-context error
+  shape, and is cleanly distinguishable from criteria-false
+  (`NO_APPLICABLE_PROCESS` for entry; step-skip for steps). Both approval
+  contexts run in **blank mode** (`blank + 5 = 5` false AND
+  `ISBLANK(blank + 5)` true — a complementary pair, not a double negative),
+  blank text equals `""`, and text `=` is case-sensitive — agreeing with
+  validation rules and field updates on all three. **ApprovalProcess
+  compile-checks criteria on BOTH create and update** (bogus-function
+  canaries rejected on create AND on a valid→bogus update flip), unlike
+  flows and weblinks — so the wave-2 approval availability verdicts carry
+  no create-path caveat.
 
 ## Function port (unsupported → simulated)
 
@@ -494,13 +515,14 @@ verification before a fix:
 - ✅ **Case sensitivity of text `=` / `<>`** — oracle-verified case-sensitive,
   and re-confirmed per context: formula fields (wave 1) and validation rules
   at runtime (wave 2, `rt_case_eq`) agree.
-- ✅ **Div-by-zero surfacing per context** — four distinct behaviors, all
+- ✅ **Div-by-zero surfacing per context** — five distinct behaviors, all
   runtime-verified: formula fields produce a real `#Error!` (wave 1);
   validation rules block the save with a system error naming the rule
   (wave 2, `err_divzero`); flows yield null (wave 3); workflow field updates
   block the save with `CANNOT_INSERT_UPDATE_ACTIVATE_ENTITY` (wave 4,
-  `wfu_divzero`). `^` overflow surfacing settled in wave 4 (result > 1e64
-  errors). Approval contexts remain runtime-unprobed.
+  `wfu_divzero`); approval criteria block the SUBMIT while the save goes
+  through (wave 6, `ae_divzero`/`as_divzero`). `^` overflow surfacing
+  settled in waves 4–6 (result > 1e64 errors, both compile paths).
 - ✅ **Blank propagation through arithmetic/comparison under both blank modes** —
   corpus-verified (semantics-pass section above); validation rules
   additionally runtime-verified as blank-mode (wave-2 `rt_blank_*` probes).
@@ -557,6 +579,9 @@ base cap (`1.5^400` errors), the fold-based leading-zero rendering model
   field-valued `7^55`) — our 40-sig carry cannot express the org's
   scale-42 value exactly; currently computed with a double-rounding caveat
   (unobservable through the TEXT budget).
+- Approval-criteria `IFERROR` and AND/OR short-circuit past a runtime
+  error — the VR channel proved short-circuit there; no approval
+  equivalent probed yet.
 - ~~Registry function coverage~~ — closed 2026-07-28: audited against the
   official reference (101 functions registered; 35 added, of which 16
   corpus-backed and simulated — see the function-port-2 section). The wave-3

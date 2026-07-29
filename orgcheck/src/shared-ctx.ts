@@ -31,7 +31,8 @@ export type CtxComponentKind =
   | "global" // one $Global's availability probe
   | "runtime_rule" // active gated VR for the DML-triggered runtime pass
   | "flow_value" // Active flow whose interview output is a value probe
-  | "wfu_runtime"; // active gated workflow rule + field update (value channel)
+  | "wfu_runtime" // active gated workflow rule + field update (value channel)
+  | "approval_runtime"; // active gated approval process (submit-for-approval channel)
 
 /** One deployable metadata component (or a child fragment of a shared file). */
 export interface CtxComponent {
@@ -82,7 +83,8 @@ export interface CtxBatch {
     | "matrix"
     | "runtime"
     | "flow_values"
-    | "wfu_runtime";
+    | "wfu_runtime"
+    | "approval_runtime";
   readonly componentIds: readonly string[];
 }
 
@@ -101,6 +103,24 @@ export interface CtxFlowValueProbe {
   readonly formula: string;
   readonly returns: string;
   readonly question: string;
+}
+
+/** An ACTIVE approval process whose criteria formula is evaluated by the org at
+ * submit-for-approval time. `approval_entry` probes carry the formula as
+ * process entry criteria (trivial step); `approval_step` probes invert — the
+ * entry criteria is the bare gate and the formula guards step 1. */
+export interface CtxApprovalProbe {
+  readonly id: string;
+  readonly context: "approval_entry" | "approval_step";
+  readonly object: string;
+  /** Gate value inserted into Gate__c so at most one active process on the
+   * object matches; error probes are gateless and own their object outright,
+   * since a criteria that throws would otherwise be evaluated for every
+   * submission on a shared object. */
+  readonly gate?: string;
+  readonly formula: string;
+  readonly question: string;
+  readonly interpret: Readonly<Record<string, string>>;
 }
 
 export interface CtxRuntimeProbe {
@@ -122,6 +142,7 @@ export interface CtxPlan {
   readonly runtimeProbes: readonly CtxRuntimeProbe[];
   readonly flowValueProbes: readonly CtxFlowValueProbe[];
   readonly fieldUpdateProbes: readonly CtxFieldUpdateProbe[];
+  readonly approvalProbes: readonly CtxApprovalProbe[];
   /** Objects the runtime pass inserts into (permission-set + readback scope):
    * object api name → editable input field api names. */
   readonly runtimeObjects: Readonly<Record<string, readonly string[]>>;
@@ -181,6 +202,48 @@ export interface CtxFieldUpdateResult {
   readonly message?: string;
 }
 
+export interface CtxApprovalResult {
+  readonly id: string;
+  readonly context: "approval_entry" | "approval_step";
+  /** SUBMITTED = the process was entered; NO_PROCESS = the org found no
+   * applicable process (a false entry criteria reads this way); REFUSED = the
+   * submit failed for some other reason; EXCEPTION = the submit call threw;
+   * INSERT_FAILED = the probe record never saved, so nothing was observed. */
+  readonly outcome:
+    | "SUBMITTED"
+    | "NO_PROCESS"
+    | "REFUSED"
+    | "EXCEPTION"
+    | "INSERT_FAILED"
+    | "NOT_RUN";
+  /** Approval.ProcessResult.getInstanceStatus(): Pending when a step produced a
+   * work item, Approved when step criteria were skipped into final approval. */
+  readonly instanceStatus?: string;
+  /** New work items from the submit; -1 when the call never got that far. */
+  readonly workitems?: number;
+  readonly message?: string;
+  /** ProcessInstance readback keyed by process developer name, as independent
+   * corroboration of the in-transaction ProcessResult. */
+  readonly instanceStatusSoql?: string;
+  readonly workitemsSoql?: number;
+}
+
+/** One deploy of the approval components. The create and update passes are
+ * recorded separately: some containers validate formulas only on one path. */
+export interface CtxApprovalDeployPass {
+  readonly pass: "create" | "update" | "update_flip";
+  readonly accepted: readonly string[];
+  readonly rejected: Readonly<Record<string, string>>;
+}
+
+export interface CtxApprovalChannel {
+  /** ok-canary deployed AND a bogus-function canary rejected on at least one
+   * pass — otherwise nothing this channel reports is a verdict. */
+  readonly verifiable: boolean;
+  readonly detail: string;
+  readonly passes: readonly CtxApprovalDeployPass[];
+}
+
 export interface CtxResults {
   readonly collectedAt: string;
   readonly org: Readonly<Record<string, unknown>>;
@@ -190,4 +253,6 @@ export interface CtxResults {
   readonly runtime: readonly CtxRuntimeResult[];
   readonly flowValues: readonly CtxFlowValueResult[];
   readonly fieldUpdates: readonly CtxFieldUpdateResult[];
+  readonly approvals: readonly CtxApprovalResult[];
+  readonly approvalChannel?: CtxApprovalChannel;
 }

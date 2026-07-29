@@ -136,6 +136,173 @@
     }
   ],
 
+  "approvalRuntimeProbes": [
+    {
+      "id": "ae_canary",
+      "context": "approval_entry",
+      "object": "FxApE__c",
+      "gate": "ae_canary",
+      "formula": "1 = 1",
+      "question": "Channel canary: a gated always-true entry criteria must accept the submission.",
+      "interpret": {
+        "SUBMITTED": "channel sound — gated active processes are entered and the submit result is readable",
+        "NO_PROCESS": "CHANNEL BROKEN — do not trust any approval runtime verdict from this run"
+      }
+    },
+    {
+      "id": "ae_false",
+      "context": "approval_entry",
+      "object": "FxApE__c",
+      "gate": "ae_false",
+      "formula": "1 = 2",
+      "question": "False control: how a provably-false entry criteria reports, so criteria-false can be told apart from criteria-errored.",
+      "interpret": {
+        "NO_PROCESS": "a false entry criteria surfaces as NO_APPLICABLE_PROCESS — the baseline every other entry probe is read against",
+        "SUBMITTED": "CHANNEL BROKEN — a false criteria was entered; the gate is not discriminating"
+      }
+    },
+    {
+      "id": "ae_divzero",
+      "context": "approval_entry",
+      "object": "FxApEz__c",
+      "formula": "(1 / 0) = 1",
+      "question": "Wave-6: div-by-zero in an executing entry criteria — blocked submit, thrown exception, or silently criteria-false? (FF: #Error!; VR: blocked save; flow: null.)",
+      "interpret": {
+        "NO_PROCESS": "the runtime error is swallowed and the criteria reads as false — indistinguishable from ae_false",
+        "EXCEPTION": "the error surfaces as its own submit failure",
+        "REFUSED": "the submit was refused with a non-NO_APPLICABLE_PROCESS error (capture the status code)",
+        "SUBMITTED": "div-by-zero compared equal?! — investigate"
+      }
+    },
+    {
+      "id": "ae_blank_add",
+      "context": "approval_entry",
+      "object": "FxApE__c",
+      "gate": "ae_blank_add",
+      "formula": "(BlankN__c + 5) = 5",
+      "question": "Wave-6: which blank mode does an entry criteria execute under — blank + 5 = 5 (zero mode) or blank (blank mode)?",
+      "interpret": {
+        "SUBMITTED": "blank Number reads as 0 — zero-mode arithmetic",
+        "NO_PROCESS": "blank + 5 is not 5 — blank-mode arithmetic (confirm against ae_blank_add_null)"
+      }
+    },
+    {
+      "id": "ae_blank_add_null",
+      "context": "approval_entry",
+      "object": "FxApE__c",
+      "gate": "ae_blank_add_null",
+      "formula": "ISBLANK(BlankN__c + 5)",
+      "question": "Wave-6: the positive half of the blank-mode question — is blank + 5 itself blank? Exactly one of this and ae_blank_add must submit.",
+      "interpret": {
+        "SUBMITTED": "blank + 5 is blank — blank-mode arithmetic",
+        "NO_PROCESS": "blank + 5 is a number — zero-mode arithmetic"
+      }
+    },
+    {
+      "id": "ae_blank_text",
+      "context": "approval_entry",
+      "object": "FxApE__c",
+      "gate": "ae_blank_text",
+      "formula": "BlankT__c = \"\"",
+      "question": "Wave-6: does a blank Text field equal \"\" in an executing entry criteria (formula fields and validation rules: true)?",
+      "interpret": {
+        "SUBMITTED": "blank text coerces to \"\" — same as formula fields and validation rules",
+        "NO_PROCESS": "blank text does NOT equal \"\" here — differs from formula fields"
+      }
+    },
+    {
+      "id": "ae_case_eq",
+      "context": "approval_entry",
+      "object": "FxApE__c",
+      "gate": "ae_case_eq",
+      "formula": "\"a\" = \"A\"",
+      "question": "Wave-6: text = case sensitivity in an executing entry criteria (formula fields: case-sensitive, org-verified).",
+      "interpret": {
+        "SUBMITTED": "case-INsensitive — differs from formula fields",
+        "NO_PROCESS": "case-sensitive, same as formula fields"
+      }
+    },
+
+    {
+      "id": "as_canary",
+      "context": "approval_step",
+      "object": "FxApS__c",
+      "gate": "as_canary",
+      "formula": "1 = 1",
+      "question": "Channel canary: an always-true step criteria must produce a work item (Pending).",
+      "interpret": {
+        "SUBMITTED": "read instanceStatus/workitems — Pending with 1 work item means the step was entered"
+      }
+    },
+    {
+      "id": "as_false",
+      "context": "approval_step",
+      "object": "FxApS__c",
+      "gate": "as_false",
+      "formula": "1 = 2",
+      "question": "False control: a provably-false step criteria under ifCriteriaNotMet=ApproveRecord, so step-skipped can be told apart from step-errored.",
+      "interpret": {
+        "SUBMITTED": "read instanceStatus/workitems — Approved with 0 work items is the skip baseline"
+      }
+    },
+    {
+      "id": "as_divzero",
+      "context": "approval_step",
+      "object": "FxApSz__c",
+      "formula": "(1 / 0) = 1",
+      "question": "Wave-6: div-by-zero in an executing step criteria — thrown exception, or silently criteria-false (step skipped)?",
+      "interpret": {
+        "REFUSED": "the submit was refused with the org's own error (capture the status code) — the step criteria did not read as false",
+        "EXCEPTION": "the error surfaces as an Apex exception rather than a save result",
+        "SUBMITTED": "compare instanceStatus/workitems against as_false: Approved/0 means the error read as false, Pending/1 means it read as true"
+      }
+    },
+    {
+      "id": "as_blank_add",
+      "context": "approval_step",
+      "object": "FxApS__c",
+      "gate": "as_blank_add",
+      "formula": "(BlankN__c + 5) = 5",
+      "question": "Wave-6: which blank mode does a step criteria execute under?",
+      "interpret": {
+        "SUBMITTED": "Pending/1 means blank reads as 0 (zero mode); Approved/0 means blank-mode arithmetic"
+      }
+    },
+    {
+      "id": "as_blank_add_null",
+      "context": "approval_step",
+      "object": "FxApS__c",
+      "gate": "as_blank_add_null",
+      "formula": "ISBLANK(BlankN__c + 5)",
+      "question": "Wave-6: the positive half of the step blank-mode question. Exactly one of this and as_blank_add must reach the step.",
+      "interpret": {
+        "SUBMITTED": "Pending/1 means blank + 5 is blank (blank mode); Approved/0 means zero mode"
+      }
+    },
+    {
+      "id": "as_blank_text",
+      "context": "approval_step",
+      "object": "FxApS__c",
+      "gate": "as_blank_text",
+      "formula": "BlankT__c = \"\"",
+      "question": "Wave-6: blank Text = \"\" inside an executing step criteria.",
+      "interpret": {
+        "SUBMITTED": "Pending/1 means blank text coerces to \"\"; Approved/0 means it does not"
+      }
+    },
+    {
+      "id": "as_case_eq",
+      "context": "approval_step",
+      "object": "FxApS__c",
+      "gate": "as_case_eq",
+      "formula": "\"a\" = \"A\"",
+      "question": "Wave-6: text = case sensitivity inside an executing step criteria.",
+      "interpret": {
+        "SUBMITTED": "Pending/1 means case-INsensitive; Approved/0 means case-sensitive"
+      }
+    }
+  ],
+
   "runtimeProbes": [
     {
       "id": "rt_canary_fired",

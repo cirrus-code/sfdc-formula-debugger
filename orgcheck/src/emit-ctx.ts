@@ -220,3 +220,28 @@ if ((results.fieldUpdates ?? []).length > 0) {
     );
   }
 }
+
+if ((results.approvals ?? []).length > 0) {
+  const ch = results.approvalChannel;
+  console.log(
+    `\n--- approval runtime probes --- ${ch?.verifiable ? "✅" : "⛔"} ${ch?.detail ?? "no channel status"}`,
+  );
+  for (const pass of ch?.passes ?? []) {
+    const rejected = Object.entries(pass.rejected);
+    console.log(
+      `  [${pass.pass}] ${pass.accepted.length} accepted, ${rejected.length} rejected` +
+        rejected.map(([id, p]) => `\n    ${id}: ${p.slice(0, 160)}`).join(""),
+    );
+  }
+  // Step-criteria verdicts live in the instance status, not the submit outcome:
+  // a skipped step means final approval with no work item.
+  for (const a of results.approvals) {
+    console.log(
+      `${a.id} [${a.context}]: ${a.outcome} status=${a.instanceStatus ?? "-"} workitems=${
+        a.workitems ?? "-"
+      } (soql: ${a.instanceStatusSoql ?? "-"}/${a.workitemsSoql ?? "-"})${
+        a.message ? ` — ${a.message.slice(0, 160)}` : ""
+      }`,
+    );
+  }
+}
