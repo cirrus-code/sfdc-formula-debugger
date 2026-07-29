@@ -53,9 +53,7 @@ describe("checker: per-context arity (org-verified: TRUNC)", () => {
   });
 
   it("does not enforce the override in Tier 2 (deploy-unverifiable) contexts", () => {
-    expect(codes("TRUNC(1.5)", "email_template")).not.toContain(
-      "wrong-arity",
-    );
+    expect(codes("TRUNC(1.5)", "email_template")).not.toContain("wrong-arity");
   });
 });
 
@@ -75,12 +73,8 @@ describe("checker: operators", () => {
   });
 
   it("flags && and || as nonstandard and expects boolean operands", () => {
-    expect(codes("ISBLANK(x) && ISBLANK(y)")).toContain(
-      "nonstandard-operator",
-    );
-    expect(codes("ISBLANK(x) || ISBLANK(y)")).toContain(
-      "nonstandard-operator",
-    );
+    expect(codes("ISBLANK(x) && ISBLANK(y)")).toContain("nonstandard-operator");
+    expect(codes("ISBLANK(x) || ISBLANK(y)")).toContain("nonstandard-operator");
     expect(codes("1 && 2")).toContain("operator-type-mismatch");
   });
 });
@@ -113,8 +107,8 @@ describe("checker: context availability", () => {
   it("warns for SUBSTR and IFERROR outside flows (org-verified)", () => {
     expect(codes('SUBSTR("abc", 1)')).toContain("function-not-available");
     expect(codes("IFERROR(1 / 0, 0)")).toContain("function-not-available");
-    // The wave-2 matrix overturned SUBSTR's assumed validation-rule tier:
-    // the org rejects it there too ("may not be used in this type of formula").
+    // The org rejects SUBSTR in validation rules too ("may not be used in
+    // this type of formula" — corpus/org-availability.json).
     expect(codes('SUBSTR("abc", 1)', "validation_rule")).toContain(
       "function-not-available",
     );

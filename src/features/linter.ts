@@ -1,6 +1,8 @@
 import {
   parse,
   span,
+  childrenOf,
+  visitExpr,
   type BinaryOp,
   type Diagnostic,
   type Expr,
@@ -71,7 +73,7 @@ export function lint(
 ): readonly Diagnostic[] {
   const out: Diagnostic[] = [];
 
-  walk(root, (node) => {
+  visitExpr(root, (node) => {
     switch (node.kind) {
       case "StringLit":
         checkHardcodedId(node, out);
@@ -91,30 +93,6 @@ export function lint(
   checkCharLimit(source, contextId, out);
 
   return out.sort((a, b) => a.span.start - b.span.start);
-}
-
-// --- traversal -----------------------------------------------------------
-
-function children(node: Expr): readonly Expr[] {
-  switch (node.kind) {
-    case "FunctionCall":
-      return node.args;
-    case "BinaryOp":
-      return [node.left, node.right];
-    case "UnaryOp":
-      return [node.operand];
-    case "Paren":
-      return [node.expr];
-    default:
-      return [];
-  }
-}
-
-function walk(node: Expr, visit: (n: Expr) => void): void {
-  visit(node);
-  for (const child of children(node)) {
-    walk(child, visit);
-  }
 }
 
 function unwrapParen(node: Expr): Expr {
@@ -153,7 +131,7 @@ function checkIfNesting(node: Expr, out: Diagnostic[]): void {
       return;
     }
   }
-  for (const child of children(node)) {
+  for (const child of childrenOf(node)) {
     checkIfNesting(child, out);
   }
 }
@@ -164,7 +142,7 @@ function isIf(node: Expr): node is FunctionCall {
 
 /** Maximum count of IF calls along any root-to-leaf path of the subtree. */
 function ifDepth(node: Expr): number {
-  const inner = Math.max(0, ...children(node).map(ifDepth));
+  const inner = Math.max(0, ...childrenOf(node).map(ifDepth));
   return isIf(node) ? inner + 1 : inner;
 }
 

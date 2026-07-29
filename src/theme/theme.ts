@@ -76,5 +76,3 @@ export const theme = {
   syntax,
   font,
 } as const;
-
-export type Theme = typeof theme;

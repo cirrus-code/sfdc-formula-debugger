@@ -24,8 +24,3 @@ export function spanLength(s: Span): number {
 export function mergeSpans(a: Span, b: Span): Span {
   return { start: Math.min(a.start, b.start), end: Math.max(a.end, b.end) };
 }
-
-/** True if `offset` falls within `[start, end)`. */
-export function spanContains(s: Span, offset: number): boolean {
-  return offset >= s.start && offset < s.end;
-}

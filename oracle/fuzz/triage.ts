@@ -191,10 +191,10 @@ const RULES: readonly Rule[] = [
   {
     bucket: "known-divergence",
     rationale:
-      "`^` is org-bisected to scale 40 with a 1e64 result cap and a double-precision path for integer bases (VERIFICATION.md wave 4); the OSS engine's POWER range check and precision differ.",
+      "`^` is org-verified to a 1e64 result cap with folded literals rounded to 18 significant digits and a scale-42 runtime path (VERIFICATION.md); the OSS engine's POWER range check and precision differ.",
     match: (d) =>
       d.formula.includes("^") &&
-      // Agreement to ~15 significant digits is the double-path signature.
+      // Agreement to ~15 significant digits is the fold-rounding signature.
       (agreeToSignificantDigits(d.ours, d.oracle, 15) ||
         (oursErrored(d) && magnitudeAtLeast(d.oracle, 64)) ||
         (oracleErrored(d) && magnitudeAtLeast(d.ours, 64))),

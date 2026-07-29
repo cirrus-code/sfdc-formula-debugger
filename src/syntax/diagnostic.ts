@@ -14,11 +14,13 @@ export type DiagnosticCode =
   | "unterminated-comment"
   | "unexpected-character"
   | "nested-comment"
+  | "invalid-escape"
   // Parser
   | "expected-expression"
   | "expected-closing-paren"
   | "expected-field-name"
   | "unexpected-token"
+  | "nesting-too-deep"
   // Analysis
   | "unknown-function"
   | "wrong-arity"

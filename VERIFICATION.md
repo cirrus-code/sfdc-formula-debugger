@@ -62,6 +62,18 @@ left-associative, with unary tighter than everything.
   `syntax:comment_nested`).
 - ✅ **`NULL`-prefixed identifiers parse in the product** (`Null_Check__c`,
   probe `syntax:null_prefix_ident`) — the formulon defect is theirs alone.
+- ✅ **String-literal escapes** (oracle-verified 2026-07-29, engine v0.9.13,
+  `LEN`/`FIND` probes; org unprobed but the grammar and engine agree). The
+  grammar (`LexerRules.g4` `STRING_LITERAL`) accepts exactly nine escapes —
+  `\n \r \t \N \R \T \" \' \\` — and any other backslash sequence is a
+  syntax error (`"a\qb"` fails to compile; we diagnose `invalid-escape`
+  and recover). The engine *collapses only two*: `\\` → `\` and `\" `→ `"`
+  (`LEN("\\")` = 1, `LEN("a\"b")` = 3, in both quote styles). Every other
+  accepted escape keeps both characters: `\n` is literal backslash-n
+  (`LEN("a\nb")` = 4, never a newline), and `\'` keeps its backslash even
+  inside single quotes (`LEN('a\'b')` = 4) while still not terminating the
+  string. Encoded in `parser.test.ts`; worth an org probe eventually since
+  only the JVM oracle has confirmed the decode half.
 
 ## Registry data — settled by the wave-2 per-context pass (2026-07-28)
 
@@ -639,3 +651,31 @@ org-verified behavior. Remaining non-probe debts:
   graduations closed the client-reproducible refuse list (encode family,
   `BR`, `INCLUDES`, `PICKLISTCOUNT`, `FORMATDURATION`); `CASESAFEID` is the
   one deliberate holdout (org-state prefix validation).
+
+## Pre-release audit (2026-07-29) — new unverified edges
+
+Behaviors the audit made explicit. Each is either refused or chosen
+conservatively; all want an org probe before being called settled:
+
+- **POWER()** — no corpus row in either tier pins whether it shares `^`'s
+  rules (integer-only exponent, 1e64 cap, folded/runtime precision split).
+  Now `simulatable: false` (it previously simulated through decimal.js's
+  `pow`, which leaked non-finite values and fake precision). Probe POWER
+  against `^` on the same inputs next org run. Note its availability data
+  says `custom_button_link` only.
+- **BEGINS(blank operands)** — follows the generic null-propagation wrapper
+  (returns blank), while its siblings CONTAINS/FIND are org-verified
+  blank-aware (coerce to ""). Zero blank-operand BEGINS rows exist in either
+  corpus; the asymmetry is *suspicious but unprobed*, so behavior was left
+  alone. Probe `BEGINS("abc", blank)` / `BEGINS(blank, "a")`.
+- **Temporal overflow boundaries** — date/datetime arithmetic, ADDMONTHS and
+  FROMUNIXTIME now error outside year 1–9999 instead of producing NaN dates
+  or years DATE() itself rejects. The *products'* exact boundary and error
+  surfacing are unverified; ours is chosen for internal consistency with
+  DATE()'s validated range.
+- **Typeless blanks in blank-mode arithmetic** — `NULL + 1`, unsupplied
+  fields, and CASE fallthroughs now propagate blank like typed blank fields
+  (matching the unary branch; corpora bit-identical either way). The NULL
+  *literal* case has no probe row.
+- **Sub-1000-year TEXT(date) rendering** — years now pad to 4 digits
+  ("0050-01-01", ISO/API shape). No corpus row covers years below 1000.

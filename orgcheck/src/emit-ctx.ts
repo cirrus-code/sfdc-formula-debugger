@@ -79,7 +79,9 @@ function classifyRejection(
   if (
     p.includes(`UNKNOWN FUNCTION ${bare}`) ||
     (p.includes(`FUNCTION ${bare}`) && p.includes("MAY NOT BE USED")) ||
-    (name.startsWith("$") && p.includes(name.toUpperCase()) && p.includes("DOES NOT EXIST"))
+    (name.startsWith("$") &&
+      p.includes(name.toUpperCase()) &&
+      p.includes("DOES NOT EXIST"))
   ) {
     return "unavailable";
   }
@@ -160,7 +162,11 @@ console.log("\n--- registry drift (conclusive verdicts only) ---");
 let drift = 0;
 for (const fn of FUNCTIONS) {
   for (const r of rows) {
-    if (r.kind !== "function" || r.name !== fn.name || r.verdict === "inconclusive") {
+    if (
+      r.kind !== "function" ||
+      r.name !== fn.name ||
+      r.verdict === "inconclusive"
+    ) {
       continue;
     }
     const registryAllows =
@@ -179,7 +185,11 @@ for (const fn of FUNCTIONS) {
 for (const ctx of CONTEXTS) {
   const declared = new Set(ctx.globals.map((g) => g.name));
   for (const r of rows) {
-    if (r.kind !== "global" || r.context !== ctx.id || r.verdict === "inconclusive") {
+    if (
+      r.kind !== "global" ||
+      r.context !== ctx.id ||
+      r.verdict === "inconclusive"
+    ) {
       continue;
     }
     const registryAllows = declared.has(r.name);

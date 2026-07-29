@@ -5,8 +5,8 @@ import type { FormulaContext, GlobalSpec } from "./types.ts";
  * contexts ship from day one; `tier` records verification status.
  *
  * Tier 1 = availability data org-verified (corpus/org-availability.json,
- * orgcheck wave-2 pass, 2026-07-28): every registry function and global was
- * save-probed in the context's own metadata container, canary-gated. Tier 2 =
+ * orgcheck per-context pass, 2026-07-28): every registry function and global
+ * was save-probed in the context's own metadata container, canary-gated. Tier 2 =
  * the org does NOT compile-check these containers' formulas at metadata
  * deploy (bogus functions deploy clean), so availability is unverifiable by
  * the org pass and remains best-effort; the UI labels it as such.
@@ -63,7 +63,7 @@ export const CONTEXTS: readonly FormulaContext[] = [
     // Org-verified exact: 3,916 chars rejects with "Maximum length is 3,900
     // characters" (syntax:srclen_over).
     charLimit: 3900,
-    // Wave 1, real-org div-by-zero probe: the field renders the literal
+    // Org-verified (probe err_divzero): the field renders the literal
     // #Error! value wherever it's displayed.
     runtimeErrorBehavior: "error_value",
     runtimeErrorNote:
@@ -77,8 +77,8 @@ export const CONTEXTS: readonly FormulaContext[] = [
     requiredReturnType: "Boolean",
     blankModeToggle: false,
     charLimit: 3900,
-    // Wave 2, probe err_divzero: the save is blocked with a system error
-    // naming the rule; the rule itself neither passes nor fails.
+    // Org-verified (probe err_divzero): the save is blocked with a system
+    // error naming the rule; the rule itself neither passes nor fails.
     runtimeErrorBehavior: "blocks_save",
     runtimeErrorNote:
       "The save is blocked outright with a system error naming the rule " +
@@ -96,8 +96,8 @@ export const CONTEXTS: readonly FormulaContext[] = [
       { name: "$Record", simulatable: true },
     ],
     blankModeToggle: false,
-    // Wave 3 finding: no fault occurs here — the formula resolves to blank
-    // and the flow keeps running.
+    // Org-verified (flow-interview probes): no fault occurs here — the
+    // formula resolves to blank and the flow keeps running.
     runtimeErrorBehavior: "null_result",
     runtimeErrorNote:
       "A running flow does not fault here: this formula resolves to a " +
@@ -124,8 +124,8 @@ export const CONTEXTS: readonly FormulaContext[] = [
     tier: 1,
     globals: CORE_GLOBALS,
     blankModeToggle: false,
-    // Wave 4, probe wfu_divzero: unlike a validation rule, the whole record
-    // save is blocked, not just this field update.
+    // Org-verified (probe wfu_divzero): unlike a validation rule, the whole
+    // record save is blocked, not just this field update.
     runtimeErrorBehavior: "blocks_save",
     runtimeErrorNote:
       "The entire save is blocked (CANNOT_INSERT_UPDATE_ACTIVATE_ENTITY), " +
@@ -138,9 +138,10 @@ export const CONTEXTS: readonly FormulaContext[] = [
     globals: CORE_GLOBALS,
     requiredReturnType: "Boolean",
     blankModeToggle: false,
-    // Wave 6, probe ae_divzero: the record saves, then Approval.process()
-    // fails with CANNOT_INSERT_UPDATE_ACTIVATE_ENTITY naming the process —
-    // distinguishable from criteria-false (NO_APPLICABLE_PROCESS).
+    // Org-verified (probe ae_divzero): the record saves, then
+    // Approval.process() fails with CANNOT_INSERT_UPDATE_ACTIVATE_ENTITY
+    // naming the process — distinguishable from criteria-false
+    // (NO_APPLICABLE_PROCESS).
     runtimeErrorBehavior: "blocks_submit",
     runtimeErrorNote:
       "The record still saves, but submitting it for approval fails with a " +
@@ -154,8 +155,8 @@ export const CONTEXTS: readonly FormulaContext[] = [
     globals: CORE_GLOBALS,
     requiredReturnType: "Boolean",
     blankModeToggle: false,
-    // Wave 6, probe as_divzero: same blocked-submit shape as entry criteria;
-    // the error names the process, not the step.
+    // Org-verified (probe as_divzero): same blocked-submit shape as entry
+    // criteria; the error names the process, not the step.
     runtimeErrorBehavior: "blocks_submit",
     runtimeErrorNote:
       "The record still saves, but submitting it for approval fails with a " +

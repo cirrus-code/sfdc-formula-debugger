@@ -269,7 +269,8 @@ class Checker {
         return;
       }
       const actual = argTypes[i]!;
-      if (!isAssignable(actual, param.type)) {
+      const accepted = [param.type, ...(param.altTypes ?? [])];
+      if (!accepted.some((t) => isAssignable(actual, t))) {
         this.report(
           "argument-type-mismatch",
           "warning",

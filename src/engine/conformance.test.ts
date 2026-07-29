@@ -70,10 +70,10 @@ const ORG_OVERRULED = new Set<string>([
   "testExponentiationOperator#11",
   "testExponentiationOperator#38",
   "testExponentiationOperator#39",
-  // Empty text IS blank in the product's value domain (pw8_be_* riders:
-  // "" & "", TRIM(" "), UPPER(""), SUBSTITUTE deleting everything — all
-  // read blank through ISBLANK). The oracle's "" expectations below encode
-  // a distinction the org cannot even represent.
+  // Empty text IS blank in the product's value domain (org-verified,
+  // pw8_be_* probes: "" & "", TRIM(" "), UPPER(""), SUBSTITUTE deleting
+  // everything — all read blank through ISBLANK). The oracle's ""
+  // expectations below encode a distinction the org cannot even represent.
   "testUpper#0",
   "testUpper#1",
   "testLower#0",
@@ -94,9 +94,9 @@ const ORG_OVERRULED = new Set<string>([
   "testLowerLocale#45",
   // The JVM oracle can hold an EMPTY-STRING field distinct from null
   // (ISNULL('') is false there; NULLVALUE returns the '' itself). The
-  // product has no such state: whitespace-only text saves as null (wave 1)
-  // and every empty text result is blank (pw8_be_*), so these rows encode
-  // an unreachable field state.
+  // product has no such state: whitespace-only text saves as null and every
+  // empty text result is blank (org-verified, pw8_be_* probes), so these
+  // rows encode an unreachable field state.
   "testNVLWithPhone#6",
   "testNVLWithPhone#7",
   "testNVLWithEmail#4",

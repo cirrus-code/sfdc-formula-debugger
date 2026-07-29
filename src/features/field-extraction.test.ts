@@ -41,4 +41,34 @@ describe("field extraction", () => {
   it("defaults to Text when there is no signal", () => {
     expect(fields("Foo = Bar")[0]!.inferredType).toBe("Text");
   });
+
+  it("infers Boolean from infix && operands, not Text", () => {
+    const f = fields("A__c && B__c");
+    expect(f.find((x) => x.name === "A__c")!.inferredType).toBe("Boolean");
+    expect(f.find((x) => x.name === "B__c")!.inferredType).toBe("Boolean");
+  });
+
+  it("infers Boolean from infix || operands, not Text", () => {
+    const f = fields("A__c || B__c");
+    expect(f.find((x) => x.name === "A__c")!.inferredType).toBe("Boolean");
+    expect(f.find((x) => x.name === "B__c")!.inferredType).toBe("Boolean");
+  });
+
+  it("infers Date from an ordering comparison against TODAY()", () => {
+    expect(fields("CloseDate > TODAY()")[0]!.inferredType).toBe("Date");
+  });
+
+  it("infers Text from an ordering comparison against a string literal", () => {
+    expect(fields('Name < "M"')[0]!.inferredType).toBe("Text");
+  });
+
+  it("still infers Number from an ordering comparison against a number literal", () => {
+    expect(fields("Amount > 100")[0]!.inferredType).toBe("Number");
+  });
+
+  it("defaults both sides of an ordering comparison when neither carries a signal", () => {
+    const f = fields("X__c > Y__c");
+    expect(f.find((x) => x.name === "X__c")!.inferredType).toBe("Text");
+    expect(f.find((x) => x.name === "Y__c")!.inferredType).toBe("Text");
+  });
 });

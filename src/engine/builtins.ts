@@ -196,7 +196,7 @@ function daysInMonth(y: number, m: number): number {
 const MIN_YEAR = 1;
 const MAX_YEAR = 9999;
 
-function isValidDate(p: DateParts): boolean {
+export function isValidDate(p: DateParts): boolean {
   return (
     p.year >= MIN_YEAR &&
     p.year <= MAX_YEAR &&
@@ -207,11 +207,38 @@ function isValidDate(p: DateParts): boolean {
   );
 }
 
+/**
+ * UTC epoch millis without `Date.UTC`'s two-digit-year remap (it reads years
+ * 0-99 as 1900-1999, which would silently shift DATE(50,1,1) arithmetic into
+ * the 1950s). Every epoch this module builds must go through here.
+ */
+function utcEpoch(
+  year: number,
+  month: number,
+  day: number,
+  hh = 0,
+  mi = 0,
+  ss = 0,
+): number {
+  const d = new Date(0);
+  d.setUTCFullYear(year, month - 1, day);
+  d.setUTCHours(hh, mi, ss, 0);
+  return d.getTime();
+}
+
+/** Epoch bounds matching the supported DATE() year range. */
+const MIN_EPOCH_MS = utcEpoch(MIN_YEAR, 1, 1);
+const MAX_EPOCH_MS = utcEpoch(MAX_YEAR, 12, 31, 23, 59, 59) + 999;
+
+export function isValidEpochMs(ms: number): boolean {
+  return Number.isFinite(ms) && ms >= MIN_EPOCH_MS && ms <= MAX_EPOCH_MS;
+}
+
 // LocalTime-style: seconds appear only when seconds or millis are nonzero,
 // millis only when nonzero — matches every corpus TimeOnly rendering
 // ("00:00", "00:00:09", "10:40:55.666") and the org-verified
 // TEXT(TIMEVALUE("17:30:45.125")) = "17:30:45.125".
-export function formatTime(millisOfDay: number): string {
+function formatTime(millisOfDay: number): string {
   const ms = millisOfDay % 1000;
   const s = Math.floor(millisOfDay / 1000) % 60;
   const mi = Math.floor(millisOfDay / 60_000) % 60;
@@ -230,7 +257,9 @@ export function formatTime(millisOfDay: number): string {
 function formatDate(p: DateParts): string {
   const mm = String(p.month).padStart(2, "0");
   const dd = String(p.day).padStart(2, "0");
-  return `${p.year}-${mm}-${dd}`;
+  // Year padded to four digits (ISO/API shape). No corpus row pins the
+  // rendering of years below 1000 (VERIFICATION.md, date rendering).
+  return `${String(p.year).padStart(4, "0")}-${mm}-${dd}`;
 }
 
 export function dateFromEpoch(ms: number): DateParts {
@@ -307,7 +336,10 @@ export const BUILTINS: Record<string, Builtin> = {
         return blank("Text");
       }
       return text(
-        hms(Math.floor(Math.abs(a!.data.millisOfDay - b.data.millisOfDay) / 1000), 2),
+        hms(
+          Math.floor(Math.abs(a!.data.millisOfDay - b.data.millisOfDay) / 1000),
+          2,
+        ),
       );
     }
     if (a!.type === "Datetime" && b !== undefined && b.type === "Datetime") {
@@ -315,7 +347,9 @@ export const BUILTINS: Record<string, Builtin> = {
         return blank("Text");
       }
       return text(
-        dhms(Math.floor(Math.abs(a!.data.epochMillis - b.data.epochMillis) / 1000)),
+        dhms(
+          Math.floor(Math.abs(a!.data.epochMillis - b.data.epochMillis) / 1000),
+        ),
       );
     }
     // A blank operand of a Time/Datetime pair arrives typeless (a blank
@@ -457,7 +491,10 @@ export const BUILTINS: Record<string, Builtin> = {
   },
   MAX: (args) => num(Decimal.max(...args.map(dnum))),
   MIN: (args) => num(Decimal.min(...args.map(dnum))),
-  POWER: ([a, b]) => num(dnum(a!).pow(dnum(b!))),
+  // POWER has no implementation on purpose: no corpus row pins whether it
+  // shares `^`'s org-verified rules (integer-only exponent, 1e64 cap, folded
+  // vs runtime precision), so it is registry-marked non-simulatable until
+  // probed (VERIFICATION.md) — same treatment as LN/EXP.
   TRUNC: ([a, digits]) => num(truncTo(dnum(a!), digits ? toInt(digits) : 0)),
   // MFLOOR/MCEILING are the mathematical floor/ceiling (toward ∓∞), unlike
   // FLOOR/CEILING which round relative to zero. Verified against the corpus.
@@ -484,15 +521,22 @@ export const BUILTINS: Record<string, Builtin> = {
   DATETIMEVALUE: ([a]) => {
     const m = dstr(a!)
       .trim()
-      .match(/^(\d{4})-(\d{1,2})-(\d{1,2}) (\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
+      .match(
+        /^(\d{4})-(\d{1,2})-(\d{1,2}) (\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/,
+      );
     if (!m) {
       return error("#Error! (DATETIMEVALUE: invalid date/time text)");
     }
     const [y, mo, d, hh, mi, ss] = m.slice(1).map((x) => Number(x ?? 0));
-    if (!isValidDate({ year: y, month: mo, day: d }) || hh > 23 || mi > 59 || ss > 59) {
+    if (
+      !isValidDate({ year: y, month: mo, day: d }) ||
+      hh > 23 ||
+      mi > 59 ||
+      ss > 59
+    ) {
       return error("#Error! (DATETIMEVALUE: invalid date/time text)");
     }
-    return datetimeValue(Date.UTC(y, mo - 1, d, hh, mi, ss));
+    return datetimeValue(utcEpoch(y, mo, d, hh, mi, ss));
   },
   TIMEVALUE: ([a]) => {
     if (a!.type === "Datetime" && !a!.blank) {
@@ -527,7 +571,7 @@ export const BUILTINS: Record<string, Builtin> = {
   DAYOFYEAR: ([a]) =>
     dateField(
       a!,
-      (p) => (epochOfDate(p) - Date.UTC(p.year, 0, 1)) / 86_400_000 + 1,
+      (p) => (epochOfDate(p) - utcEpoch(p.year, 1, 1)) / 86_400_000 + 1,
     ),
   // ISO-8601: the week containing the date's Thursday; week 1 holds Jan 4.
   ISOWEEK: ([a]) =>
@@ -535,7 +579,7 @@ export const BUILTINS: Record<string, Builtin> = {
       const t = isoThursday(p);
       return (
         Math.floor(
-          (t.getTime() - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86_400_000 / 7,
+          (t.getTime() - utcEpoch(t.getUTCFullYear(), 1, 1)) / 86_400_000 / 7,
         ) + 1
       );
     }),
@@ -556,16 +600,36 @@ export const BUILTINS: Record<string, Builtin> = {
       ? num(epochOfDate(p) / 1000)
       : error("#Error! (UNIXTIMESTAMP: not a date)");
   },
-  FROMUNIXTIME: ([a]) =>
-    datetimeValue(Math.round(dnum(a!).times(1000).toNumber())),
+  FROMUNIXTIME: ([a]) => {
+    const ms = Math.round(dnum(a!).times(1000).toNumber());
+    return isValidEpochMs(ms)
+      ? datetimeValue(ms)
+      : error("#Error! (FROMUNIXTIME: out of range)");
+  },
   YEAR: ([a]) => dateField(a!, (p) => p.year),
   MONTH: ([a]) => dateField(a!, (p) => p.month),
   DAY: ([a]) => dateField(a!, (p) => p.day),
   ADDMONTHS: ([a, n]) => {
+    // Type-preserving: a Datetime keeps its type and time-of-day — the month
+    // math applies to the GMT date parts only (oracle-verified,
+    // testAddMonthsDateTime: 2004-12-31 11:32 + 3 → 2005-03-31 11:32).
+    if (a!.type === "Datetime" && !a!.blank) {
+      const ms = a!.data.epochMillis;
+      const parts = dateFromEpoch(ms);
+      const moved = addMonths(parts, toInt(n!));
+      if (!isValidDate(moved)) {
+        return error("#Error! (ADDMONTHS: date out of range)");
+      }
+      return datetimeValue(epochOfDate(moved) + (ms - epochOfDate(parts)));
+    }
     const p = datePartsOf(a!);
-    return p
-      ? dateValue(addMonths(p, toInt(n!)))
-      : error("#Error! (ADDMONTHS: not a date)");
+    if (!p) {
+      return error("#Error! (ADDMONTHS: not a date)");
+    }
+    const moved = addMonths(p, toInt(n!));
+    return isValidDate(moved)
+      ? dateValue(moved)
+      : error("#Error! (ADDMONTHS: date out of range)");
   },
 };
 
@@ -586,7 +650,7 @@ export const BUILTINS: Record<string, Builtin> = {
  * a conventional rendering that keeps the leading zero (TEXT(0.5) = "0.5",
  * org-verified) — while still stripping trailing zeros (TEXT(2.50) = "2.5").
  */
-export function renderProductNumber(d: Decimal, literal: boolean): string {
+function renderProductNumber(d: Decimal, literal: boolean): string {
   if (d.isInteger()) {
     return d.toFixed(0);
   }
@@ -620,7 +684,9 @@ export const SPECIAL_FORMS: Record<string, SpecialForm> = {
     // ".99", org-verified (semantics:text_percent_field), not the ×100
     // display convention.
     if (v.type === "Number" || v.type === "Currency" || v.type === "Percent") {
-      return text(renderProductNumber(v.data, isFoldedNumericLiteral(args[0]!)));
+      return text(
+        renderProductNumber(v.data, isFoldedNumericLiteral(args[0]!)),
+      );
     }
     if (v.type === "Time") {
       // TEXT(time) always renders the full HH:MM:SS.mmm (oracle-verified,
@@ -745,16 +811,17 @@ function initcapWord(w: string): string {
   return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
 }
 
+/**
+ * The number grammar VALUE()/ISNUMBER() accept, pinned by corpus rows
+ * (testIsNumber / testValue*): optional sign, digits with optional fraction
+ * ("1." and ".1" both parse), optional exponent ("1.e+1", ".1e-1").
+ * Deliberately NOT decimal.js's constructor, which also accepts "NaN",
+ * "Infinity" and 0x/0b/0o forms — those must fail here, not become values.
+ */
+const NUMBER_TEXT = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
+
 function isParsableNumber(s: string): boolean {
-  if (s.trim() === "") {
-    return false;
-  }
-  try {
-    void new Decimal(s.trim());
-    return true;
-  } catch {
-    return false;
-  }
+  return NUMBER_TEXT.test(s.trim());
 }
 
 /**
@@ -804,7 +871,7 @@ function datePartsOf(v: SfValue): DateParts | null {
 }
 
 export function epochOfDate(p: DateParts): number {
-  return Date.UTC(p.year, p.month - 1, p.day);
+  return utcEpoch(p.year, p.month, p.day);
 }
 
 function utcDate(p: DateParts): Date {
@@ -819,7 +886,10 @@ function isoThursday(p: DateParts): Date {
   return t;
 }
 
-function timeField(v: SfValue, pick: (millisOfDay: number) => number): EvalResult {
+function timeField(
+  v: SfValue,
+  pick: (millisOfDay: number) => number,
+): EvalResult {
   if (v.blank || v.type !== "Time") {
     return error("#Error! (expected a Time value)");
   }
@@ -846,7 +916,9 @@ function padTo(
     // text is returned as-is rather than guessing at an error.
     return text(s);
   }
-  const fill = p.repeat(Math.ceil((n - s.length) / p.length)).slice(0, n - s.length);
+  const fill = p
+    .repeat(Math.ceil((n - s.length) / p.length))
+    .slice(0, n - s.length);
   return text(side === "left" ? fill + s : s + fill);
 }
 
@@ -869,7 +941,7 @@ function parseDate(s: string): EvalResult {
 function addMonths(p: DateParts, n: number): DateParts {
   const total = p.year * 12 + (p.month - 1) + n;
   const year = Math.floor(total / 12);
-  const month = ((total % 12) + 12) % 12 + 1;
+  const month = (((total % 12) + 12) % 12) + 1;
   // Org-verified (semantics:addmonths_*): the LAST day of a month maps to the
   // last day of the target month (Feb 28 + 1 = Mar 31), while any other
   // overflow merely clamps (Jan 30 + 1 = Feb 28).

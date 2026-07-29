@@ -8,6 +8,8 @@ export const syntax = {
     nestedComment:
       "Block comments do not nest — this comment ends at the first '*/'.",
     unexpectedCharacter: (c: string) => `Unexpected character '${c}'.`,
+    invalidEscape: (c: string) =>
+      `Invalid escape '\\${c}' in string literal. Salesforce only allows \\n \\r \\t \\N \\R \\T \\" \\' \\\\.`,
   },
   parser: {
     unexpectedTrailingInput: "Unexpected trailing input after the formula.",
@@ -16,5 +18,7 @@ export const syntax = {
     expectedClosingParenForCall: "Expected ')' to close the function call.",
     expectedClosingParenForGroup: "Expected ')' to close the group.",
     expectedExpression: "Expected an expression.",
+    nestingTooDeep:
+      "Formula is nested too deeply to analyze; simplify the expression.",
   },
 };

@@ -69,9 +69,21 @@ export function parse(source: string): ParseResult {
   };
 }
 
+/**
+ * Recursion budget for nested expressions. parse() must never throw (the
+ * editor calls it on every keystroke, unguarded), so pathological nesting —
+ * e.g. a pasted blob of thousands of parens — has to be cut off well below
+ * the JS stack limit, which browsers can hit around a few thousand frames.
+ * Real formulas stay far under this; Salesforce's own compiled-size limit
+ * rejects deep nesting long before 500 levels.
+ */
+const MAX_NESTING_DEPTH = 500;
+
 class Parser {
   readonly diagnostics: Diagnostic[] = [];
   private pos = 0;
+  private depth = 0;
+  private depthExceeded = false;
 
   constructor(private readonly tokens: readonly Token[]) {}
 
@@ -94,6 +106,11 @@ class Parser {
   }
 
   private error(code: DiagnosticCode, s: Span, message: string): void {
+    // Past the nesting cutoff, every unwinding frame would report a missing
+    // `)`; the single nesting-too-deep diagnostic already tells the story.
+    if (this.depthExceeded) {
+      return;
+    }
     this.diagnostics.push({ code, severity: "error", span: s, message });
   }
 
@@ -122,6 +139,34 @@ class Parser {
   // --- Expressions (Pratt) ------------------------------------------------
 
   private parseExpr(minPrec: number): Expr {
+    if (this.depth >= MAX_NESTING_DEPTH) {
+      return this.bailTooDeep();
+    }
+    this.depth++;
+    const expr = this.parseExprInner(minPrec);
+    this.depth--;
+    return expr;
+  }
+
+  /** Cut off recursion: report once, consume the rest, return an ErrorNode. */
+  private bailTooDeep(): Expr {
+    const start = this.current().span.start;
+    this.error(
+      "nesting-too-deep",
+      this.current().span,
+      t().syntax.parser.nestingTooDeep,
+    );
+    this.depthExceeded = true;
+    while (this.current().kind !== "eof") {
+      this.advance();
+    }
+    return {
+      kind: "ErrorNode",
+      span: span(start, Math.max(start, this.prevEnd())),
+    };
+  }
+
+  private parseExprInner(minPrec: number): Expr {
     let left = this.parseUnary();
     for (;;) {
       if (this.current().kind !== "operator") {
@@ -152,8 +197,15 @@ class Parser {
       this.current().kind === "operator" &&
       (this.current().text === "-" || this.current().text === "+")
     ) {
+      // Sign chains recurse here without re-entering parseExpr, so they need
+      // their own depth check (`----…1` would otherwise blow the stack).
+      if (this.depth >= MAX_NESTING_DEPTH) {
+        return this.bailTooDeep();
+      }
+      this.depth++;
       const opTok = this.advance();
       const operand = this.parseUnary();
+      this.depth--;
       return {
         kind: "UnaryOp",
         op: opTok.text as UnaryOperator,
@@ -244,7 +296,18 @@ class Parser {
     while (this.current().kind !== "rparen" && this.current().kind !== "eof") {
       args.push(this.parseExpr(0));
       if (this.current().kind === "comma") {
-        this.advance();
+        const comma = this.advance();
+        // `F(a,)` — a trailing comma is a missing argument, recovered the same
+        // way as an interior hole (`F(a,,b)`): diagnostic + ErrorNode.
+        if (this.current().kind === "rparen" || this.current().kind === "eof") {
+          const at = span(comma.span.end, comma.span.end);
+          this.error(
+            "expected-expression",
+            at,
+            t().syntax.parser.expectedExpression,
+          );
+          args.push({ kind: "ErrorNode", span: at });
+        }
         continue;
       }
       if (this.current().kind === "rparen" || this.current().kind === "eof") {
@@ -302,8 +365,8 @@ class Parser {
 
   private parseErrorPrimary(): Expr {
     const tok = this.current();
-    const at =
-      tok.kind === "eof" ? span(tok.span.start, tok.span.start) : tok.span;
+    // The eof token is already zero-width, so tok.span works for every kind.
+    const at = tok.span;
     this.error("expected-expression", at, t().syntax.parser.expectedExpression);
     // Consume the offending token unless it is a separator the caller needs to
     // see (prevents infinite loops without swallowing structural tokens).
@@ -325,9 +388,16 @@ class Parser {
   }
 }
 
-const ESCAPE_CHARS: Record<string, string> = { n: "\n", t: "\t", r: "\r" };
-
-/** Strip surrounding quotes and resolve backslash escapes. */
+/**
+ * Strip surrounding quotes and resolve backslash escapes.
+ *
+ * The product grammar accepts nine escapes (`\n \r \t \N \R \T \" \' \\`),
+ * but the engine collapses only `\\` and `\"`; every other escape keeps both
+ * characters — `\n` is a literal backslash-n, never a newline, and `\'` keeps
+ * its backslash in both quote styles (oracle-verified: LEN("a\nb") = 4,
+ * LEN("\\") = 1, LEN("a\"b") = 3, LEN('a\'b') = 4; VERIFICATION.md, string
+ * escapes). Invalid escapes are diagnosed by the lexer and kept verbatim here.
+ */
 function decodeString(raw: string): string {
   if (raw.length === 0) {
     return "";
@@ -342,7 +412,7 @@ function decodeString(raw: string): string {
     const ch = body[i]!;
     if (ch === "\\" && i + 1 < body.length) {
       const next = body[++i]!;
-      out += ESCAPE_CHARS[next] ?? next;
+      out += next === "\\" || next === '"' ? next : ch + next;
     } else {
       out += ch;
     }

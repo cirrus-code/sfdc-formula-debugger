@@ -33,6 +33,8 @@ import {
   dateFromEpoch,
   epochOfDate,
   isFoldedNumericLiteral,
+  isValidDate,
+  isValidEpochMs,
 } from "./builtins.ts";
 
 export interface EvalEnv {
@@ -66,8 +68,8 @@ export function evaluateFormula(ast: Expr, env: EvalEnv): EvalResult {
 // Salesforce carries 39 significant figures through chained `/` and `*` (see
 // value.ts) and rounds HALF_UP to this many decimal places only when a Number is
 // "materialized": the final result and each value handed to a function or
-// comparison. Rounding after every operation instead (our old behavior) loses the
-// guard digits, so e.g. FLOOR((1/9)*9) came out 0 rather than 1. Oracle-verified.
+// comparison. Never round per-operation — that loses the guard digits and
+// FLOOR((1/9)*9) becomes 0 instead of 1. Oracle-verified.
 const MAX_SCALE = 32;
 
 function materialize(v: SfValue): SfValue {
@@ -136,7 +138,7 @@ function evaluate(node: Expr, env: EvalEnv): EvalResult {
       if (operand.blank && env.blankMode === "blank") {
         return blank("Number");
       }
-      const d = toDecimal(operand, env);
+      const d = toDecimal(operand);
       return node.op === "-" ? num(d.negated()) : num(d);
     }
     case "BinaryOp":
@@ -148,18 +150,13 @@ function evaluate(node: Expr, env: EvalEnv): EvalResult {
   }
 }
 
-/** Coerce a value to a Decimal, applying blank-handling mode for blank numbers. */
-function toDecimal(v: SfValue, env: EvalEnv): Decimal {
-  if (v.blank) {
-    if (env.blankMode === "zero") {
-      return new Decimal(0);
-    }
-    // Blank-mode propagation happens in the callers — arithmetic and compare
-    // bail out before coercing — so a blank that still reaches here (unary
-    // minus, or a blank non-numeric operand) coerces to 0.
-    return new Decimal(0);
-  }
-  return asDecimal(v);
+/**
+ * Coerce a value to a Decimal. Blank-mode propagation happens in the callers
+ * (arithmetic, compare, and unary minus bail out first), so any blank that
+ * reaches here reads as 0 in both modes.
+ */
+function toDecimal(v: SfValue): Decimal {
+  return v.blank ? new Decimal(0) : asDecimal(v);
 }
 
 function isNumericType(v: SfValue): v is Extract<SfValue, { data: Decimal }> {
@@ -240,7 +237,7 @@ function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
     case "<=":
     case ">":
     case ">=":
-      return compare(node.op, l, r, env);
+      return compare(node.op, l, r);
     default:
       return assertNever(node.op);
   }
@@ -260,18 +257,18 @@ function arithmetic(
   if ((isDatelike(l) || isDatelike(r)) && (l.blank || r.blank)) {
     return blank(isDatelike(l) ? l.type : r.type);
   }
-  // In "blank" mode, a blank numeric operand makes the whole result blank.
-  if (
-    env.blankMode === "blank" &&
-    ((isNumericType(l) && l.blank) || (isNumericType(r) && r.blank))
-  ) {
+  // In "blank" mode, a blank operand makes the whole result blank. This
+  // includes typeless blanks (a NULL literal, an unsupplied field, a CASE
+  // fallthrough), matching the UnaryOp branch — a typed and a typeless blank
+  // must not diverge (VERIFICATION.md, blank propagation).
+  if (env.blankMode === "blank" && (l.blank || r.blank)) {
     return blank("Number");
   }
   if (isDatelike(l) || isDatelike(r)) {
-    return temporalArithmetic(op, l, r, env);
+    return temporalArithmetic(op, l, r);
   }
-  const a = toDecimal(l, env);
-  const b = toDecimal(r, env);
+  const a = toDecimal(l);
+  const b = toDecimal(r);
   // Results carry decimal.js's 39-sig-fig precision (value.ts); they are rounded
   // to 32 places only at materialization, never per operation.
   switch (op) {
@@ -298,15 +295,14 @@ function arithmetic(
 }
 
 /**
- * `^` per the org (wave-4/5/6 probe bisects). The operator has TWO org-side
- * code paths, split by whether the compiler constant-folds it (both operands
- * numeric literals — see isFoldedNumericLiteral):
+ * `^` per the org. The operator has TWO org-side code paths, split by
+ * whether the compiler constant-folds it (both operands numeric literals —
+ * see isFoldedNumericLiteral):
  *
  * FOLDED, b ≥ 0: the exact value rounded to 18 SIGNIFICANT digits, HALF_UP —
  * digit-exact across sixteen probes (3^34 exact at 17 digits, which no IEEE
- * double can produce; the pw5_dbl/pw6_clamp/pw7_clamp/pw8_flush series),
- * refuting an earlier IEEE-double reading of 2^100 and 3^40. Nothing is
- * ever tail-truncated (0.5^76 keeps all 18 digits through place 40): a
+ * double can produce; the pw5_dbl/pw6_clamp/pw7_clamp/pw8_flush series).
+ * Nothing is ever tail-truncated (0.5^76 keeps all 18 digits through place 40): a
  * folded value is kept whole unless it rounds to zero at 39 decimal
  * places, in which case it FLUSHES to zero — every kept row down to
  * 0.5^129 ≈ 1.5e-39 renders in full and every flushed row is below 5e-40
@@ -474,7 +470,6 @@ function temporalArithmetic(
   op: "+" | "-" | "*" | "/" | "^",
   l: SfValue,
   r: SfValue,
-  env: EvalEnv,
 ): EvalResult {
   const unsupportedMix = error(
     `#Error! (unsupported ${l.type} ${op} ${r.type})`,
@@ -484,15 +479,26 @@ function temporalArithmetic(
   }
   const sign = op === "+" ? 1 : -1;
   if (l.type === "Date" && isNumericType(r)) {
-    const days = toDecimal(r, env).truncated().toNumber();
-    return dateValue(dateFromEpoch(epochOfDate(asDate(l)) + sign * days * DAY_MS));
+    const days = toDecimal(r).truncated().toNumber();
+    const epoch = epochOfDate(asDate(l)) + sign * days * DAY_MS;
+    // Out-of-range results must surface as a simulated error — new Date()
+    // would otherwise yield NaN parts or years past 9999 that DATE() itself
+    // rejects. The exact product boundary is unverified (VERIFICATION.md).
+    if (!Number.isFinite(epoch) || !isValidDate(dateFromEpoch(epoch))) {
+      return error("#Error! (date out of range)");
+    }
+    return dateValue(dateFromEpoch(epoch));
   }
   if (l.type === "Date" && r.type === "Date" && op === "-") {
     return num((epochOfDate(asDate(l)) - epochOfDate(asDate(r))) / DAY_MS);
   }
   if (l.type === "Datetime" && isNumericType(r)) {
-    const deltaMs = toDecimal(r, env).times(DAY_MS).toNumber();
-    return datetimeValue(asDatetimeMs(l) + sign * Math.round(deltaMs));
+    const deltaMs = toDecimal(r).times(DAY_MS).toNumber();
+    const ms = asDatetimeMs(l) + sign * Math.round(deltaMs);
+    if (!isValidEpochMs(ms)) {
+      return error("#Error! (datetime out of range)");
+    }
+    return datetimeValue(ms);
   }
   if (l.type === "Datetime" && r.type === "Datetime" && op === "-") {
     return num(new Decimal(asDatetimeMs(l) - asDatetimeMs(r)).div(DAY_MS));
@@ -501,9 +507,11 @@ function temporalArithmetic(
     // Milliseconds; a result past midnight wraps (10:34 + 26h ≡ 12:34,
     // testAddBigTimeValue) but a negative one is a runtime error
     // (testSubtractBigTimeValue, testAddHoursWithTwoCustFields).
-    const delta = toDecimal(r, env).truncated().toNumber();
+    const delta = toDecimal(r).truncated().toNumber();
     const raw = asTimeMs(l) + sign * delta;
-    return raw < 0 ? error("#Error! (time out of range)") : timeValue(raw % DAY_MS);
+    return raw < 0
+      ? error("#Error! (time out of range)")
+      : timeValue(raw % DAY_MS);
   }
   if (l.type === "Time" && r.type === "Time" && op === "-") {
     // A negative difference wraps forward a day (testSubtractTwoTimeFields:
@@ -621,7 +629,6 @@ function compare(
   op: "<" | "<=" | ">" | ">=",
   l: SfValue,
   r: SfValue,
-  env: EvalEnv,
 ): EvalResult {
   // An ordering comparison against a blank operand is false (blank mode). In zero
   // mode blank numerics already read as 0 upstream, so this only fires for values
@@ -638,9 +645,7 @@ function compare(
     cmp = Math.sign(lt - rt);
   } else {
     // Order at the 32-place materialized scale, consistent with equality.
-    cmp = toDecimal(materialize(l), env).comparedTo(
-      toDecimal(materialize(r), env),
-    );
+    cmp = toDecimal(materialize(l)).comparedTo(toDecimal(materialize(r)));
   }
   switch (op) {
     case "<":

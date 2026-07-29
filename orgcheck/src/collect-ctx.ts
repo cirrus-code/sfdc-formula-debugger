@@ -1,17 +1,12 @@
-// Run the wave-2 per-context pass: deploy each batch from ctx-plan.json
-// (per-component rejections are verdicts, per wave 1's rounds pattern), gate
+// Run the per-context availability pass: deploy each batch from ctx-plan.json
+// (per-component rejections are verdicts, retried in rounds — see below), gate
 // each container's matrix on its canaries, run the DML-triggered runtime
 // probes, and write a joined results file for emit-ctx.
 //
 //   pnpm collect-ctx -- --org <alias> [--skip-runtime] [--only <batchPrefix>]
 
 import { execFileSync } from "node:child_process";
-import {
-  mkdirSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { childSortKey } from "./shared-ctx.ts";
 import type {
@@ -148,8 +143,8 @@ function writePackage(components: CtxComponent[]): void {
   );
 }
 
-// ---- deploy rounds (wave-1 pattern: the org discards the whole request on
-// any component failure, so drop rejections and retry until a round lands) ----
+// ---- deploy rounds (the org discards the whole request on any component
+// failure, so drop rejections and retry until a round lands) ----
 
 interface DeployOutcome {
   deployed: Set<string>; // component ids
@@ -220,8 +215,12 @@ function deployRounds(label: string, componentIds: string[]): DeployOutcome {
       throw new Error(
         `${label}: unmatchable deploy failures:\n` +
           failures
-            .map((f: { componentType?: string; fullName?: string; problem?: string }) =>
-              `  ${f.componentType} ${f.fullName}: ${f.problem}`,
+            .map(
+              (f: {
+                componentType?: string;
+                fullName?: string;
+                problem?: string;
+              }) => `  ${f.componentType} ${f.fullName}: ${f.problem}`,
             )
             .join("\n"),
       );
@@ -307,7 +306,9 @@ for (const batch of plan.batches) {
     }
   }
   if (batch.phase === "canary") {
-    const ok = batch.componentIds.find((i) => byId.get(i)!.kind === "canary_ok")!;
+    const ok = batch.componentIds.find(
+      (i) => byId.get(i)!.kind === "canary_ok",
+    )!;
     const bogus = batch.componentIds.find(
       (i) => byId.get(i)!.kind === "canary_bogus",
     )!;
@@ -325,7 +326,9 @@ for (const batch of plan.batches) {
     if (!verifiable) {
       gateFailed.set(batch.container!, detail);
     }
-    console.log(`${batch.id}: ${verifiable ? "VERIFIABLE" : "GATE FAILED"} — ${detail}`);
+    console.log(
+      `${batch.id}: ${verifiable ? "VERIFIABLE" : "GATE FAILED"} — ${detail}`,
+    );
   }
 }
 
@@ -333,9 +336,9 @@ for (const batch of plan.batches) {
 
 const runtime: CtxRuntimeResult[] = [];
 
-// Same FLS lesson as wave 1: API-deployed fields are invisible to the CLI
-// user's anonymous Apex without an explicit grant — needed by every
-// record-touching channel (VR runtime, field-update runtime).
+// API-deployed fields are invisible to the CLI user's anonymous Apex
+// without an explicit FLS grant — needed by every record-touching channel
+// (VR runtime, field-update runtime).
 if (
   !skipRuntime &&
   (!only ||
@@ -383,12 +386,22 @@ if (
       `permission set deploy failed: ${JSON.stringify(permRes.result?.details?.componentFailures)}`,
     );
   }
-  const assign = sfJson(["org", "permset", "assign", "--name", PERMSET, "-o", org]);
+  const assign = sfJson([
+    "org",
+    "permset",
+    "assign",
+    "--name",
+    PERMSET,
+    "-o",
+    org,
+  ]);
   const assignFailures = (assign.result?.failures ?? []).filter(
     (f: { message?: string }) => !/uplicate/.test(f.message ?? ""),
   );
   if (assignFailures.length > 0) {
-    throw new Error(`permset assignment failed: ${JSON.stringify(assignFailures)}`);
+    throw new Error(
+      `permset assignment failed: ${JSON.stringify(assignFailures)}`,
+    );
   }
 }
 
@@ -409,7 +422,9 @@ if (!skipRuntime && (!only || only === "runtime")) {
   if (!run.result?.success) {
     throw new Error(
       `data-ctx.apex failed: ${
-        run.result?.compileProblem || run.result?.exceptionMessage || JSON.stringify(run).slice(0, 500)
+        run.result?.compileProblem ||
+        run.result?.exceptionMessage ||
+        JSON.stringify(run).slice(0, 500)
       }`,
     );
   }
@@ -424,8 +439,13 @@ if (!skipRuntime && (!only || only === "runtime")) {
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&");
-  const seen = new Map<string, { outcome: "SAVED" | "FIRED" | "ERR"; message?: string }>();
-  for (const m of logs.matchAll(/CTXRESULT\|([^|]+)\|(SAVED|ERRRAW)\|?([^\n]*)/g)) {
+  const seen = new Map<
+    string,
+    { outcome: "SAVED" | "FIRED" | "ERR"; message?: string }
+  >();
+  for (const m of logs.matchAll(
+    /CTXRESULT\|([^|]+)\|(SAVED|ERRRAW)\|?([^\n]*)/g,
+  )) {
     const [, id, kind, msg] = m;
     if (kind === "SAVED") {
       seen.set(id, { outcome: "SAVED" });
@@ -455,7 +475,11 @@ if (!skipRuntime && (!only || only === "runtime")) {
       continue;
     }
     const r = seen.get(rt.id);
-    runtime.push({ id: rt.id, outcome: r?.outcome ?? "NOT_RUN", message: r?.message });
+    runtime.push({
+      id: rt.id,
+      outcome: r?.outcome ?? "NOT_RUN",
+      message: r?.message,
+    });
   }
 }
 
@@ -486,8 +510,13 @@ if (!skipRuntime && (!only || only === "flow_values")) {
       .replace(/&lt;/g, "<")
       .replace(/&gt;/g, ">")
       .replace(/&amp;/g, "&");
-    const seen = new Map<string, { outcome: "VALUE" | "ERROR"; value: string }>();
-    for (const m of logs.matchAll(/CTXRESULT\|([^|]+)\|(FLOWVAL64|FLOWERR)\|([^\n]*)/g)) {
+    const seen = new Map<
+      string,
+      { outcome: "VALUE" | "ERROR"; value: string }
+    >();
+    for (const m of logs.matchAll(
+      /CTXRESULT\|([^|]+)\|(FLOWVAL64|FLOWERR)\|([^\n]*)/g,
+    )) {
       const [, id, kind, payload] = m;
       seen.set(id, {
         outcome: kind === "FLOWVAL64" ? "VALUE" : "ERROR",
@@ -593,14 +622,12 @@ if (
   plan.approvalProbes.length > 0 &&
   (!only || only.startsWith("approval_runtime"))
 ) {
-  const approver: string | undefined = sfJson([
-    "org",
-    "display",
-    "-o",
-    org,
-  ]).result?.username;
+  const approver: string | undefined = sfJson(["org", "display", "-o", org])
+    .result?.username;
   if (!approver) {
-    throw new Error("cannot resolve the org username for the approval approver");
+    throw new Error(
+      "cannot resolve the org username for the approval approver",
+    );
   }
   // An approval step will not activate without a real approver, but the plan
   // must stay org-independent, so the placeholder is resolved only here.
@@ -626,12 +653,17 @@ if (
     } catch (e) {
       // A whole-package rejection is a documented dead end, not a reason to
       // lose the rest of the run's results.
-      console.warn(`${batchId} (${pass}) deploy aborted: ${(e as Error).message}`);
+      console.warn(
+        `${batchId} (${pass}) deploy aborted: ${(e as Error).message}`,
+      );
       passes.push({
         pass,
         accepted: [],
         rejected: Object.fromEntries(
-          batch.componentIds.map((id) => [id, `deploy aborted: ${(e as Error).message}`]),
+          batch.componentIds.map((id) => [
+            id,
+            `deploy aborted: ${(e as Error).message}`,
+          ]),
         ),
       });
       return null;
@@ -656,7 +688,8 @@ if (
 
   const canary = approvalPass("approval_runtime:canary", "create", true);
   const okDeployed = canary?.deployed.has("approvalcanary:ok") ?? false;
-  const bogusEntry = canary?.rejected.has("approvalcanary:bogus_entry") ?? false;
+  const bogusEntry =
+    canary?.rejected.has("approvalcanary:bogus_entry") ?? false;
   const bogusStep = canary?.rejected.has("approvalcanary:bogus_step") ?? false;
   const verifiable = okDeployed && (bogusEntry || bogusStep);
   let rejectedCriteria = "step criteria was";
@@ -674,7 +707,9 @@ if (
     detail =
       "approval processes do NOT compile-check criteria formulas on the create path (both bogus-function canaries deployed clean) — acceptances are meaningless";
   }
-  console.log(`approval_runtime: ${verifiable ? "VERIFIABLE" : "GATE FAILED"} — ${detail}`);
+  console.log(
+    `approval_runtime: ${verifiable ? "VERIFIABLE" : "GATE FAILED"} — ${detail}`,
+  );
 
   approvalPass("approval_runtime:probes", "create", true);
   // Some containers validate formulas on metadata UPDATE but not CREATE (and
@@ -691,7 +726,14 @@ if (
   );
   if (anyLive) {
     console.log("approval runtime: submitting probe records…");
-    const run = sfJson(["apex", "run", "--file", "approvals-run.apex", "-o", org]);
+    const run = sfJson([
+      "apex",
+      "run",
+      "--file",
+      "approvals-run.apex",
+      "-o",
+      org,
+    ]);
     if (!run.result?.success) {
       console.warn(
         `approvals-run.apex failed: ${run.result?.compileProblem || run.result?.exceptionMessage || "unknown"}`,
@@ -701,7 +743,9 @@ if (
     writeFileSync(join(ROOT, "results", "ctx-approval-log.txt"), raw);
     // Only the marker's own pipes need decoding — the payload rode in as base64
     // precisely so the org's error text could not be mangled in transit.
-    const logs = raw.replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)));
+    const logs = raw.replace(/&#(\d+);/g, (_, n) =>
+      String.fromCharCode(Number(n)),
+    );
     const seen = new Map<string, string[]>();
     for (const m of logs.matchAll(/APPRV64\|([A-Za-z0-9+/=]+)/g)) {
       const fields = Buffer.from(m[1], "base64").toString("utf8").split("|");
@@ -733,7 +777,10 @@ if (
       const k = w.ProcessInstanceId as string;
       wiCount.set(k, (wiCount.get(k) ?? 0) + 1);
     }
-    const newestByDef = new Map<string, { status: string; workitems: number }>();
+    const newestByDef = new Map<
+      string,
+      { status: string; workitems: number }
+    >();
     for (const inst of instances) {
       const def = inst.ProcessDefinition?.DeveloperName as string | undefined;
       if (!def || newestByDef.has(def)) {
@@ -771,7 +818,9 @@ if (
         rawOutcome === "REFUSED" && /NO_APPLICABLE_PROCESS/i.test(message)
           ? "NO_PROCESS"
           : (rawOutcome as CtxApprovalResult["outcome"]);
-      const soql = newestByDef.get(`APR_${p.id.replace(/[^A-Za-z0-9]+/g, "_")}`);
+      const soql = newestByDef.get(
+        `APR_${p.id.replace(/[^A-Za-z0-9]+/g, "_")}`,
+      );
       approvals.push({
         id: p.id,
         context: p.context,

@@ -24,6 +24,19 @@ const KEYWORD_KINDS: Record<string, TokenKind> = {
   NULL: "null",
 };
 
+/** The nine escapes formula-engine's STRING_LITERAL grammar rule accepts. */
+const VALID_STRING_ESCAPES = new Set([
+  "n",
+  "r",
+  "t",
+  "N",
+  "R",
+  "T",
+  '"',
+  "'",
+  "\\",
+]);
+
 class Lexer {
   private pos = 0;
   private readonly tokens: Token[] = [];
@@ -172,7 +185,17 @@ class Lexer {
         break;
       }
       if (c === "\\" && this.peek(1) !== "") {
-        this.pos += 2; // escape sequence: consume backslash + escaped char
+        // The product grammar (formula-engine LexerRules.g4, STRING_LITERAL)
+        // rejects any backslash not starting one of the nine listed escapes.
+        // We diagnose instead and keep lexing for recovery.
+        if (!VALID_STRING_ESCAPES.has(this.peek(1))) {
+          this.error(
+            "invalid-escape",
+            span(this.pos, this.pos + 2),
+            t().syntax.lexer.invalidEscape(this.peek(1)),
+          );
+        }
+        this.pos += 2;
         continue;
       }
       this.pos++;

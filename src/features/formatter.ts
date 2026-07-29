@@ -3,6 +3,7 @@ import {
   BINARY_PRECEDENCE,
   parse,
   spanLength,
+  visitExpr,
   type Expr,
   type Token,
   type Trivia,
@@ -134,24 +135,7 @@ function attachComments(root: Expr, tokens: readonly Token[]): CommentMap {
 }
 
 function collect(node: Expr, out: Expr[]): void {
-  out.push(node);
-  switch (node.kind) {
-    case "FunctionCall":
-      node.args.forEach((a) => collect(a, out));
-      return;
-    case "BinaryOp":
-      collect(node.left, out);
-      collect(node.right, out);
-      return;
-    case "UnaryOp":
-      collect(node.operand, out);
-      return;
-    case "Paren":
-      collect(node.expr, out);
-      return;
-    default:
-      return;
-  }
+  visitExpr(node, (n) => out.push(n));
 }
 
 /** Node ending closest before `offset` (deepest on ties) — the comment's left neighbour. */

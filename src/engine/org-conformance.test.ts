@@ -23,8 +23,7 @@ const rows: CorpusRow[] = JSON.parse(
 );
 
 // Escape hatch for org rows whose rendering rule is not pinned down yet:
-// quarantined rows count toward neither pass nor fail. Currently empty — the
-// wave-4 `^` bisect settled every previously quarantined row.
+// quarantined rows count toward neither pass nor fail. Currently empty.
 const NUMERIC_RENDERING_QUARANTINE = new Set<string>([]);
 
 describe("conformance: org-verified corpus (real-org tier)", () => {

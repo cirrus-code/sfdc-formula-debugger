@@ -15,7 +15,7 @@ import type {
  * agrees with each entry's `simulatable` flag.
  *
  * `contexts` data is org-verified where possible (corpus/org-availability.json,
- * wave-2 pass 2026-07-28; enforced by org-availability.test.ts): each function
+ * 2026-07-28; enforced by org-availability.test.ts): each function
  * was save-probed in every context whose metadata container compile-checks
  * formulas — all of them except email templates, whose merge formulas the org
  * never validates at deploy. Availability is still surfaced as a soft warning
@@ -43,9 +43,9 @@ const rest = (name: string, type: SfType): ParamSpec => ({
 });
 
 // Contexts where change-tracking functions are allowed. Org-verified
-// (wave-2 matrix, 2026-07-28): validation rules, field updates, and approval
-// criteria accept them; workflow RULES reject them ("may not be used in this
-// type of formula") — surprising, but the org is authoritative.
+// (corpus/org-availability.json): validation rules, field updates, and
+// approval criteria accept them; workflow RULES reject them ("may not be
+// used in this type of formula") — surprising, but the org is authoritative.
 const CHANGE_CONTEXTS: readonly ContextId[] = [
   "validation_rule",
   "workflow_field_update",
@@ -53,8 +53,8 @@ const CHANGE_CONTEXTS: readonly ContextId[] = [
   "approval_step",
 ];
 
-// Org-verified (wave-2 matrix, 2026-07-28): functions the OSS engine supports
-// but EVERY verifiable product context rejects at save ("Unknown function" /
+// Org-verified (corpus/org-availability.json): functions the OSS engine
+// supports but EVERY verifiable product context rejects at save ("Unknown function" /
 // "may not be used in this type of formula") — formula fields, validation
 // rules, workflow rules/field updates, default values, approval criteria,
 // flow formulas, custom buttons, and quick actions all refuse them. They stay
@@ -62,8 +62,8 @@ const CHANGE_CONTEXTS: readonly ContextId[] = [
 // they appear (suppressed only in the deploy-unverifiable email context).
 const NO_VERIFIED_CONTEXT: readonly ContextId[] = [];
 
-// Wave-2 verified groupings for the coverage additions (2026-07-28 matrix):
-// the encode family lives only where output is rendered for the web…
+// Org-verified groupings (corpus/org-availability.json): the encode family
+// lives only where output is rendered for the web…
 const ENCODE_CONTEXTS: readonly ContextId[] = [
   "flow_formula",
   "custom_button_link",
@@ -83,7 +83,7 @@ const ALL_BUT_BUTTON: readonly ContextId[] = [
   "email_template",
 ];
 
-// Org-verified (VERIFICATION.md, wave-2 pass): TRUNC's single-argument form
+// Org-verified (VERIFICATION.md): TRUNC's single-argument form
 // only saves in formula fields; every other Tier 1 (compile-checked) context
 // requires both arguments. email_template is Tier 2 (deploy never compile-
 // checks it) so it's left out — the checker treats Tier 2 as best-effort.
@@ -554,7 +554,10 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     params: [req("number", "Number"), req("power", "Number")],
     returnType: fixed("Number"),
     contexts: ["custom_button_link"],
-    simulatable: true,
+    // Not simulated: no corpus row pins whether POWER shares `^`'s verified
+    // rules (integer-only exponent, 1e64 cap, precision limits), so it
+    // refuses rather than guess (VERIFICATION.md).
+    simulatable: false,
     docsUrl: DOCS,
     summary: "Raises a number to a power.",
   },
@@ -629,7 +632,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   },
   {
     name: "DATEVALUE",
-    params: [req("expression", "Text")],
+    params: [{ ...req("expression", "Text"), altTypes: ["Datetime"] }],
     returnType: fixed("Date"),
     contexts: "all",
     simulatable: true,
@@ -666,7 +669,9 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   {
     name: "ADDMONTHS",
     params: [req("date", "Date"), req("num", "Number")],
-    returnType: fixed("Date"),
+    // Datetime in, Datetime out — the time-of-day is preserved
+    // (oracle-verified, testAddMonthsDateTime).
+    returnType: sameAsArg(0),
     contexts: "all",
     simulatable: true,
     docsUrl: DOCS,
@@ -719,7 +724,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
       "Looks up a value from another object. Not available in simulation (org state).",
   },
 
-  // --- Date & time (corpus-backed port, 2026-07-28) -----------------------
+  // --- Date & time (additional) --------------------------------------------
   {
     name: "DATETIMEVALUE",
     params: [req("value", "Text")],
@@ -850,7 +855,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     summary: "The date/time for a count of seconds since the Unix epoch.",
   },
 
-  // --- Text (corpus-backed port, 2026-07-28) ------------------------------
+  // --- Text (additional) ---------------------------------------------------
   {
     name: "LPAD",
     params: [
@@ -892,7 +897,10 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   // until golden rows pin their behavior — or forever, for org-state values.
   {
     name: "INCLUDES",
-    params: [req("multiselect_picklist", "Multipicklist"), req("text_literal", "Text")],
+    params: [
+      req("multiselect_picklist", "Multipicklist"),
+      req("text_literal", "Text"),
+    ],
     returnType: fixed("Boolean"),
     contexts: "all",
     simulatable: true,
@@ -903,7 +911,16 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     name: "REGEX",
     params: [req("text", "Text"), req("regex_text", "Text")],
     returnType: fixed("Boolean"),
-    contexts: ["validation_rule", "workflow_field_update", "default_value", "flow_formula", "approval_entry", "approval_step", "quick_action", "email_template"],
+    contexts: [
+      "validation_rule",
+      "workflow_field_update",
+      "default_value",
+      "flow_formula",
+      "approval_entry",
+      "approval_step",
+      "quick_action",
+      "email_template",
+    ],
     // Salesforce matches with Java's regex dialect, which differs from
     // JavaScript's in ways a client cannot faithfully bridge (possessive
     // quantifiers, Java-only classes) — refuse rather than subtly mismatch.
@@ -1003,7 +1020,11 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   },
   {
     name: "HYPERLINK",
-    params: [req("url", "Text"), req("friendly_name", "Text"), opt("target", "Text")],
+    params: [
+      req("url", "Text"),
+      req("friendly_name", "Text"),
+      opt("target", "Text"),
+    ],
     returnType: fixed("Text"),
     contexts: ["formula_field", "flow_formula", "email_template"],
     simulatable: false,
@@ -1084,7 +1105,16 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
     name: "PICKLISTCOUNT",
     params: [req("multiselect_picklist", "Multipicklist")],
     returnType: fixed("Number"),
-    contexts: ["formula_field", "validation_rule", "workflow_field_update", "default_value", "flow_formula", "quick_action", "custom_button_link", "email_template"],
+    contexts: [
+      "formula_field",
+      "validation_rule",
+      "workflow_field_update",
+      "default_value",
+      "flow_formula",
+      "quick_action",
+      "custom_button_link",
+      "email_template",
+    ],
     simulatable: true,
     docsUrl: DOCS,
     summary: "The number of selected values in a multi-select picklist.",

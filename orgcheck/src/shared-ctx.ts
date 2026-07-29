@@ -1,14 +1,13 @@
-// Shared types for the wave-2 per-context pass (generate-ctx → collect-ctx →
-// emit-ctx). Erasable-TS only, like shared.ts.
+// Shared types for the per-context availability pass (generate-ctx →
+// collect-ctx → emit-ctx). Erasable-TS only, like shared.ts.
 //
-// Wave 2 asks a different question than wave 1: not "what does this formula
-// evaluate to" but "does this context's compiler accept this construct at
-// all". Each probe is one metadata component whose deploy accept/reject is the
-// verdict, so the plan is a list of deployable component fragments rather than
-// formula fields + records.
+// This pass asks a different question than the value probes (generate.ts):
+// not "what does this formula evaluate to" but "does this context's compiler
+// accept this construct at all". Each probe is one metadata component whose
+// deploy accept/reject is the verdict, so the plan is a list of deployable
+// component fragments rather than formula fields + records.
 
-/** Wave-2 context ids — every registry context (formula_field joined the
- * matrix once the registry outgrew wave 1's hand-written probes). */
+/** Availability-matrix container ids — every registry context. */
 export type CtxContainerId =
   | "formula_field"
   | "validation_rule"

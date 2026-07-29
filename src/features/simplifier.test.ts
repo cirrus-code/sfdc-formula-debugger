@@ -282,7 +282,97 @@ function sameResult(a: EvalResult, b: EvalResult): boolean {
   return a.data === b.data;
 }
 
+describe("simplifier: foldedness-sensitive positions (TEXT and ^)", () => {
+  // The engine evaluates literal-shaped TEXT() arguments and `^` operands on
+  // a distinct compile-time path (isFoldedNumericLiteral), so a rewrite that
+  // turns a computed subtree into a bare literal there would change the
+  // simulated value even though the arithmetic is identical.
+  it("refuses to fold a ^ operand from computed to literal shape", () => {
+    expect(s("(1 + 1) ^ 100").changed).toBe(false);
+    // Same trap with parens the formatter would strip: `2 * 1` is already an
+    // unparenthesized ^ operand after cleanParens, and must stay unfolded.
+    expect(rules("(2 * 1) ^ 100")).not.toContain("constant-fold");
+  });
+
+  it("refuses to hoist a literal IF branch into a TEXT() argument", () => {
+    expect(s("TEXT(IF(TRUE, 0.5, X__c))").changed).toBe(false);
+  });
+
+  it("still rewrites where foldedness is unaffected", () => {
+    expect(out("A = (1 + 1)")).toBe("A = 2");
+    expect(out("TEXT(IF(TRUE, X__c, Y__c))")).toBe("TEXT(X__c)");
+    // Folding an ENTIRE ^ expression is safe — the fold evaluates the
+    // original shape, so the captured value is the runtime-path result.
+    expect(out("2 ^ (1 + 1) = N")).toBe("4 = N");
+  });
+});
+
+// Numeric ASTs that exercise TEXT() and `^` — the two foldedness-sensitive
+// positions — alongside ordinary arithmetic, parens, and IF branches.
+const numLeaf: fc.Arbitrary<Expr> = fc.oneof(
+  fc.constantFrom(numLit("0.5"), numLit("2"), numLit("3"), numLit("1.25")),
+  fc.constantFrom(ref("N"), ref("M")),
+);
+
+const numAst: fc.Arbitrary<Expr> = fc.letrec<{ node: Expr }>((tie) => ({
+  node: fc.oneof(
+    { maxDepth: 3, depthSize: "small" },
+    numLeaf,
+    fc.tuple(tie("node"), tie("node")).map(([a, b]) => bin("+", a, b)),
+    fc.tuple(tie("node"), tie("node")).map(([a, b]) => bin("*", a, b)),
+    // Exponents stay small literals or a foldable sum, so `^` hits both its
+    // folded and runtime paths without unbounded BigInt work.
+    fc
+      .tuple(
+        tie("node"),
+        fc.constantFrom<Expr>(
+          numLit("2"),
+          numLit("100"),
+          bin("+", numLit("1"), numLit("1")),
+        ),
+      )
+      .map(([a, b]): Expr => bin("^", { kind: "Paren", expr: a, span: S }, b)),
+    tie("node").map((x): Expr => ({ kind: "Paren", expr: x, span: S })),
+    fc
+      .tuple(boolLeaf, tie("node"), tie("node"))
+      .map(([c, a, b]) => call("IF", c, a, b)),
+    tie("node").map((x) => call("TEXT", x)),
+  ),
+})).node;
+
+/** Evaluate, treating an UnsupportedError refusal as its own outcome kind. */
+function evalOutcome(ast: Expr, env: Parameters<typeof evaluateFormula>[1]) {
+  try {
+    return evaluateFormula(ast, env);
+  } catch {
+    return "unsupported" as const;
+  }
+}
+
 describe("simplifier: rule-7 property — rewrites preserve engine semantics", () => {
+  it("numeric rewrites preserve TEXT()/^ results over random inputs", () => {
+    fc.assert(
+      fc.property(numAst, envArb, (ast, env) => {
+        const simplified = simplify(ast).ast;
+        const before = evalOutcome(ast, env);
+        const after = evalOutcome(simplified, env);
+        const agree =
+          before === "unsupported" || after === "unsupported"
+            ? before === after
+            : sameResult(before, after);
+        if (!agree) {
+          throw new Error(
+            `rewrite changed behavior\n  original:   ${formatExpr(ast)}\n` +
+              `  simplified: ${formatExpr(simplified)}\n` +
+              `  env: ${JSON.stringify([...env.fields], null, 0)} mode=${env.blankMode}\n` +
+              `  before=${JSON.stringify(before)} after=${JSON.stringify(after)}`,
+          );
+        }
+      }),
+      { numRuns: 500 },
+    );
+  });
+
   it("original and simplified agree over random inputs, blanks, both modes", () => {
     fc.assert(
       fc.property(boolAst, envArb, (ast, env) => {

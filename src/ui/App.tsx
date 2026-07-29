@@ -191,10 +191,7 @@ export function App() {
           </Suspense>
         )}
 
-        <ProblemsPanel
-          source={source}
-          diagnostics={diagnostics}
-        />
+        <ProblemsPanel source={source} diagnostics={diagnostics} />
       </div>
 
       <footer

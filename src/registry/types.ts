@@ -29,6 +29,12 @@ export type ContextId = string;
 export interface ParamSpec {
   readonly name: string;
   readonly type: SfType;
+  /**
+   * Additional accepted families beyond `type`, for params that genuinely
+   * take unrelated types (DATEVALUE: text or a datetime). The checker accepts
+   * an argument assignable to any listed type.
+   */
+  readonly altTypes?: readonly SfType[];
   /** A variadic tail param absorbs all remaining arguments. */
   readonly variadic?: boolean;
   readonly optional?: boolean;
@@ -93,10 +99,7 @@ export interface GlobalSpec {
  * generic `#Error!` outcome in that case.
  */
 export type RuntimeErrorBehavior =
-  | "error_value"
-  | "blocks_save"
-  | "blocks_submit"
-  | "null_result";
+  "error_value" | "blocks_save" | "blocks_submit" | "null_result";
 
 export interface FormulaContext {
   readonly id: ContextId;

@@ -87,17 +87,52 @@ function walkBinary(
       walk(node.left, "Text");
       walk(node.right, "Text");
       return;
+    case "&&":
+    case "||":
+      walk(node.left, "Boolean");
+      walk(node.right, "Boolean");
+      return;
     case "<":
     case "<=":
     case ">":
     case ">=":
-      walk(node.left, "Number");
-      walk(node.right, "Number");
+      // No single expected type applies to both sides (Name < "M" vs.
+      // CloseDate > TODAY() vs. Amount > 100): infer each operand from what
+      // its sibling concretely is, rather than assuming Number.
+      walk(node.left, orderingHint(node.right));
+      walk(node.right, orderingHint(node.left));
       return;
     default:
       // Equality: operands can be anything; no strong signal.
       walk(node.left, "Unknown");
       walk(node.right, "Unknown");
+  }
+}
+
+/**
+ * Type hint an ordering-comparison operand takes from its sibling: a literal
+ * pins the type outright, and a call to a function with a fixed (non-dynamic,
+ * e.g. not `sameAsArg`) return type pins it too. Anything else carries no
+ * signal — "Unknown" defers to the form's default, never a guessed Number.
+ */
+function orderingHint(sibling: Expr): SfType {
+  let node = sibling;
+  while (node.kind === "Paren") {
+    node = node.expr;
+  }
+  switch (node.kind) {
+    case "StringLit":
+      return "Text";
+    case "NumberLit":
+      return "Number";
+    case "FunctionCall": {
+      const spec = getFunction(node.callee);
+      return spec && spec.returnType.kind === "fixed"
+        ? spec.returnType.type
+        : "Unknown";
+    }
+    default:
+      return "Unknown";
   }
 }
 

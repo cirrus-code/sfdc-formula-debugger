@@ -1,5 +1,4 @@
 import type { Span } from "./span.ts";
-import type { Trivia } from "./token.ts";
 
 /**
  * Discriminated-union AST for Salesforce formulas. Every node carries a `span`,
@@ -33,20 +32,8 @@ export type BinaryOperator =
 /** `NOT`/`AND`/`OR` are functions in Salesforce; the only prefix operators are sign. */
 export type UnaryOperator = "-" | "+";
 
-/**
- * Comments attached to a node for the formatter. The formatter computes
- * attachment in a side table (keeping the AST immutable), so this optional slot
- * is unused today; its shape is fixed so the type stays stable if a future pass
- * wants to carry comments on the node itself.
- */
-export interface NodeComments {
-  readonly leading: readonly Trivia[];
-  readonly trailing: readonly Trivia[];
-}
-
 interface NodeBase {
   readonly span: Span;
-  readonly comments?: NodeComments;
 }
 
 export interface NumberLit extends NodeBase {
@@ -137,4 +124,28 @@ export type NodeKind = Expr["kind"];
  */
 export function assertNever(x: never): never {
   throw new Error(`Unhandled AST node: ${JSON.stringify(x)}`);
+}
+
+/** Direct child expressions of a node, in source order. */
+export function childrenOf(node: Expr): readonly Expr[] {
+  switch (node.kind) {
+    case "FunctionCall":
+      return node.args;
+    case "BinaryOp":
+      return [node.left, node.right];
+    case "UnaryOp":
+      return [node.operand];
+    case "Paren":
+      return [node.expr];
+    default:
+      return [];
+  }
+}
+
+/** Pre-order traversal: `visit` sees each node before its children. */
+export function visitExpr(node: Expr, visit: (n: Expr) => void): void {
+  visit(node);
+  for (const child of childrenOf(node)) {
+    visitExpr(child, visit);
+  }
 }

@@ -383,7 +383,7 @@ describe("engine: ported functions (corpus-verified)", () => {
   });
 });
 
-describe("engine: ^ semantics (org-verified, wave-4/5 bisects)", () => {
+describe("engine: ^ semantics (org-verified, pw* probe bisects)", () => {
   it("computes exact integer powers up to the 1e64 result cap", () => {
     expect(s("TEXT(10 ^ 64)")).toBe(`1${"0".repeat(64)}`);
     expect(s("TEXT(10 ^ 61)")).toBe(`1${"0".repeat(61)}`);
@@ -492,7 +492,7 @@ describe("engine: ^ semantics (org-verified, wave-4/5 bisects)", () => {
     ).toBe(true);
   });
 
-  it("applies the org's flush, precision, and rounding rules (wave 8)", () => {
+  it("applies the org's flush, precision, and rounding rules (pw8_* probes)", () => {
     // Folded deep fractions keep all 18 digits down to the 39-place
     // rounding line (pw8_flush bisect)…
     expect(s("TEXT(0.5 ^ 120)")).toBe(
@@ -572,7 +572,9 @@ describe("engine: encode family (org-verified via flow interviews, fv_* probes)"
   };
 
   it("HTMLENCODE emits the org's entity set (fv_htmlencode)", () => {
-    expect(textOf(ev(`HTMLENCODE('<a> & "b"')`))).toBe("&lt;a&gt; &amp; &quot;b&quot;");
+    expect(textOf(ev(`HTMLENCODE('<a> & "b"')`))).toBe(
+      "&lt;a&gt; &amp; &quot;b&quot;",
+    );
     expect(textOf(ev(`HTMLENCODE("it's")`))).toBe("it&#39;s");
   });
 
@@ -587,6 +589,121 @@ describe("engine: encode family (org-verified via flow interviews, fv_* probes)"
   });
 
   it("URLENCODE matches Java URLEncoder on the probed characters (fv_urlencode)", () => {
-    expect(textOf(ev(`URLENCODE("a b&c/d?e=f+g")`))).toBe("a+b%26c%2Fd%3Fe%3Df%2Bg");
+    expect(textOf(ev(`URLENCODE("a b&c/d?e=f+g")`))).toBe(
+      "a+b%26c%2Fd%3Fe%3Df%2Bg",
+    );
+  });
+});
+
+describe("engine: VALUE/ISNUMBER reject non-decimal syntax", () => {
+  // decimal.js's constructor accepts these; the product's number grammar
+  // does not — they must error/false, never become values.
+  it("rejects NaN, Infinity, and radix-prefixed strings", () => {
+    for (const bad of [
+      '"NaN"',
+      '"Infinity"',
+      '"-Infinity"',
+      '"0xff"',
+      '"0b101"',
+      '"0o17"',
+    ]) {
+      expect(isError(ev(`VALUE(${bad})`))).toBe(true);
+      expect(b(`ISNUMBER(${bad})`)).toBe(false);
+    }
+  });
+
+  it("keeps the corpus-verified accepted and rejected forms", () => {
+    for (const good of [
+      '"1."',
+      '".1"',
+      '"+1."',
+      '"1.e+1"',
+      '".1e-1"',
+      '"123.4512345e2"',
+    ]) {
+      expect(b(`ISNUMBER(${good})`)).toBe(true);
+    }
+    for (const bad of [
+      '"--1234"',
+      '"1-234"',
+      '"-1.2.34"',
+      '"-"',
+      '".."',
+      '"1..1"',
+      '"."',
+    ]) {
+      expect(b(`ISNUMBER(${bad})`)).toBe(false);
+    }
+  });
+});
+
+describe("engine: early years survive epoch round-trips (no Date.UTC remap)", () => {
+  it("keeps DATE(50,…) arithmetic in year 50, not 1950", () => {
+    expect(s("TEXT(DATE(50, 1, 1) + 1)")).toBe("0050-01-02");
+    expect(n("YEAR(DATE(50, 1, 1) + 0)")).toBe("50");
+    expect(n("YEAR(ADDMONTHS(DATE(50, 1, 1), 1))")).toBe("50");
+  });
+
+  it("reads a four-digit sub-100 year in DATETIMEVALUE", () => {
+    expect(n('YEAR(DATEVALUE(DATETIMEVALUE("0050-01-01 12:00:00")))')).toBe(
+      "50",
+    );
+  });
+});
+
+describe("engine: out-of-range temporal results are simulated errors", () => {
+  it("errors instead of yielding NaN or impossible years", () => {
+    expect(isError(ev("DATE(2020, 1, 1) + 400000000"))).toBe(true);
+    expect(isError(ev("DATE(2020, 1, 1) - 800000"))).toBe(true);
+    expect(isError(ev("DATE(2020, 1, 1) + 4000000"))).toBe(true);
+    expect(isError(ev("NOW() + 400000000"))).toBe(true);
+    expect(isError(ev("ADDMONTHS(DATE(1, 1, 1), -1)"))).toBe(true);
+    expect(isError(ev("ADDMONTHS(DATE(9999, 12, 1), 2)"))).toBe(true);
+    expect(isError(ev("FROMUNIXTIME(99999999999999)"))).toBe(true);
+  });
+
+  it("still computes in-range results", () => {
+    expect(s("TEXT(DATE(2020, 1, 1) + 31)")).toBe("2020-02-01");
+    expect(s("TEXT(ADDMONTHS(DATE(2020, 1, 31), 1))")).toBe("2020-02-29");
+  });
+});
+
+describe("engine: ADDMONTHS preserves Datetime type and time-of-day", () => {
+  // Oracle-verified (testAddMonthsDateTime): 2004-12-31 11:32 + 3 months is
+  // 2005-03-31 11:32 — a Datetime, not a truncated Date.
+  it("keeps the time on a Datetime input", () => {
+    expect(s('TEXT(ADDMONTHS(DATETIMEVALUE("2004-12-31 11:32:00"), 3))')).toBe(
+      "2005-03-31 11:32:00Z",
+    );
+  });
+
+  it("keeps the org-verified month-end clamp on Date inputs", () => {
+    expect(s("TEXT(ADDMONTHS(DATE(2021, 2, 28), 1))")).toBe("2021-03-31");
+    expect(s("TEXT(ADDMONTHS(DATE(2021, 1, 30), 1))")).toBe("2021-02-28");
+  });
+});
+
+describe("engine: typeless blanks propagate through arithmetic in blank mode", () => {
+  it("treats NULL and unsupplied fields like typed blank fields", () => {
+    for (const src of [
+      "NULL + 1",
+      "1 + NULL",
+      "NULL * 5",
+      "Missing__c + 1",
+      "CASE(1, 2, 3) + 1",
+    ]) {
+      const r = ev(src, { blankMode: "blank" });
+      expect(isError(r)).toBe(false);
+      expect((r as SfValue).blank).toBe(true);
+    }
+    // Consistent with the unary branch, and unchanged in zero mode.
+    expect((ev("-NULL", { blankMode: "blank" }) as SfValue).blank).toBe(true);
+    expect(n("NULL + 1", { blankMode: "zero" })).toBe("1");
+  });
+});
+
+describe("engine: POWER refuses simulation (unverified against ^)", () => {
+  it("throws UnsupportedError rather than guessing", () => {
+    expect(() => ev("POWER(2, 3)")).toThrow(UnsupportedError);
   });
 });

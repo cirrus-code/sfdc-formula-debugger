@@ -3,6 +3,7 @@ import { simplifySource } from "../../features/simplifier.ts";
 import { t } from "../../i18n/index.ts";
 import { palette } from "../../theme/theme.ts";
 import { Panel } from "../Panel.tsx";
+import { hasComments as sourceHasComments } from "./comments.ts";
 
 interface SimplifyPanelProps {
   readonly source: string;
@@ -23,7 +24,7 @@ export function SimplifyPanel({ source, onApply }: SimplifyPanelProps) {
 
   // The simplified output is comment-free; refuse to silently destroy the
   // user's comments on Apply (comments must survive every transformation).
-  const hasComments = source.includes("/*");
+  const hasComments = sourceHasComments(source);
 
   return (
     <Panel

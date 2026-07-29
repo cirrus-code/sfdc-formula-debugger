@@ -12,7 +12,22 @@ import type { SfType } from "../../registry/index.ts";
 import { localizedContextRuntimeErrorNote, t } from "../../i18n/index.ts";
 import { palette, syntax, font } from "../../theme/theme.ts";
 import { Panel } from "../Panel.tsx";
-import { buildFieldValue, FIELD_TYPES, renderResult } from "./fieldValue.ts";
+import {
+  buildFieldValue,
+  classifyResult,
+  FIELD_TYPES,
+  type ResultOutcome,
+} from "./fieldValue.ts";
+
+/**
+ * The simulation's evaluation outcome: a typed discriminant carried alongside
+ * the display text so a formula that legitimately evaluates to the text
+ * "#Error!" is never confused with a genuine runtime FormulaError (both would
+ * otherwise render the identical string).
+ */
+type Outcome =
+  | ResultOutcome
+  | { readonly kind: "unsupported"; readonly functionName: string };
 
 interface FieldInput {
   readonly type: SfType;
@@ -87,7 +102,7 @@ export function SimulatePanel({
     }));
   };
 
-  const outcome = useMemo(() => {
+  const outcome = useMemo((): Outcome => {
     const map = new Map<string, SfValue>();
     for (const f of fields) {
       const input = inputs[f.name] ?? {
@@ -98,18 +113,16 @@ export function SimulatePanel({
       map.set(f.name, buildFieldValue(input.type, input.value, input.blank));
     }
     try {
-      return {
-        result: renderResult(
-          evaluateFormula(ast, { fields: map, blankMode, now }),
-        ),
-      };
+      return classifyResult(
+        evaluateFormula(ast, { fields: map, blankMode, now }),
+      );
     } catch (e) {
       // evaluateFormula only throws UnsupportedError; anything else already
-      // degraded to #Error inside it.
+      // degraded to a FormulaError inside it.
       if (e instanceof UnsupportedError) {
-        return { unsupported: e.functionName };
+        return { kind: "unsupported", functionName: e.functionName };
       }
-      return { result: "#Error!" };
+      return { kind: "error", text: "#Error!" };
     }
   }, [ast, fields, inputs, blankMode, now]);
 
@@ -216,7 +229,7 @@ export function SimulatePanel({
         ) : null}
       </ResultBar>
 
-      {outcome.result === "#Error!" && runtimeErrorNote ? (
+      {outcome.kind === "error" && runtimeErrorNote ? (
         <p
           style={{
             padding: "0 1rem 0.7rem",
@@ -320,42 +333,52 @@ function FieldWidget({
           ? "decimal"
           : undefined
       }
-      placeholder={
-        input.type === "Date" ? "" : t().ui.simulate.valuePlaceholder
-      }
+      placeholder={placeholderFor(input.type)}
       onChange={(e) => onChange({ value: e.target.value })}
       style={inputStyle}
     />
   );
 }
 
-function resultLabel(outcome: {
-  result?: string;
-  unsupported?: string;
-}): string {
-  if (outcome.unsupported) {
-    return t().ui.simulate.cannotSimulate(outcome.unsupported);
+/** Format-template placeholders are formula-language tokens, not prose. */
+function placeholderFor(type: SfType): string {
+  switch (type) {
+    case "Date":
+      return "";
+    case "Time":
+      return "HH:MM:SS";
+    case "Datetime":
+      return "YYYY-MM-DD HH:MM:SS";
+    default:
+      return t().ui.simulate.valuePlaceholder;
   }
-  if (outcome.result === "#Error!") {
-    return t().ui.simulate.errorResult;
+}
+
+function resultLabel(outcome: Outcome): string {
+  switch (outcome.kind) {
+    case "unsupported":
+      return t().ui.simulate.cannotSimulate(outcome.functionName);
+    case "error":
+      return t().ui.simulate.errorResult;
+    case "value":
+      return outcome.text;
   }
-  return outcome.result ?? "";
 }
 
 function ResultBar({
   outcome,
   children,
 }: {
-  outcome: { result?: string; unsupported?: string };
+  outcome: Outcome;
   children?: ReactNode;
 }) {
   const label = resultLabel(outcome);
   let led = "led--ok";
   let color: string = palette.text;
-  if (outcome.unsupported) {
+  if (outcome.kind === "unsupported") {
     led = "led--warn";
     color = palette.textMuted;
-  } else if (outcome.result === "#Error!") {
+  } else if (outcome.kind === "error") {
     led = "led--err";
     color = palette.danger;
   }

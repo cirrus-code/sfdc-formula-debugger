@@ -1,6 +1,8 @@
 import {
   astEqual,
+  childrenOf,
   parse,
+  visitExpr,
   type BinaryOp,
   type Expr,
   type FunctionCall,
@@ -9,6 +11,7 @@ import {
 import {
   evaluateFormula,
   isError,
+  isFoldedNumericLiteral,
   UnsupportedError,
   type SfValue,
 } from "../engine/index.ts";
@@ -76,7 +79,7 @@ export function simplify(root: Expr): SimplifyResult {
     steps.push({
       rule: "redundant-parens",
       title: t().simplifier.redundantParens.title,
-      detail: oneLine(deparened),
+      detail: `${oneLine(root)}  →  ${oneLine(deparened)}`,
       before: formatExpr(root),
       after: formatExpr(deparened),
     });
@@ -86,7 +89,7 @@ export function simplify(root: Expr): SimplifyResult {
   // Each rule strictly decreases node count, so this terminates; the cap is a
   // belt-and-braces guard against a future non-decreasing rule.
   for (let i = 0; i < 200; i++) {
-    const rewritten = rewriteOnce(current);
+    const rewritten = rewriteOnce(current, false);
     if (!rewritten) {
       break;
     }
@@ -249,21 +252,6 @@ function countParens(node: Expr): number {
   return n;
 }
 
-function childrenOf(node: Expr): readonly Expr[] {
-  switch (node.kind) {
-    case "FunctionCall":
-      return node.args;
-    case "BinaryOp":
-      return [node.left, node.right];
-    case "UnaryOp":
-      return [node.operand];
-    case "Paren":
-      return [node.expr];
-    default:
-      return [];
-  }
-}
-
 /**
  * Drop every Paren node the formatter would not re-insert: parens at the root,
  * around function arguments, and where operator precedence already binds the
@@ -310,9 +298,19 @@ interface Rewrite {
   readonly detail: string;
 }
 
-/** Apply the first matching rule anywhere in the tree (self before children). */
-function rewriteOnce(node: Expr): Rewrite | null {
-  const local = applyRules(node);
+/**
+ * Apply the first matching rule anywhere in the tree (self before children).
+ *
+ * `foldSensitive` marks positions whose *syntactic* literal-ness the engine
+ * evaluates differently: TEXT()'s argument and `^` operands go down a
+ * distinct compile-time path when they are literal-shaped (see
+ * isFoldedNumericLiteral). A rewrite there must not change that shape, or an
+ * equivalence-preserving rule would change the simulated value — e.g.
+ * folding `(1 + 1) ^ 100` to `2 ^ 100` moves it from the exact runtime path
+ * to the 18-significant-digit folded path.
+ */
+function rewriteOnce(node: Expr, foldSensitive: boolean): Rewrite | null {
+  const local = applyRules(node, foldSensitive);
   if (local) {
     return {
       ...local,
@@ -321,12 +319,34 @@ function rewriteOnce(node: Expr): Rewrite | null {
   }
   const kids = childrenOf(node);
   for (let i = 0; i < kids.length; i++) {
-    const r = rewriteOnce(kids[i]!);
+    const r = rewriteOnce(
+      kids[i]!,
+      childFoldSensitivity(node, i, foldSensitive),
+    );
     if (r) {
       return { ...r, node: replaceChild(node, i, r.node) };
     }
   }
   return null;
+}
+
+/** Whether child `index` of `node` sits in a foldedness-sensitive position. */
+function childFoldSensitivity(
+  node: Expr,
+  index: number,
+  own: boolean,
+): boolean {
+  if (node.kind === "BinaryOp" && node.op === "^") {
+    return true;
+  }
+  if (isCall(node, "TEXT") && index === 0) {
+    return true;
+  }
+  // isFoldedNumericLiteral looks through parens, so sensitivity does too.
+  if (node.kind === "Paren") {
+    return own;
+  }
+  return false;
 }
 
 function replaceChild(parent: Expr, index: number, child: Expr): Expr {
@@ -363,12 +383,22 @@ const RULES: readonly Rule[] = [
   dropRedundantArgs,
 ];
 
-function applyRules(node: Expr): Omit<Rewrite, "detail"> | null {
+function applyRules(
+  node: Expr,
+  foldSensitive: boolean,
+): Omit<Rewrite, "detail"> | null {
   for (const rule of RULES) {
     const r = rule(node);
-    if (r) {
-      return r;
+    if (!r) {
+      continue;
     }
+    if (
+      foldSensitive &&
+      isFoldedNumericLiteral(node) !== isFoldedNumericLiteral(r.node)
+    ) {
+      continue;
+    }
+    return r;
   }
   return null;
 }
@@ -735,7 +765,7 @@ function collectSuggestions(root: Expr): readonly SimplifySuggestion[] {
   // An IF that is part of an already-suggested chain must not re-suggest its
   // own tail as a shorter CASE.
   const consumedChainLinks = new Set<Expr>();
-  visit(root, (node) => {
+  visitExpr(root, (node) => {
     suggestDeMorgan(node, out);
     suggestAnnihilator(node, out);
     suggestBooleanIf(node, out);
@@ -743,13 +773,6 @@ function collectSuggestions(root: Expr): readonly SimplifySuggestion[] {
     suggestCaseChain(node, out, consumedChainLinks);
   });
   return out;
-}
-
-function visit(node: Expr, f: (n: Expr) => void): void {
-  f(node);
-  for (const c of childrenOf(node)) {
-    visit(c, f);
-  }
 }
 
 /** De Morgan direction that would shorten: all-negated AND/OR operands. */
@@ -817,15 +840,22 @@ function suggestBooleanIf(node: Expr, out: SimplifySuggestion[]): void {
     return;
   }
   const [cond, thenB, elseB] = node.args as [Expr, Expr, Expr];
-  if (
-    isBoolLit(thenB, true) &&
-    isBoolLit(elseB, false) &&
-    !nonBlankBoolean(cond)
-  ) {
+  if (nonBlankBoolean(cond)) {
+    return;
+  }
+  if (isBoolLit(thenB, true) && isBoolLit(elseB, false)) {
     out.push({
       rule: "boolean-shaped-if",
       span: node.span,
       message: t().simplifier.booleanShapedIf.suggestion(oneLine(cond)),
+    });
+  } else if (isBoolLit(thenB, false) && isBoolLit(elseB, true)) {
+    out.push({
+      rule: "boolean-shaped-if",
+      span: node.span,
+      message: t().simplifier.booleanShapedIf.suggestion(
+        `NOT(${oneLine(cond)})`,
+      ),
     });
   }
 }

@@ -5,7 +5,7 @@ import { FUNCTIONS } from "./functions.ts";
 
 /**
  * Registry availability vs the org-verified per-context matrix
- * (corpus/org-availability.json, produced by orgcheck's wave-2 pass): every
+ * (corpus/org-availability.json, produced by orgcheck's per-context pass): every
  * conclusive org verdict must agree with the registry's `contexts` data and
  * each context's declared globals.
  *

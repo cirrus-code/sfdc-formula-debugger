@@ -16,7 +16,7 @@ import {
   asText,
   type SfValue,
 } from "./value.ts";
-import { concatString } from "./builtins.ts";
+import { concatString, epochOfDate } from "./builtins.ts";
 
 /**
  * Conformance comparison of our evaluator against an oracle corpus row
@@ -168,7 +168,10 @@ function buildTemporal(type: "Date" | "Datetime", value: string): SfValue {
   }
   const [y, mo, d, hh, mi, ss] = m.slice(1, 7).map((x) => Number(x ?? 0));
   const offsetHours = m[7] === "PST" ? 8 : 0;
-  const epoch = Date.UTC(y, mo - 1, d, hh + offsetHours, mi, ss);
+  // epochOfDate, not Date.UTC — the latter remaps years 0-99 to the 1900s.
+  const epoch =
+    epochOfDate({ year: y, month: mo, day: d }) +
+    (((hh + offsetHours) * 60 + mi) * 60 + ss) * 1000;
   if (type === "Datetime") {
     return datetimeValue(epoch);
   }
@@ -242,14 +245,16 @@ function compare(
     case "datetime":
     case "timeonly": {
       // The oracle renders temporals Java-style ("Tue Nov 15 17:00:00 GMT
-      // 2005"); those rows stay incomparable (quarantine, as before). Rows
-      // rendered in our own shapes — ISO dates, GMT "…Z" datetimes,
-      // LocalTime-style times (exactly the org-tier encodings) — compare.
+      // 2005"); those rows are incomparable (quarantine). Rows rendered in
+      // our own shapes — ISO dates, GMT "…Z" datetimes, LocalTime-style
+      // times (exactly the org-tier encodings) — compare.
       if (/^[A-Z][a-z]{2} [A-Z][a-z]{2} /.test(expected)) {
         return { status: "quarantine" };
       }
       const rendered =
-        result.type === "Date" || result.type === "Datetime" || result.type === "Time"
+        result.type === "Date" ||
+        result.type === "Datetime" ||
+        result.type === "Time"
           ? concatString(result)
           : null;
       return {

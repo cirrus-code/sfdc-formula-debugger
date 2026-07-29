@@ -15,10 +15,6 @@ export function isNumeric(t: SfType): boolean {
   return NUMERIC.has(t);
 }
 
-export function isTextish(t: SfType): boolean {
-  return TEXTISH.has(t);
-}
-
 export function isDatelike(t: SfType): boolean {
   return DATELIKE.has(t);
 }
@@ -35,6 +31,13 @@ export function isAssignable(actual: SfType, expected: SfType): boolean {
     return true;
   }
   if (TEXTISH.has(actual) && TEXTISH.has(expected)) {
+    return true;
+  }
+  // The evaluator reads the GMT date out of a Datetime wherever a Date is
+  // wanted (YEAR(NOW()), ADDMONTHS(datetime, n) — oracle-verified,
+  // testIsoWeekWithDateTime and kin). One-directional: a Date supplies no
+  // time, and Time stays incompatible with both.
+  if (actual === "Datetime" && expected === "Date") {
     return true;
   }
   return false;

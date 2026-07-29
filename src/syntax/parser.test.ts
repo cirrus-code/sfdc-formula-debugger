@@ -41,9 +41,29 @@ describe("parser: literals", () => {
     expect(expectClean("0.1")).toMatchObject({ kind: "NumberLit", raw: "0.1" });
   });
 
-  it("decodes string escapes", () => {
+  it('collapses only the \\\\ and \\" escapes', () => {
+    // Oracle-verified decode table (VERIFICATION.md, string escapes): the
+    // grammar accepts nine escapes but the engine collapses exactly two.
     expect(ast('"a\\"b"')).toMatchObject({ value: 'a"b' });
-    expect(ast('"line\\nbreak"')).toMatchObject({ value: "line\nbreak" });
+    expect(ast("'a\\\"b'")).toMatchObject({ value: 'a"b' });
+    expect(ast('"C:\\\\path"')).toMatchObject({ value: "C:\\path" });
+    expect(ast('"\\\\"')).toMatchObject({ value: "\\" });
+  });
+
+  it("keeps every other accepted escape as literal characters", () => {
+    // \n is backslash-n (LEN 4 in the product), never a newline.
+    expect(ast('"line\\nbreak"')).toMatchObject({ value: "line\\nbreak" });
+    expect(ast('"a\\tb"')).toMatchObject({ value: "a\\tb" });
+    expect(ast('"a\\Nb"')).toMatchObject({ value: "a\\Nb" });
+    // \' keeps its backslash in BOTH quote styles (LEN('a\'b') = 4).
+    expect(ast('"a\\\'b"')).toMatchObject({ value: "a\\'b" });
+    expect(ast("'a\\'b'")).toMatchObject({ value: "a\\'b" });
+  });
+
+  it("diagnoses escapes the product grammar rejects", () => {
+    expect(codes('"a\\qb"')).toEqual(["invalid-escape"]);
+    // Still recovers: the string parses and keeps the sequence verbatim.
+    expect(ast('"a\\qb"')).toMatchObject({ value: "a\\qb" });
   });
 });
 
@@ -233,6 +253,46 @@ describe("parser: error recovery", () => {
   it("suppresses cascading errors inside an error region", () => {
     // A single bad token should not spray diagnostics across the whole formula.
     expect(codes("@").length).toBeLessThanOrEqual(2);
+  });
+
+  it("reports a trailing comma as a missing argument", () => {
+    // Variadic callees make this reachable with zero other diagnostics, so a
+    // silent swallow would simulate a formula the user did not write.
+    for (const src of ["AND(a, b,)", "OR(a,)", "IF(a, b,)"]) {
+      const { ast, diagnostics } = parse(src);
+      const call = ast as FunctionCall;
+      expect(call.kind).toBe("FunctionCall");
+      expect(call.args.at(-1)!.kind).toBe("ErrorNode");
+      expect(diagnostics.map((d) => d.code)).toContain("expected-expression");
+    }
+    // The diagnostic points at the hole right after the comma.
+    const { diagnostics } = parse("OR(a,)");
+    const d = diagnostics.find((x) => x.code === "expected-expression")!;
+    expect(d.span).toEqual({ start: 5, end: 5 });
+  });
+
+  it("keeps zero-argument calls diagnostic-free", () => {
+    expect(expectClean("TODAY()")).toMatchObject({
+      kind: "FunctionCall",
+      args: [],
+    });
+  });
+
+  it("cuts off pathological nesting instead of overflowing the stack", () => {
+    for (const src of [
+      "(".repeat(5000) + "1",
+      "-".repeat(5000) + "1",
+      "IF(".repeat(2000) + "1",
+    ]) {
+      expect(() => parse(src)).not.toThrow();
+      const { ast, diagnostics } = parse(src);
+      expect(ast).toBeTruthy();
+      expect(
+        diagnostics.filter((d) => d.code === "nesting-too-deep"),
+      ).toHaveLength(1);
+    }
+    // Realistic nesting is untouched.
+    expect(expectClean("(".repeat(50) + "1" + ")".repeat(50))).toBeTruthy();
   });
 });
 

@@ -1,13 +1,14 @@
-// Wave 2: compile the per-context availability matrix into deployable
-// metadata fragments.
+// Compile the per-context availability matrix into deployable metadata
+// fragments.
 //
 //   src/registry/functions.ts (the one registry) + probes/contexts.json
 //     → ctx-plan.json   (component fragments + batches; collect-ctx composes
 //                        per-round packages from them)
 //     → data-ctx.apex   (runtime validation-rule probe records)
 //
-// Unlike wave 1, no formula field is ever read back here: each probe is one
-// metadata component per (construct × context container), and the deploy
+// Unlike the value probes (generate.ts), no formula field is ever read back
+// here: each probe is one metadata component per (construct × context
+// container), and the deploy
 // accept/reject — with its message — IS the observation. Containers that can
 // reference record fields get typed input fields as arguments (no helper
 // taint); detached containers (default value, flow, quick action, email) fall
@@ -73,7 +74,10 @@ const LITERALS: Partial<Record<SfType, { src: string; taint: string[] }>> = {
   Text: { src: '"a"', taint: [] },
   Boolean: { src: "TRUE", taint: [] },
   Date: { src: "DATE(2026, 1, 1)", taint: ["DATE"] },
-  Datetime: { src: 'DATETIMEVALUE("2026-01-01 00:00:00")', taint: ["DATETIMEVALUE"] },
+  Datetime: {
+    src: 'DATETIMEVALUE("2026-01-01 00:00:00")',
+    taint: ["DATETIMEVALUE"],
+  },
   Time: { src: 'TIMEVALUE("12:00:00")', taint: ["TIMEVALUE"] },
   Unknown: { src: '"a"', taint: [] },
 };
@@ -215,10 +219,7 @@ function fieldChild(
     lines.push(`        <length>255</length>`);
   }
   if (type === "Number") {
-    lines.push(
-      `        <precision>18</precision>`,
-      `        <scale>2</scale>`,
-    );
+    lines.push(`        <precision>18</precision>`, `        <scale>2</scale>`);
   }
   lines.push(`        <type>${type}</type>`);
   if (type === "Checkbox" && defaultValue === undefined) {
@@ -782,7 +783,6 @@ function hostFor(objects: string[], index: number, perObject: number): string {
   return objects[Math.min(Math.floor(index / perObject), objects.length - 1)];
 }
 
-
 // --- formula_field: typed formula CustomFields, field-capable, no wrapper ---
 
 {
@@ -853,9 +853,10 @@ function hostFor(objects: string[], index: number, perObject: number): string {
       childXml: `    <fields>\n${typeLines.join("\n")}\n    </fields>`,
     };
     addComponent(c);
-    (p.kind === "canary_ok" || p.kind === "canary_bogus" ? canary : matrix).push(
-      c.id,
-    );
+    (p.kind === "canary_ok" || p.kind === "canary_bogus"
+      ? canary
+      : matrix
+    ).push(c.id);
   }
   pushBatches(container, { canary, matrix });
 }
@@ -865,7 +866,12 @@ function hostFor(objects: string[], index: number, perObject: number): string {
 function booleanContainer(
   container: CtxContainerId,
   objects: string[],
-  emit: (host: string, name: string, formula: string, p: ProbeInput) => CtxComponent,
+  emit: (
+    host: string,
+    name: string,
+    formula: string,
+    p: ProbeInput,
+  ) => CtxComponent,
 ): void {
   const canary: string[] = [];
   const matrix: string[] = [];
@@ -895,9 +901,10 @@ function booleanContainer(
     const name = probeName(p.id);
     const c = { ...emit(host, name, formula, p), taint };
     addComponent(c);
-    (p.kind === "canary_ok" || p.kind === "canary_bogus" ? canary : matrix).push(
-      c.id,
-    );
+    (p.kind === "canary_ok" || p.kind === "canary_bogus"
+      ? canary
+      : matrix
+    ).push(c.id);
   }
   pushBatches(container, { canary, matrix });
 }
@@ -1025,9 +1032,10 @@ approvalContainer("approval_step", ["FxCtxA3__c", "FxCtxA4__c"]);
       childXml: fieldUpdateChild(name, target, formula),
     };
     addComponent(c);
-    (p.kind === "canary_ok" || p.kind === "canary_bogus" ? canary : matrix).push(
-      c.id,
-    );
+    (p.kind === "canary_ok" || p.kind === "canary_bogus"
+      ? canary
+      : matrix
+    ).push(c.id);
   }
   pushBatches(container, { canary, matrix });
 }
@@ -1095,9 +1103,10 @@ approvalContainer("approval_step", ["FxCtxA3__c", "FxCtxA4__c"]);
       childXml: fieldChild(apiName, fieldType, formula),
     };
     addComponent(c);
-    (p.kind === "canary_ok" || p.kind === "canary_bogus" ? canary : matrix).push(
-      c.id,
-    );
+    (p.kind === "canary_ok" || p.kind === "canary_bogus"
+      ? canary
+      : matrix
+    ).push(c.id);
   }
   pushBatches(container, { canary, matrix });
 }
@@ -1150,9 +1159,10 @@ approvalContainer("approval_step", ["FxCtxA3__c", "FxCtxA4__c"]);
       xml: flowXml(name, formula, returns),
     };
     addComponent(c);
-    (p.kind === "canary_ok" || p.kind === "canary_bogus" ? canary : matrix).push(
-      c.id,
-    );
+    (p.kind === "canary_ok" || p.kind === "canary_bogus"
+      ? canary
+      : matrix
+    ).push(c.id);
   }
   pushBatches(container, { canary, matrix });
 }
@@ -1205,9 +1215,10 @@ approvalContainer("approval_step", ["FxCtxA3__c", "FxCtxA4__c"]);
       xml: quickActionXml(name, "FxCtxQ__c", target, formula),
     };
     addComponent(c);
-    (p.kind === "canary_ok" || p.kind === "canary_bogus" ? canary : matrix).push(
-      c.id,
-    );
+    (p.kind === "canary_ok" || p.kind === "canary_bogus"
+      ? canary
+      : matrix
+    ).push(c.id);
   }
   pushBatches(container, { canary, matrix });
 }
@@ -1251,9 +1262,10 @@ approvalContainer("approval_step", ["FxCtxA3__c", "FxCtxA4__c"]);
       childXml: webLinkChild(name, formula),
     };
     addComponent(c);
-    (p.kind === "canary_ok" || p.kind === "canary_bogus" ? canary : matrix).push(
-      c.id,
-    );
+    (p.kind === "canary_ok" || p.kind === "canary_bogus"
+      ? canary
+      : matrix
+    ).push(c.id);
   }
   pushBatches(container, { canary, matrix });
 }
@@ -1298,9 +1310,10 @@ approvalContainer("approval_step", ["FxCtxA3__c", "FxCtxA4__c"]);
       extraFiles: { [`email/unfiled$public/${name}.email`]: files.body },
     };
     addComponent(c);
-    (p.kind === "canary_ok" || p.kind === "canary_bogus" ? canary : matrix).push(
-      c.id,
-    );
+    (p.kind === "canary_ok" || p.kind === "canary_bogus"
+      ? canary
+      : matrix
+    ).push(c.id);
   }
   pushBatches(container, { canary, matrix });
 }
@@ -1482,9 +1495,7 @@ for (const fv of manifest.flowValueProbes) {
 batches.unshift({
   id: "support",
   phase: "support",
-  componentIds: components
-    .filter((c) => c.kind === "support")
-    .map((c) => c.id),
+  componentIds: components.filter((c) => c.kind === "support").map((c) => c.id),
 });
 batches.push({ id: "runtime", phase: "runtime", componentIds: runtimeIds });
 batches.push({
@@ -1616,7 +1627,9 @@ function approvalRunApex(): string {
     "// Base64 because the debug channel entity-encodes pipes and quotes, which",
     "// would corrupt the delimiter and the org's own error text.",
   ];
-  for (const o of new Set(manifest.approvalRuntimeProbes.map((p) => p.object))) {
+  for (const o of new Set(
+    manifest.approvalRuntimeProbes.map((p) => p.object),
+  )) {
     // Records locked by a pending approval refuse to delete; leftovers are
     // harmless because every verdict comes from this run's own submit result.
     lines.push(`Database.delete([SELECT Id FROM ${o} LIMIT 10000], false);`);
