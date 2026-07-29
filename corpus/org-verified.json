@@ -10942,5 +10942,88 @@
   ],
   "blankMode": "blank",
   "expected": ".00000000000040536215597144386832065866109"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw7_clamp_05_73#0",
+  "formula": "TEXT(0.5 ^ 73)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0.000000000000000000000105879118406787542"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw7_clamp_05_76#0",
+  "formula": "TEXT(0.5 ^ 76)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0.0000000000000000000000132348898008484428"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw7_recip_cap#0",
+  "formula": "TEXT(0.1 ^ -70)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw7_rt_bigsig#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "7"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "55"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw7_find_empty_needle#0",
+  "formula": "TEXT(FIND(\"\", \"abc\"))",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw7_find_empty_both#0",
+  "formula": "TEXT(FIND(\"\", \"\"))",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw7_value_empty#0",
+  "formula": "IF(ISBLANK(VALUE(\"\")), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "BLANKRESULT"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw7_value_space#0",
+  "formula": "IF(ISBLANK(VALUE(\" \")), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
  }
 ]

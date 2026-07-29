@@ -301,12 +301,15 @@ function arithmetic(
  * numeric literals — see isFoldedNumericLiteral):
  *
  * FOLDED, b ≥ 0: the exact value rounded to 18 SIGNIFICANT digits, HALF_UP —
- * digit-exact across ten probes (3^34 exact at 17 digits, which no IEEE
+ * digit-exact across twelve probes (3^34 exact at 17 digits, which no IEEE
  * double can produce; 3^39/7^25/6^30/2^90/2^100/3^40/1.5^350/0.7^80/
- * 0.23^25), refuting an earlier IEEE-double reading of 2^100 and 3^40. A
- * tail clamp zeroes deep fractions: place 33 survives (pw6_clamp_023_25)
- * and place 40 zeroes (pw5_scale_05_132), bracketing the clamp in [33, 39]
- * decimal places — values the bracket leaves ambiguous are refused.
+ * 0.23^25/0.5^73/0.5^76), refuting an earlier IEEE-double reading of 2^100
+ * and 3^40. Nothing is ever tail-truncated (0.5^76 keeps all 18 digits
+ * through place 40, pw7_clamp_05_76, killing a scale-clamp reading): a
+ * folded value is either kept whole or FLUSHED to zero. Every flushed row
+ * sits below 5e-40 — i.e. rounds to zero at 39 places (0.5^132 / 0.5^135 /
+ * 0.1^41 / 0.5^200) — and every kept row is ≥ 1.32e-23 (0.5^76); the
+ * bracket between is unprobed and refuses.
  *
  * RUNTIME (one field operand suffices, pw6_rt_mixed) and every negative
  * exponent in either path: decimal at SCALE 42, HALF_UP — field-valued
@@ -314,21 +317,31 @@ function arithmetic(
  * digit-exact at place 42, field-valued 3^40 returns the exact integer
  * (pw6_rt_int) where the folded form rounds to …800, 1.00596^240's 39
  * rendered digits are the TEXT 39-sig budget over a scale-42 value (#18),
- * and (1e-13)^1000 → 0 falls out of the scale (#20). Computed on
- * decimal.js's 40-sig carry, so digits past 40 significant places can
- * double-round at the quantize boundary — unobservable through the
- * 39/40-sig TEXT budget and the 32-place materialization.
+ * and (1e-13)^1000 → 0 falls out of the scale (#20). The carry has a
+ * PRECISION limit: 43 significant digits compute (#18) but field-valued
+ * 7^55 (47 digits, well under the magnitude cap) is a runtime error
+ * (pw7_rt_bigsig) — 44–46 digits are unprobed and refuse; ≥ 47 errors
+ * under every candidate limit. Results at 10 or above take an exact BigInt
+ * path so the true significance is known (negative exponents there are
+ * non-terminating and refuse). Computed on decimal.js's 40-sig carry, so
+ * digits past 40 significant places can double-round at the quantize
+ * boundary — unobservable through the 39/40-sig TEXT budget and the
+ * 32-place materialization.
  *
- * CAP: |result| > 1e64 is a runtime #Error! in both paths (literal
- * owb/owb2/owc bisects; field-valued 10^80, pw6_rt_cap). Oversized
- * negative-exponent reciprocals (0.1^-70 territory) are the one unprobed
- * corner and refuse. 0^negative is a runtime #Error!, not blank
- * (pw6_zeroneg_blank: ISBLANK over it errors the whole formula), matching
- * the reciprocal's division by zero. 0^0 = 1 in both paths (pw5_zero_zero,
- * testExponentiationOperator#1–#3).
+ * CAP: |result| > 1e64 is a runtime #Error! in both paths and both
+ * exponent signs (literal owb/owb2/owc bisects; field-valued 10^80,
+ * pw6_rt_cap; the 0.1^-70 reciprocal, pw7_recip_cap). 0^negative is a
+ * runtime #Error!, not blank (pw6_zeroneg_blank: ISBLANK over it errors
+ * the whole formula), matching the reciprocal's division by zero. 0^0 = 1
+ * in both paths (pw5_zero_zero, testExponentiationOperator#1–#3).
  */
 const POW_CAP = new Decimal("1e64");
 const POW_SCALE = 42;
+// Verified flush/keep boundary bracket for folded deep fractions: all
+// flushed rows round to zero at 39 places (< 5e-40), the smallest kept row
+// is 0.5^76 ≈ 1.32e-23.
+const POW_FOLD_FLUSH = new Decimal("5e-40");
+const POW_FOLD_KEEP = new Decimal("1.3e-23");
 
 function powProduct(a: Decimal, b: Decimal, folded: boolean): EvalResult {
   const raw = a.pow(b);
@@ -340,20 +353,66 @@ function powProduct(a: Decimal, b: Decimal, folded: boolean): EvalResult {
     if (sig.abs().greaterThan(POW_CAP)) {
       return error("#Error! (^ result exceeds 1e64)");
     }
-    const r33 = sig.toDecimalPlaces(33, Decimal.ROUND_HALF_UP);
-    const r39 = sig.toDecimalPlaces(39, Decimal.ROUND_HALF_UP);
-    if (!r33.equals(r39)) {
+    if (sig.abs().lessThan(POW_FOLD_FLUSH)) {
+      return num(0);
+    }
+    if (sig.abs().lessThan(POW_FOLD_KEEP)) {
       throw new UnsupportedError("^");
     }
-    return num(r33);
+    return num(sig);
   }
   if (raw.abs().greaterThan(POW_CAP)) {
-    if (b.isNegative()) {
-      throw new UnsupportedError("^");
-    }
     return error("#Error! (^ result exceeds 1e64)");
   }
+  // Values below 10 need at most 1 + 42 significant digits at scale 42 —
+  // inside the verified 43-digit carry. Larger values may need more than
+  // decimal.js's 40-sig carry can even represent, so their true significance
+  // is computed exactly (BigInt) rather than read off the rounded value.
+  if (raw.e >= 1) {
+    const exact = b.isNegative() ? null : exactPow(a, b.toNumber());
+    if (exact === null) {
+      throw new UnsupportedError("^");
+    }
+    const scaled = exact.toDecimalPlaces(POW_SCALE, Decimal.ROUND_HALF_UP);
+    const sigCount = scaled.isZero() ? 0 : scaled.precision();
+    if (sigCount >= 47) {
+      return error("#Error! (^ result exceeds the numeric precision limit)");
+    }
+    if (sigCount > 43) {
+      throw new UnsupportedError("^");
+    }
+    return num(scaled);
+  }
   return num(raw.toDecimalPlaces(POW_SCALE, Decimal.ROUND_HALF_UP));
+}
+
+/**
+ * Exact a^b for a non-negative integer exponent, as an unrounded Decimal
+ * (the constructor does not round; only operations do). Null when the exact
+ * form would be unreasonably large to compute — such results are far outside
+ * anything org-verified anyway.
+ */
+function exactPow(a: Decimal, b: number): Decimal | null {
+  const fixed = a.toFixed();
+  const neg = fixed.startsWith("-");
+  const digits = (neg ? fixed.slice(1) : fixed).replace(".", "");
+  const k = a.decimalPlaces();
+  if (b > 5000 || k * b > 10_000) {
+    return null;
+  }
+  const n = BigInt(digits) ** BigInt(b);
+  const scale = k * b;
+  const sign = neg && b % 2 === 1 ? "-" : "";
+  let s = n.toString();
+  if (scale === 0) {
+    return new Decimal(sign + s);
+  }
+  if (s.length <= scale) {
+    s = "0".repeat(scale - s.length + 1) + s;
+  }
+  return new Decimal(
+    `${sign}${s.slice(0, s.length - scale)}.${s.slice(s.length - scale)}`,
+  );
 }
 
 const DAY_MS = 86_400_000;

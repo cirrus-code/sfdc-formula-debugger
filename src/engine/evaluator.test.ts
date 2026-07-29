@@ -420,7 +420,16 @@ describe("engine: ^ semantics (org-verified, wave-4/5 bisects)", () => {
     expect(s("TEXT(1 / (10 ^ 40) / (10 ^ 40))")).toBe(`.${"0".repeat(79)}1`);
   });
 
-  it("folded deep fractions zero out past the tail clamp", () => {
+  it("folded values are kept whole or flushed to zero — never truncated", () => {
+    // Kept in full even when the 18-sig tail reaches place 40
+    // (pw7_clamp_05_73, pw7_clamp_05_76).
+    expect(s("TEXT(0.5 ^ 73)")).toBe(
+      "0.000000000000000000000105879118406787542",
+    );
+    expect(s("TEXT(0.5 ^ 76)")).toBe(
+      "0.0000000000000000000000132348898008484428",
+    );
+    // Flushed: everything that rounds to zero at 39 places.
     expect(s("TEXT(0.5 ^ 200)")).toBe("0");
     expect(s("TEXT(0.5 ^ 132)")).toBe("0");
     expect(s("TEXT(0.1 ^ 41)")).toBe("0");
@@ -456,22 +465,32 @@ describe("engine: ^ semantics (org-verified, wave-4/5 bisects)", () => {
     expect(n("0 ^ 0")).toBe("1");
   });
 
-  it("errors on 0^negative and runtime overflow (org-verified)", () => {
+  it("errors on 0^negative, overflow, and the runtime precision limit", () => {
     // pw6_zeroneg_blank: ISBLANK(0^-1) errors the whole formula — a runtime
     // #Error!, not blank.
     expect(isError(ev("0 ^ -1"))).toBe(true);
-    // pw6_rt_cap: the 1e64 cap binds field-valued powers too.
+    // pw6_rt_cap / pw7_recip_cap: the 1e64 cap binds field-valued powers
+    // and negative-exponent reciprocals alike.
     expect(
       isError(ev("N1 ^ N2", { fields: { N1: num("10"), N2: num("80") } })),
+    ).toBe(true);
+    expect(isError(ev("0.1 ^ -70"))).toBe(true);
+    // pw7_rt_bigsig: field-valued 7^55 (47 significant digits) errors even
+    // though its magnitude is far below the 1e64 cap.
+    expect(
+      isError(ev("N1 ^ N2", { fields: { N1: num("7"), N2: num("55") } })),
     ).toBe(true);
   });
 
   it("refuses the unverified slivers rather than guessing", () => {
-    // A folded value whose 18-sig tail lands in the unpinned [33, 39]-place
-    // clamp bracket.
+    // A folded deep fraction inside the unprobed flush/keep bracket
+    // (5e-40, 1.32e-23).
     expect(() => ev("TEXT(0.5 ^ 120)")).toThrow(UnsupportedError);
-    // Oversized negative-exponent reciprocals are unprobed.
-    expect(() => ev("0.1 ^ -70")).toThrow(UnsupportedError);
+    // A runtime result of 44 significant digits — between the verified
+    // 43-digit compute (#18) and the verified 47-digit error (7^55).
+    expect(() =>
+      ev("N1 ^ N2", { fields: { N1: num("7"), N2: num("52") } }),
+    ).toThrow(UnsupportedError);
   });
 });
 

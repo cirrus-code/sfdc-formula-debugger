@@ -364,8 +364,14 @@ export const BUILTINS: Record<string, Builtin> = {
   CONTAINS: ([a, b]) => bool(dstr(a!).includes(dstr(b!))),
   BEGINS: ([a, b]) => bool(dstr(a!).startsWith(dstr(b!))),
   FIND: ([search, txt, start]) => {
+    const needle = dstr(search!);
+    // An empty (or blank) search term finds nothing — 0, not position 1
+    // (org-verified, pw7_find_empty_needle / pw7_find_empty_both).
+    if (needle === "") {
+      return num(0);
+    }
     const from = start ? Math.max(0, toInt(start) - 1) : 0;
-    const idx = dstr(txt!).indexOf(dstr(search!), from);
+    const idx = dstr(txt!).indexOf(needle, from);
     return num(idx < 0 ? 0 : idx + 1);
   },
   SUBSTITUTE: ([a, oldT, newT]) => {
@@ -406,9 +412,16 @@ export const BUILTINS: Record<string, Builtin> = {
   // (the product renders ~40 digits, more than the 32-place function boundary)
   // and must know whether its argument is a bare literal.
   VALUE: ([a]) => {
-    const s = dstr(a!).trim();
-    return isParsableNumber(s)
-      ? num(new Decimal(s))
+    const s = dstr(a!);
+    // VALUE("") is blank, but VALUE(" ") is a runtime error — the org splits
+    // what the OSS oracle blankets as null (org-verified, pw7_value_empty /
+    // pw7_value_space).
+    if (s === "") {
+      return blank("Number");
+    }
+    const t = s.trim();
+    return isParsableNumber(t)
+      ? num(new Decimal(t))
       : error("#Error! (VALUE: not a number)");
   },
   // Padded length ≤ 0 is null; a shorter target truncates; the pad string

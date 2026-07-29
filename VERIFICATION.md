@@ -382,10 +382,12 @@ formerly-refusing functions, now simulated with golden coverage:
   `TEXT(0.7^80)` = `0.000…`, `TEXT(0.23^25)` likewise; parens fold away,
   `TEXT((0.5))` = `0.5`) while computed values drop the zero even at tiny
   scale (`TEXT(1/4)` = `.25`, `pw6_div_quarter` — the fold model, not a
-  scale threshold, drives the leading zero). A tail clamp zeroes folded deep
-  fractions: place 33 survives (`pw6_clamp_023_25`), place 40 zeroes
-  (`pw5_scale_05_132`), bracketing the clamp in [33, 39] (exact place
-  unpinned; the ambiguous sliver refuses).
+  scale threshold, drives the leading zero). Folded deep fractions are
+  never tail-truncated — `0.5^76` keeps all 18 digits through place 40
+  (`pw7_clamp_05_76`, killing the scale-clamp reading) — they are either
+  kept whole or FLUSHED to zero: every flushed row rounds to zero at 39
+  places (< 5e-40: `0.5^132`/`0.5^135`/`0.1^41`/`0.5^200`) and every kept
+  row is ≥ 1.32e-23; the bracket between refuses.
   **Runtime (one field operand suffices, `pw6_rt_mixed`) and every negative
   exponent in either path: decimal at scale 42, HALF_UP** — digit-exact on
   field-valued `0.7^80` / `0.5^132` / `3^-25` and literal `3^-25` / `7^-20`
@@ -394,15 +396,28 @@ formerly-refusing functions, now simulated with golden coverage:
   are the TEXT 39-sig budget over a scale-42 value (#18); `(1e-13)^1000` →
   0 falls out of the scale (#20); `99^-1`'s 40 rendered places likewise
   (budget, not value scale).
-  **Cap: results past 1e64 are runtime errors in BOTH paths** (`10^64`
-  computes; literal `10^65`/`2^213`/`9^68`/`(10^40)^2` error; field-valued
-  `10^80` errors, `pw6_rt_cap`); the cap is `^`-only (1e180 via `*`
-  computes) and does not bind tiny negatives. Oversized negative-exponent
-  reciprocals (`0.1^-70` territory) remain unprobed (refuse).
+  **Cap: results past 1e64 are runtime errors in BOTH paths and both
+  exponent signs** (`10^64` computes; literal `10^65`/`2^213`/`9^68`/
+  `(10^40)^2` error; field-valued `10^80` errors, `pw6_rt_cap`; the
+  `0.1^-70` reciprocal errors, `pw7_recip_cap`); the cap is `^`-only
+  (1e180 via `*` computes) and does not bind tiny values.
+  **Runtime precision limit**: 43 significant digits at scale 42 compute
+  (#18) but field-valued `7^55` — 47 digits, magnitude far below the cap —
+  is a runtime error (`pw7_rt_bigsig`); 44–46 digits are unprobed
+  (evaluator refuses), ≥ 47 errors under every candidate limit. The
+  evaluator takes an exact BigInt path for results ≥ 10 so true
+  significance is known rather than read off a rounded carry.
   **Edges**: `0^0` = 1 in both paths (`pw5_zero_zero`, #1–#3); `0^negative`
   is a runtime `#Error!`, not blank (`pw6_zeroneg_blank`: `ISBLANK(0^-1)`
   errors the whole formula). The numeric-rendering quarantine remains
   empty.
+- ✅ **WS4-derived function edges (wave 7)**: `FIND` with an empty search
+  term returns **0**, not 1 (`pw7_find_empty_needle`, and
+  `FIND("", "")` = 0 too) — the JVM oracle was right and our indexOf-based
+  1 was a bug, fixed. `VALUE("")` is **blank** while `VALUE(" ")` is a
+  runtime **`#Error!`** (`pw7_value_empty`/`pw7_value_space`) — the org
+  SPLITS what the oracle blankets as null, so probing beat adopting the
+  oracle verdict wholesale.
 - Flow-context runtime facts: **div-by-zero yields null in a running flow**
   (vs `#Error!` in formula fields and a blocked save in validation rules),
   and **flow formulas reject string literals containing backslashes** at
@@ -567,31 +582,30 @@ base cap (`1.5^400` errors), the fold-based leading-zero rendering model
 (`TEXT(1/4)` = `.25`, `TEXT((0.5))` = `0.5`), and mixed-operand behavior
 (one field blocks folding). Still open:
 
+Wave 7 (2026-07-29) closed: the folded flush/keep model ✅ (the [33, 39]
+scale-clamp reading is dead — `0.5^76` keeps place 40; flushed rows all
+round to zero at 39 places), the reciprocal cap ✅ (`0.1^-70` errors), the
+runtime precision limit ✅ (43 sigs compute, 47 error), `FIND` empty search
+term = 0 ✅ (our bug, fixed), and the `VALUE("")`/`VALUE(" ")` split ✅
+(blank/error — the org overrules the oracle on whitespace). Still open:
+
 - ~~`CASESAFEID` explanatory note~~ — shipped: a registry lint note now
   explains the public suffix algorithm and why simulation refuses (the org
   validates ids against its live key-prefix registry). The refusal itself
   is permanent.
-- WS4 differential fuzzing (built, first pass 5,000 probes): two evaluator
-  disagreements with the JVM oracle await org arbitration — `FIND` with an
-  empty search term (we say 1, the oracle 0) and `VALUE("")` /
-  `VALUE(" ")` (we error, the oracle blanks) — staged as `pw7_find_*` /
-  `pw7_value_*` probes. The blank-typing cluster it found (text-function
-  blanks falling into numeric arithmetic) is fixed against the org-verified
-  text-blank rules. ~140 blank-vs-empty-text candidates in the fuzz report
-  are unreadable through the org's readback channel and stay oracle-tier.
-- The folded tail clamp's exact place in [33, 39] — `TEXT(0.5^73)` (18-sig
-  ends at place 39) and `TEXT(0.5^76)` (ends at 40, magnitude above 1e-40)
-  would discriminate scale-39 from a 1e-40 magnitude floor; the sliver
-  currently refuses.
-- Oversized negative-exponent reciprocals (`0.1^-70`) — cap behavior
-  unprobed; refuses.
-- Runtime `^` results needing more than 40 significant digits (e.g.
-  field-valued `7^55`) — our 40-sig carry cannot express the org's
-  scale-42 value exactly; currently computed with a double-rounding caveat
-  (unobservable through the TEXT budget).
+- The folded flush/keep boundary inside (5e-40, 1.32e-23) — probes at e.g.
+  `0.5^80` (8.3e-25) and `0.5^129` (1.5e-39) would bisect; the bracket
+  refuses.
+- The runtime precision limit's exact place in (43, 47) — a field-valued
+  44-digit power (e.g. `7^52`) discriminates; the band refuses.
+- Runtime (field-valued) `^` results ≥ 10 with negative exponents are
+  non-terminating decimals whose true scale-42 significance we cannot
+  confirm — refuses (e.g. `0.3^-5`).
 - Approval-criteria `IFERROR` and AND/OR short-circuit past a runtime
   error — the VR channel proved short-circuit there; no approval
   equivalent probed yet.
+- ~140 blank-vs-empty-text WS4 candidates are unreadable through the org's
+  readback channel and stay oracle-tier.
 - ~~Registry function coverage~~ — closed 2026-07-28: audited against the
   official reference (101 functions registered; 35 added, of which 16
   corpus-backed and simulated — see the function-port-2 section). The wave-3
