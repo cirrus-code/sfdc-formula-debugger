@@ -296,77 +296,64 @@ function arithmetic(
 }
 
 /**
- * `^` per the org (wave-4/5 probe bisects). The operator has TWO org-side
+ * `^` per the org (wave-4/5/6 probe bisects). The operator has TWO org-side
  * code paths, split by whether the compiler constant-folds it (both operands
  * numeric literals — see isFoldedNumericLiteral):
  *
  * FOLDED, b ≥ 0: the exact value rounded to 18 SIGNIFICANT digits, HALF_UP —
- * digit-exact across nine probes (3^34 exact at 17 digits, 3^39/7^25/6^30/
- * 2^90/2^100/3^40/1.5^350/0.7^80), refuting the earlier IEEE-double reading
- * of 2^100 and 3^40 (0.7^80's double diverges from the org; the exact-18-sig
- * value matches). A tail clamp zeroes deep fractions: place 30 survives
- * (pw5_scale_07_80) and place 40 zeroes (pw5_scale_05_132), so the clamp
- * lies in [30, 39] decimal places — values the bracket leaves ambiguous are
- * refused. Results with |value| > 1e64 are runtime errors (10^64 computes;
- * 10^65, 2^213, 9^68, (10^40)^2 error) — the cap is `^`-only ((10^60)^3 via
- * `*` computes). (0-10)^65 also errors, but that operand is not provably
- * folded, so it does not pin which path enforces the cap.
+ * digit-exact across ten probes (3^34 exact at 17 digits, which no IEEE
+ * double can produce; 3^39/7^25/6^30/2^90/2^100/3^40/1.5^350/0.7^80/
+ * 0.23^25), refuting an earlier IEEE-double reading of 2^100 and 3^40. A
+ * tail clamp zeroes deep fractions: place 33 survives (pw6_clamp_023_25)
+ * and place 40 zeroes (pw5_scale_05_132), bracketing the clamp in [33, 39]
+ * decimal places — values the bracket leaves ambiguous are refused.
  *
- * RUNTIME (any field operand), b ≥ 0: full decimal precision —
- * 1.00596^240 renders 39 exact significant digits
- * (testExponentiationOperator#18), which no 18-digit path could produce.
- * Magnitudes below Oracle NUMBER's 1e-130 floor flush to zero
- * ((1e-13)^1000 = 0, #20); the region between 1e-130 and our shallowest
- * verified rendering (~1e-39) is unprobed and refused, as is runtime
- * overflow past 1e64.
+ * RUNTIME (one field operand suffices, pw6_rt_mixed) and every negative
+ * exponent in either path: decimal at SCALE 42, HALF_UP — field-valued
+ * 0.7^80 / 0.5^132 / 3^-25 and literal 3^-25 / 7^-20 / 9^-30 are all
+ * digit-exact at place 42, field-valued 3^40 returns the exact integer
+ * (pw6_rt_int) where the folded form rounds to …800, 1.00596^240's 39
+ * rendered digits are the TEXT 39-sig budget over a scale-42 value (#18),
+ * and (1e-13)^1000 → 0 falls out of the scale (#20). Computed on
+ * decimal.js's 40-sig carry, so digits past 40 significant places can
+ * double-round at the quantize boundary — unobservable through the
+ * 39/40-sig TEXT budget and the 32-place materialization.
  *
- * b < 0 (both paths): decimal at scale 42 — 3^-25, 7^-20, 9^-30 all end at
- * place 42 digit-exactly; 99^-1's 40 rendered places are the TEXT 39-sig
- * budget capping a scale-42 value; field-valued (-20)^-40 → 0 (#6) shows
- * runtime agrees. 10^-80 evaluates (no cap on tiny), but reciprocals larger
- * than 1e64 are unprobed and refused. 0^negative reads back null — blank vs
- * #Error! is ambiguous through the readback channel — so it refuses.
+ * CAP: |result| > 1e64 is a runtime #Error! in both paths (literal
+ * owb/owb2/owc bisects; field-valued 10^80, pw6_rt_cap). Oversized
+ * negative-exponent reciprocals (0.1^-70 territory) are the one unprobed
+ * corner and refuse. 0^negative is a runtime #Error!, not blank
+ * (pw6_zeroneg_blank: ISBLANK over it errors the whole formula), matching
+ * the reciprocal's division by zero. 0^0 = 1 in both paths (pw5_zero_zero,
+ * testExponentiationOperator#1–#3).
  */
 const POW_CAP = new Decimal("1e64");
-const POW_NEG_SCALE = 42;
-// Oracle NUMBER cannot represent magnitudes below 1e-130; the org's numeric
-// substrate flushes them to zero (testExponentiationOperator#20).
-const ORACLE_UNDERFLOW = new Decimal("1e-130");
-const RUNTIME_VERIFIED_FLOOR = new Decimal("1e-39");
+const POW_SCALE = 42;
 
 function powProduct(a: Decimal, b: Decimal, folded: boolean): EvalResult {
   const raw = a.pow(b);
   if (!raw.isFinite()) {
-    throw new UnsupportedError("^");
+    return error("#Error! (division by zero)");
   }
-  if (b.isNegative()) {
-    if (raw.abs().greaterThan(POW_CAP)) {
-      throw new UnsupportedError("^");
-    }
-    return num(raw.toDecimalPlaces(POW_NEG_SCALE, Decimal.ROUND_HALF_UP));
-  }
-  if (folded) {
+  if (folded && !b.isNegative()) {
     const sig = raw.toSignificantDigits(18, Decimal.ROUND_HALF_UP);
     if (sig.abs().greaterThan(POW_CAP)) {
       return error("#Error! (^ result exceeds 1e64)");
     }
-    const r30 = sig.toDecimalPlaces(30, Decimal.ROUND_HALF_UP);
+    const r33 = sig.toDecimalPlaces(33, Decimal.ROUND_HALF_UP);
     const r39 = sig.toDecimalPlaces(39, Decimal.ROUND_HALF_UP);
-    if (!r30.equals(r39)) {
+    if (!r33.equals(r39)) {
       throw new UnsupportedError("^");
     }
-    return num(r30);
+    return num(r33);
   }
   if (raw.abs().greaterThan(POW_CAP)) {
-    throw new UnsupportedError("^");
+    if (b.isNegative()) {
+      throw new UnsupportedError("^");
+    }
+    return error("#Error! (^ result exceeds 1e64)");
   }
-  if (!raw.isZero() && raw.abs().lessThan(ORACLE_UNDERFLOW)) {
-    return num(0);
-  }
-  if (!raw.isZero() && raw.abs().lessThan(RUNTIME_VERIFIED_FLOOR)) {
-    throw new UnsupportedError("^");
-  }
-  return num(raw);
+  return num(raw.toDecimalPlaces(POW_SCALE, Decimal.ROUND_HALF_UP));
 }
 
 const DAY_MS = 86_400_000;

@@ -295,7 +295,8 @@ export const BUILTINS: Record<string, Builtin> = {
   // or the absolute difference of a Time pair (HH:MM:SS) or Datetime pair
   // (always D:HH:MM:SS). Fractions truncate (.99 → 0s); hours accumulate past
   // 24 unless days are split out; a blank includeDays checkbox reads false
-  // while a blank operand nulls. Negative seconds are unverified — refuse.
+  // while a blank operand nulls. Negative seconds render their magnitude:
+  // ±1000000 render identically across all four overloads in the corpus.
   FORMATDURATION: ([a, b]) => {
     const hms = (t: number, hoursPad: number) =>
       `${String(Math.floor(t / 3600)).padStart(hoursPad, "0")}:${String(Math.floor(t / 60) % 60).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
@@ -320,10 +321,7 @@ export const BUILTINS: Record<string, Builtin> = {
     if (a!.blank) {
       return blank("Text");
     }
-    const secs = dnum(a!).truncated().toNumber();
-    if (secs < 0) {
-      return error("#Error! (FORMATDURATION: negative seconds unverified)");
-    }
+    const secs = dnum(a!).truncated().abs().toNumber();
     return text(b !== undefined && boolCoerce(b) ? dhms(secs) : hms(secs, 2));
   },
   // Entity set org-verified via the flow interview channel (fv_htmlencode):

@@ -10791,5 +10791,156 @@
   "fields": [],
   "blankMode": "blank",
   "expected": "1237940039285380270000000000"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw6_clamp_023_25#0",
+  "formula": "TEXT(0.23 ^ 25)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0.000000000000000110457675719195455"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw6_paren_lit#0",
+  "formula": "TEXT((0.5))",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0.5"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw6_div_quarter#0",
+  "formula": "TEXT(1 / 4)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": ".25"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw6_zeroneg_blank#0",
+  "formula": "IF(ISBLANK(0 ^ -1), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw6_rt_int#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "40"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "12157665459056928801"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw6_rt_frac#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.7"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "80"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": ".00000000000040536215597144386832065866109"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw6_rt_neg#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-25"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": ".000000000001180235387157383256511216967589"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw6_rt_cap#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "10"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "80"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw6_rt_deep#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.5"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "132"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": ".000000000000000000000000000000000000000184"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw6_rt_mixed#0",
+  "formula": "TEXT(0.7 ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "80"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": ".00000000000040536215597144386832065866109"
  }
 ]

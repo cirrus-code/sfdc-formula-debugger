@@ -1212,6 +1212,40 @@
           "value": "80"
         }
       }
+    },
+    {
+      "id": "pw7_clamp_05_73",
+      "question": "Wave-7: folded clamp — 0.5^73's 18-sig value ends at place 39. Full ⇒ clamp = 39; truncated ⇒ clamp ∈[33,38].",
+      "formula": "TEXT(0.5 ^ 73)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw7_clamp_05_76",
+      "question": "Wave-7: folded clamp vs magnitude floor — 0.5^76 ≈ 1.32e-23, 18-sig ends at place 40. Full 18 digits ⇒ a 1e-40 magnitude floor, not a scale clamp; cut at 39 ⇒ scale-39.",
+      "formula": "TEXT(0.5 ^ 76)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw7_recip_cap",
+      "question": "Wave-7: oversized negative-exponent reciprocal — 0.1^-70 = 1e70 > 1e64. null ⇒ the cap binds negatives too; digits ⇒ negatives are uncapped.",
+      "formula": "TEXT(0.1 ^ -70)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw7_rt_bigsig",
+      "question": "Wave-7: field-valued 7^55 (47 digits) — scale-42 needs 47 sigs, past Oracle NUMBER's ~40. Exact leading digits vs rounded tail pins the runtime carry.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "7"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "55"
+        }
+      }
     }
   ]
 }

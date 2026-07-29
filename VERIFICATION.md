@@ -377,26 +377,31 @@ formerly-refusing functions, now simulated with golden coverage:
   exact-18-sig and NOT the double — 0.7^80's double diverges in digit 16).
   This retracts wave 4's IEEE-double reading of `2^100`/`3^40`: both values
   coincidentally equal exact-18-sig, and the discriminating probes picked
-  exact-18-sig. Folded fractional results render literal-style (leading zero
-  kept: `TEXT(0.7^80)` = `0.000…`), and a tail clamp zeroes deep fractions —
-  place 30 survives, place 40 zeroes, so the clamp sits in [30, 39] (exact
-  place unpinned; the ambiguous sliver refuses).
-  **Runtime (any field operand), positive exponent: full decimal precision**
-  — field-valued `1.00596^240` renders 39 exact significant digits
-  (`testExponentiationOperator#18`). Magnitudes below Oracle NUMBER's 1e-130
-  floor flush to 0 (`(1e-13)^1000` = 0, #20); between 1e-130 and ~1e-39
-  unprobed (refuses).
-  **Negative exponents, both paths: decimal at scale 42** — `3^-25`,
-  `7^-20`, `9^-30` all end digit-exactly at place 42; `99^-1`'s 40 rendered
-  places are the TEXT 39-sig budget capping a scale-42 value; field-valued
-  `(-20)^-40` → 0 (#6) confirms runtime agrees; `10^-80` → 0.
-  **Cap: results past 1e64 are runtime errors** for literal probes (`10^64`
-  computes; `10^65`/`2^213`/`9^68`/`(10^40)^2` error; `(0-10)^65` errors
-  too but is path-ambiguous); the cap is `^`-only (1e180 via `*` computes)
-  and does not bind tiny negatives. Runtime overflow is unprobed (refuses).
+  exact-18-sig. Folded results render literal-style (leading zero kept:
+  `TEXT(0.7^80)` = `0.000…`, `TEXT(0.23^25)` likewise; parens fold away,
+  `TEXT((0.5))` = `0.5`) while computed values drop the zero even at tiny
+  scale (`TEXT(1/4)` = `.25`, `pw6_div_quarter` — the fold model, not a
+  scale threshold, drives the leading zero). A tail clamp zeroes folded deep
+  fractions: place 33 survives (`pw6_clamp_023_25`), place 40 zeroes
+  (`pw5_scale_05_132`), bracketing the clamp in [33, 39] (exact place
+  unpinned; the ambiguous sliver refuses).
+  **Runtime (one field operand suffices, `pw6_rt_mixed`) and every negative
+  exponent in either path: decimal at scale 42, HALF_UP** — digit-exact on
+  field-valued `0.7^80` / `0.5^132` / `3^-25` and literal `3^-25` / `7^-20`
+  / `9^-30`; field-valued `3^40` returns the exact `…801` where the folded
+  form rounds to `…800` (`pw6_rt_int`); `1.00596^240`'s 39 rendered digits
+  are the TEXT 39-sig budget over a scale-42 value (#18); `(1e-13)^1000` →
+  0 falls out of the scale (#20); `99^-1`'s 40 rendered places likewise
+  (budget, not value scale).
+  **Cap: results past 1e64 are runtime errors in BOTH paths** (`10^64`
+  computes; literal `10^65`/`2^213`/`9^68`/`(10^40)^2` error; field-valued
+  `10^80` errors, `pw6_rt_cap`); the cap is `^`-only (1e180 via `*`
+  computes) and does not bind tiny negatives. Oversized negative-exponent
+  reciprocals (`0.1^-70` territory) remain unprobed (refuse).
   **Edges**: `0^0` = 1 in both paths (`pw5_zero_zero`, #1–#3); `0^negative`
-  reads back null — blank vs `#Error!` ambiguous through the channel —
-  refuses pending a rider. The numeric-rendering quarantine remains empty.
+  is a runtime `#Error!`, not blank (`pw6_zeroneg_blank`: `ISBLANK(0^-1)`
+  errors the whole formula). The numeric-rendering quarantine remains
+  empty.
 - Flow-context runtime facts: **div-by-zero yields null in a running flow**
   (vs `#Error!` in formula fields and a blocked save in validation rules),
   and **flow formulas reject string literals containing backslashes** at
@@ -532,24 +537,26 @@ channel ✅ (`wfu_*` probes: blocked save on div-by-zero, blank mode,
 case-sensitive `=`), DST closed by analysis (datetimes are GMT instants;
 the org applies no zone arithmetic a client must reproduce).
 
-Wave 5 (2026-07-29) closed: the `^` fold/runtime split (18-sig folded, full
-precision runtime, scale-42 negatives — see the org-pass section; the wave-4
-IEEE-double reading is retracted), `0^0` = 1, the negative-base cap
-behavior, and the fractional-base cap (`1.5^400` errors). Still open (pw6
-rider candidates):
+Waves 5+6 (2026-07-29) closed: the `^` fold/runtime split (18-sig folded;
+runtime and all negatives at scale 42 — see the org-pass section; the
+wave-4 IEEE-double reading is retracted), `0^0` = 1, `0^negative` = runtime
+error, the cap in both paths (literal and field-valued), the fractional-
+base cap (`1.5^400` errors), the fold-based leading-zero rendering model
+(`TEXT(1/4)` = `.25`, `TEXT((0.5))` = `0.5`), and mixed-operand behavior
+(one field blocks folding). Still open:
 
 - `CASESAFEID` — refusal is likely permanent (org-state prefix validation),
   but a UI-side note could explain the suffix algorithm.
-- The folded tail clamp's exact place in [30, 39] — a literal probe whose
-  18-sig value ends between places 31–39 (e.g. `0.23^25`, ends at 33)
-  discriminates; the sliver currently refuses.
-- Runtime `^` overflow (field-valued `10^80`) and the runtime deep-fraction
-  region between 1e-130 and 1e-39.
-- `0 ^ negative` — null readback is blank-vs-error ambiguous; an
-  `IF(ISBLANK(0^-1), …)` rider discriminates. The evaluator refuses.
-- The leading-zero rendering mechanism: fold-based (only `^` results render
-  literal-style) vs scale-based — `TEXT(1/4)` discriminates (".25" = fold
-  model, "0.25" = scale-threshold model), plus a field-valued `0.7^80`.
+- The folded tail clamp's exact place in [33, 39] — `TEXT(0.5^73)` (18-sig
+  ends at place 39) and `TEXT(0.5^76)` (ends at 40, magnitude above 1e-40)
+  would discriminate scale-39 from a 1e-40 magnitude floor; the sliver
+  currently refuses.
+- Oversized negative-exponent reciprocals (`0.1^-70`) — cap behavior
+  unprobed; refuses.
+- Runtime `^` results needing more than 40 significant digits (e.g.
+  field-valued `7^55`) — our 40-sig carry cannot express the org's
+  scale-42 value exactly; currently computed with a double-rounding caveat
+  (unobservable through the TEXT budget).
 - ~~Registry function coverage~~ — closed 2026-07-28: audited against the
   official reference (101 functions registered; 35 added, of which 16
   corpus-backed and simulated — see the function-port-2 section). The wave-3

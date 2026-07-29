@@ -386,8 +386,12 @@ describe("engine: ^ semantics (org-verified, wave-4/5 bisects)", () => {
     expect(s("TEXT(3 ^ 40)")).toBe("12157665459056928800");
     expect(s("TEXT(2 ^ 100)")).toBe("1267650600228229400000000000000");
     // A folded fractional base renders literal-style, leading zero kept
-    // (pw5_scale_07_80).
+    // (pw5_scale_07_80, pw6_clamp_023_25) — while computed values drop it
+    // (pw6_div_quarter) and parens fold away (pw6_paren_lit).
     expect(s("TEXT(0.7 ^ 80)")).toBe("0.000000000000405362155971443868");
+    expect(s("TEXT(0.23 ^ 25)")).toBe("0.000000000000000110457675719195455");
+    expect(s("TEXT(1 / 4)")).toBe(".25");
+    expect(s("TEXT((0.5))")).toBe("0.5");
   });
 
   it("negative exponents compute at scale 42 in both paths", () => {
@@ -411,39 +415,52 @@ describe("engine: ^ semantics (org-verified, wave-4/5 bisects)", () => {
     expect(s("TEXT(0.1 ^ 41)")).toBe("0");
   });
 
-  it("field-valued ^ runs at full decimal precision", () => {
-    const fields = {
-      N1: num("1.00596"),
-      N2: num("240"),
-    };
-    // testExponentiationOperator#18: 39 exact significant digits — no
-    // 18-digit path could produce these.
-    expect(s("TEXT(N1 ^ N2)", { fields })).toBe(
-      "4.16265990153128261843019338536618499848",
+  it("field-valued ^ runs at scale 42 — full digits where fold rounds", () => {
+    // pw6_rt_int: the exact 3^40, where the folded form rounds to …800.
+    expect(
+      s("TEXT(N1 ^ N2)", { fields: { N1: num("3"), N2: num("40") } }),
+    ).toBe("12157665459056928801");
+    // pw6_rt_frac: scale-42 digits, computed-style rendering (no leading
+    // zero) — the same power folded gives 18 digits with the zero kept.
+    expect(
+      s("TEXT(N1 ^ N2)", { fields: { N1: num("0.7"), N2: num("80") } }),
+    ).toBe(".00000000000040536215597144386832065866109");
+    // pw6_rt_mixed: one field operand is enough to block folding.
+    expect(s("TEXT(0.7 ^ N2)", { fields: { N2: num("80") } })).toBe(
+      ".00000000000040536215597144386832065866109",
     );
-    // #6: runtime negative exponents share the scale-42 rule.
+    // testExponentiationOperator#18: the TEXT 39-sig budget over scale 42.
+    expect(
+      s("TEXT(N1 ^ N2)", { fields: { N1: num("1.00596"), N2: num("240") } }),
+    ).toBe("4.16265990153128261843019338536618499848");
+    // #6 and #20: deep values zero out at scale 42.
     expect(n("N1 ^ N2", { fields: { N1: num("-20"), N2: num("-40") } })).toBe(
       "0",
     );
-    // #20: magnitudes below Oracle NUMBER's 1e-130 floor flush to zero.
     expect(
       n("N1 ^ N2", { fields: { N1: num("0.0000000000001"), N2: num("1000") } }),
     ).toBe("0");
-    // #1: 0^0 is 1 at runtime, matching the folded pw5_zero_zero.
+    // #1 and pw5_zero_zero: 0^0 is 1 in both paths.
     expect(n("N1 ^ N2", { fields: { N1: num("0"), N2: num("0") } })).toBe("1");
     expect(n("0 ^ 0")).toBe("1");
   });
 
+  it("errors on 0^negative and runtime overflow (org-verified)", () => {
+    // pw6_zeroneg_blank: ISBLANK(0^-1) errors the whole formula — a runtime
+    // #Error!, not blank.
+    expect(isError(ev("0 ^ -1"))).toBe(true);
+    // pw6_rt_cap: the 1e64 cap binds field-valued powers too.
+    expect(
+      isError(ev("N1 ^ N2", { fields: { N1: num("10"), N2: num("80") } })),
+    ).toBe(true);
+  });
+
   it("refuses the unverified slivers rather than guessing", () => {
-    // 0^negative reads back null in the org — blank vs #Error! ambiguous.
-    expect(() => ev("0 ^ -1")).toThrow(UnsupportedError);
-    // A folded value whose 18-sig tail lands in the unpinned [30, 39]-place
+    // A folded value whose 18-sig tail lands in the unpinned [33, 39]-place
     // clamp bracket.
-    expect(() => ev("TEXT(0.23 ^ 25)")).toThrow(UnsupportedError);
-    // Runtime overflow past 1e64 is unprobed (the cap rows are all literal).
-    expect(() =>
-      ev("N1 ^ N2", { fields: { N1: num("10"), N2: num("80") } }),
-    ).toThrow(UnsupportedError);
+    expect(() => ev("TEXT(0.5 ^ 120)")).toThrow(UnsupportedError);
+    // Oversized negative-exponent reciprocals are unprobed.
+    expect(() => ev("0.1 ^ -70")).toThrow(UnsupportedError);
   });
 });
 
