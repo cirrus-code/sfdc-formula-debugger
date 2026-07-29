@@ -601,9 +601,17 @@ function evalCall(node: FunctionCall, env: EvalEnv): EvalResult {
   // blank modes, since "treat blanks as zeroes" is a numeric-only, read-time
   // coercion (see FieldRef) that stops numerics from ever reaching here blank.
   // The exceptions inspect or absorb blankness themselves (ISBLANK, NULLVALUE,
-  // LEN → 0, concatenation and UPPER/LOWER → "").
+  // LEN → 0, concatenation and UPPER/LOWER → ""). The propagated blank
+  // carries the function's declared return type so downstream blank rules
+  // still apply: a blank from a Text function concatenates through `+` and
+  // compares as "" (org-verified text-blank semantics), where an untyped
+  // blank would fall into numeric arithmetic and error.
   if (!BLANK_AWARE.has(spec.name) && args.some((a) => a.blank)) {
-    return blank("Unknown");
+    const rule = spec.returnType;
+    if (rule.kind === "fixed") {
+      return blank(rule.type);
+    }
+    return blank(args[rule.index]?.type ?? "Unknown");
   }
 
   const impl = BUILTINS[spec.name];

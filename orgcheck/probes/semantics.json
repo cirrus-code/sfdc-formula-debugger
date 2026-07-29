@@ -1246,6 +1246,32 @@
           "value": "55"
         }
       }
+    },
+    {
+      "id": "pw7_find_empty_needle",
+      "question": "WS4 fuzz: FIND with an empty search term — we return 1, the JVM oracle 0. Which does the product do?",
+      "formula": "TEXT(FIND(\"\", \"abc\"))",
+      "returns": "Text"
+    },
+    {
+      "id": "pw7_find_empty_both",
+      "question": "WS4 fuzz: FIND(\"\", \"\") — 1 (indexOf semantics) vs 0 (oracle).",
+      "formula": "TEXT(FIND(\"\", \"\"))",
+      "returns": "Text"
+    },
+    {
+      "id": "pw7_value_empty",
+      "question": "WS4 fuzz: VALUE(\"\") — we hard-error, the oracle returns blank. BLANKRESULT ⇒ blank; null ⇒ error.",
+      "formula": "IF(ISBLANK(VALUE(\"\")), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "pw7_value_space",
+      "question": "WS4 fuzz: VALUE(\" \") (whitespace) — blank like the oracle, or error?",
+      "formula": "IF(ISBLANK(VALUE(\" \")), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "expectSaveError": "maybe"
     }
   ]
 }

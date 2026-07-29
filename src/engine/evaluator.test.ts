@@ -268,6 +268,17 @@ describe("engine: three-valued comparison under blank semantics (oracle-verified
 });
 
 describe("engine: blank propagation through functions (oracle-verified)", () => {
+  it("propagates blanks typed by the function's return type", () => {
+    // A blank flowing out of a Text function keeps text semantics: it
+    // absorbs into `+` concatenation and compares as "" — the org-verified
+    // text-blank rules — instead of falling into numeric arithmetic.
+    expect(s('LEFT(RIGHT("ab", -2), 3) + "a"')).toBe("a");
+    expect(b('MID("ab" & " ", -1, 0) <> LEFT(RIGHT(" ", 0), 5)')).toBe(false);
+    expect(b('MID("abcabc" & "ab", 2, 5) <> RIGHT(LEFT("-3", -1), 10)')).toBe(
+      true,
+    );
+  });
+
   it("propagates a blank arg to null in both modes, except blank-aware fns", () => {
     for (const mode of ["zero", "blank"] as const) {
       const r = ev("SUBSTITUTE(t, o, x)", {

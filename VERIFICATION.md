@@ -567,8 +567,18 @@ base cap (`1.5^400` errors), the fold-based leading-zero rendering model
 (`TEXT(1/4)` = `.25`, `TEXT((0.5))` = `0.5`), and mixed-operand behavior
 (one field blocks folding). Still open:
 
-- `CASESAFEID` — refusal is likely permanent (org-state prefix validation),
-  but a UI-side note could explain the suffix algorithm.
+- ~~`CASESAFEID` explanatory note~~ — shipped: a registry lint note now
+  explains the public suffix algorithm and why simulation refuses (the org
+  validates ids against its live key-prefix registry). The refusal itself
+  is permanent.
+- WS4 differential fuzzing (built, first pass 5,000 probes): two evaluator
+  disagreements with the JVM oracle await org arbitration — `FIND` with an
+  empty search term (we say 1, the oracle 0) and `VALUE("")` /
+  `VALUE(" ")` (we error, the oracle blanks) — staged as `pw7_find_*` /
+  `pw7_value_*` probes. The blank-typing cluster it found (text-function
+  blanks falling into numeric arithmetic) is fixed against the org-verified
+  text-blank rules. ~140 blank-vs-empty-text candidates in the fuzz report
+  are unreadable through the org's readback channel and stay oracle-tier.
 - The folded tail clamp's exact place in [33, 39] — `TEXT(0.5^73)` (18-sig
   ends at place 39) and `TEXT(0.5^76)` (ends at 40, magnitude above 1e-40)
   would discriminate scale-39 from a 1e-40 magnitude floor; the sliver

@@ -78,6 +78,32 @@ crashes while building the error message.
 `probes.division.txt` reproduces the Number division/multiplication precision
 findings.
 
+## fuzz/ — WS4 differential fuzzer
+
+`fuzz/` generates random, type-directed **constant expressions** from our own
+grammar surface (literals, every operator, and the arithmetic/text/logic
+functions both engines implement), evaluates each one under both blank modes
+with our evaluator _and_ this harness, and diffs the two. Comparison is
+delegated to `src/engine/conformance.ts` (`runRow`), so the fuzzer cannot invent
+a friendlier notion of "equal", and every difference is triaged into (a)
+suspected our-bug, (b) suspected OSS-vs-product divergence — an **org-probe
+candidate**, never a corpus row, because the org outranks this oracle — or (c) a
+divergence VERIFICATION.md already records the org overruling. Runs are
+deterministic in the seed; the JVM leg is one batched process, so 5,000 probes
+take a few seconds. It never writes to `corpus/`. Run it from the repo root
+(node lives in the default dev shell, `java` in `.#oracle` — pass `--java` or
+`$FUZZ_JAVA` when they are not in the same shell):
+
+```
+node oracle/fuzz/run.mjs --seed 1 --count 2500 --out /tmp/ws4-report.md
+```
+
+`--oracle-out FILE` replays a saved harness transcript instead of spawning the
+JVM, and `--no-oracle` stops after writing the probe file. `fuzz/fuzz.test.ts`
+covers the generator, the probe codec and the triage rules against mocked
+transcripts, so it runs in the ordinary `vitest` pass; typecheck the fuzzer with
+`pnpm exec tsc --noEmit -p oracle/fuzz`.
+
 ## Scope
 
 Rules verified through this harness so far (see git history and VERIFICATION.md):
