@@ -31,10 +31,24 @@ export const sfEditorTheme = EditorView.theme(
       borderLeftColor: palette.accent,
       borderLeftWidth: "2px",
     },
-    ".cm-selectionBackground, &.cm-focused .cm-selectionBackground, ::selection":
+    // drawSelection's drawn layer is the only selection paint. The focused
+    // selector must mirror the base theme's `&dark.cm-focused > .cm-scroller >
+    // ...` structure — anything shorter loses the specificity race and the
+    // base #233 renders instead of this color.
+    ".cm-selectionLayer .cm-selectionBackground, &.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground":
       {
         backgroundColor: `${palette.accent}2e`,
       },
+    // Keep the native selection invisible even where drawSelection's own hide
+    // rule (scoped to .cm-line) doesn't reach, and over page-level ::selection
+    // styling like global.css's. Declaring `color` is load-bearing: Firefox
+    // (Gecko 153+) treats a transparent selection with no declared color as
+    // unstyled and paints the system Highlight/HighlightText pair over the
+    // text; currentColor suppresses that while keeping token colors.
+    ".cm-content ::selection, .cm-content::selection": {
+      backgroundColor: "transparent !important",
+      color: "currentColor !important",
+    },
     ".cm-placeholder": { color: palette.textMuted, fontStyle: "italic" },
 
     ".cm-gutters": {
