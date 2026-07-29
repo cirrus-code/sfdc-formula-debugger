@@ -76,6 +76,28 @@ const ORG_OVERRULED = new Set<string>([
   "testExponentiationOperator#11",
   "testExponentiationOperator#38",
   "testExponentiationOperator#39",
+  // Empty text IS blank in the product's value domain (pw8_be_* riders:
+  // "" & "", TRIM(" "), UPPER(""), SUBSTITUTE deleting everything — all
+  // read blank through ISBLANK). The oracle's "" expectations below encode
+  // a distinction the org cannot even represent.
+  "testUpper#0",
+  "testUpper#1",
+  "testLower#0",
+  "testLower#1",
+  "testInitCap#0",
+  "testInitCap#1",
+  "testUpperLocale#0",
+  "testUpperLocale#1",
+  "testUpperLocale#22",
+  "testUpperLocale#23",
+  "testUpperLocale#44",
+  "testUpperLocale#45",
+  "testLowerLocale#0",
+  "testLowerLocale#1",
+  "testLowerLocale#22",
+  "testLowerLocale#23",
+  "testLowerLocale#44",
+  "testLowerLocale#45",
 ]);
 
 /**

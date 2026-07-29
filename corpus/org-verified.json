@@ -11025,5 +11025,466 @@
   "fields": [],
   "blankMode": "blank",
   "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_flush_05_80#0",
+  "formula": "TEXT(0.5 ^ 80)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0.000000000000000000000000827180612553027675"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_flush_05_100#0",
+  "formula": "TEXT(0.5 ^ 100)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0.000000000000000000000000000000788860905221011805"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_flush_05_120#0",
+  "formula": "TEXT(0.5 ^ 120)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0.000000000000000000000000000000000000752316384526264005"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_flush_05_129#0",
+  "formula": "TEXT(0.5 ^ 129)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0.00000000000000000000000000000000000000146936793852785938"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_prec_7_52#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "7"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "52"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_prec_7_53#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "7"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "53"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_prec_7_54#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "7"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "54"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_recip_lit_dyadic#0",
+  "formula": "TEXT(0.5 ^ -10)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "1024"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_recip_rt_dyadic#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.5"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-10"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "1024"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_recip_rt_nonterm#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-5"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "411.522633744855967078189300411522633745"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_be_left0#0",
+  "formula": "IF(ISBLANK(LEFT(\"ab\", 0)), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "BLANKRESULT"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_be_mid0#0",
+  "formula": "IF(ISBLANK(MID(\"ab\", 1, 0)), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "BLANKRESULT"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_be_right0#0",
+  "formula": "IF(ISBLANK(RIGHT(\"ab\", 0)), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "BLANKRESULT"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_be_trim#0",
+  "formula": "IF(ISBLANK(TRIM(\" \")), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "BLANKRESULT"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_be_substitute#0",
+  "formula": "IF(ISBLANK(SUBSTITUTE(\"a\", \"a\", \"\")), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "BLANKRESULT"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_be_upper#0",
+  "formula": "IF(ISBLANK(UPPER(\"\")), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "BLANKRESULT"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_be_concat#0",
+  "formula": "IF(ISBLANK(\"\" & \"\"), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "BLANKRESULT"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8_be_text_blank#0",
+  "formula": "IF(ISBLANK(TEXT(pw8bn__c)), \"BLANKRESULT\", \"VALUERESULT\")",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw8bn__c",
+    "type": "Number",
+    "value": null
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "BLANKRESULT"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8b_flush_05_130#0",
+  "formula": "TEXT(0.5 ^ 130)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8b_flush_05_131#0",
+  "formula": "TEXT(0.5 ^ 131)",
+  "dataType": "Text",
+  "fields": [],
+  "blankMode": "blank",
+  "expected": "0"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8b_recip_big_term#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.5"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-145"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8b_recip_big_nonterm#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-81"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8c_nonterm_19#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-19"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "8603915972.377323939966771693722510719698"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8c_nonterm_40#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-40"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "822526333996995908128.205840060725024038"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8c_nonterm_60#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-60"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "23589824875925728570110287127578.69837786"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8c_nonterm_76#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-76"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8c_nonterm_78#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-78"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "null"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8d_nonterm_64#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-64"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "2912324058756262786433368781182555.355291"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8d_nonterm_68#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-68"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "359546180093365776102885034713895722.8755"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8d_nonterm_72#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-72"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "44388417295477256308998152433814286774.75"
+ },
+ {
+  "source": "org:00Dbm00000rUEa5EAG:2026-07-29",
+  "name": "semantics:pw8d_nonterm_74#0",
+  "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+  "dataType": "Text",
+  "fields": [
+   {
+    "name": "pw6na__c",
+    "type": "Number",
+    "value": "0.3"
+   },
+   {
+    "name": "pw6nb__c",
+    "type": "Number",
+    "value": "-74"
+   }
+  ],
+  "blankMode": "blank",
+  "expected": "null"
  }
 ]

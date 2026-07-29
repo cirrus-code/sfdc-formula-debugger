@@ -202,7 +202,9 @@ function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
   switch (node.op) {
     case "&":
       // Materialize numeric operands so a concatenated Number shows 32 places.
-      return text(concatString(materialize(l)) + concatString(materialize(r)));
+      return normalizeEmptyText(
+        text(concatString(materialize(l)) + concatString(materialize(r))),
+      );
     case "+":
       // Salesforce '+' concatenates when both operands are text. A single blank
       // operand absorbs to "" like '&', but blank + blank stays null
@@ -211,7 +213,7 @@ function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
         if (l.blank && r.blank) {
           return blank("Text");
         }
-        return text(concatString(l) + concatString(r));
+        return normalizeEmptyText(text(concatString(l) + concatString(r)));
       }
       return arithmetic(node.op, l, r, env);
     case "-":
@@ -301,32 +303,30 @@ function arithmetic(
  * numeric literals — see isFoldedNumericLiteral):
  *
  * FOLDED, b ≥ 0: the exact value rounded to 18 SIGNIFICANT digits, HALF_UP —
- * digit-exact across twelve probes (3^34 exact at 17 digits, which no IEEE
- * double can produce; 3^39/7^25/6^30/2^90/2^100/3^40/1.5^350/0.7^80/
- * 0.23^25/0.5^73/0.5^76), refuting an earlier IEEE-double reading of 2^100
- * and 3^40. Nothing is ever tail-truncated (0.5^76 keeps all 18 digits
- * through place 40, pw7_clamp_05_76, killing a scale-clamp reading): a
- * folded value is either kept whole or FLUSHED to zero. Every flushed row
- * sits below 5e-40 — i.e. rounds to zero at 39 places (0.5^132 / 0.5^135 /
- * 0.1^41 / 0.5^200) — and every kept row is ≥ 1.32e-23 (0.5^76); the
- * bracket between is unprobed and refuses.
+ * digit-exact across sixteen probes (3^34 exact at 17 digits, which no IEEE
+ * double can produce; the pw5_dbl/pw6_clamp/pw7_clamp/pw8_flush series),
+ * refuting an earlier IEEE-double reading of 2^100 and 3^40. Nothing is
+ * ever tail-truncated (0.5^76 keeps all 18 digits through place 40): a
+ * folded value is kept whole unless it rounds to zero at 39 decimal
+ * places, in which case it FLUSHES to zero — every kept row down to
+ * 0.5^129 ≈ 1.5e-39 renders in full and every flushed row is below 5e-40
+ * (pw8_flush bisect; pw8b boundary probes at 0.5^130/131 straddle the
+ * line itself).
  *
  * RUNTIME (one field operand suffices, pw6_rt_mixed) and every negative
  * exponent in either path: decimal at SCALE 42, HALF_UP — field-valued
  * 0.7^80 / 0.5^132 / 3^-25 and literal 3^-25 / 7^-20 / 9^-30 are all
  * digit-exact at place 42, field-valued 3^40 returns the exact integer
- * (pw6_rt_int) where the folded form rounds to …800, 1.00596^240's 39
- * rendered digits are the TEXT 39-sig budget over a scale-42 value (#18),
- * and (1e-13)^1000 → 0 falls out of the scale (#20). The carry has a
- * PRECISION limit: 43 significant digits compute (#18) but field-valued
- * 7^55 (47 digits, well under the magnitude cap) is a runtime error
- * (pw7_rt_bigsig) — 44–46 digits are unprobed and refuse; ≥ 47 errors
- * under every candidate limit. Results at 10 or above take an exact BigInt
- * path so the true significance is known (negative exponents there are
- * non-terminating and refuse). Computed on decimal.js's 40-sig carry, so
- * digits past 40 significant places can double-round at the quantize
- * boundary — unobservable through the 39/40-sig TEXT budget and the
- * 32-place materialization.
+ * (pw6_rt_int) where the folded form rounds to …800, and (1e-13)^1000 → 0
+ * falls out of the scale (#20). EXACT results are limited to 43
+ * significant digits: #18 (43 sigs at scale 42) computes while 7^52 / 7^53
+ * / 7^54 / 7^55 (44–47 digits) are runtime errors (pw7_rt_bigsig,
+ * pw8_prec_* bisect). Non-terminating values escape the limit by rounding:
+ * field-valued 0.3^-5 needs 45 places-worth of digits yet computes,
+ * rendering as the TEXT 39-sig budget over a rounded carry
+ * (pw8_recip_rt_nonterm). Terminating reciprocals behave like positive
+ * exponents (0.5^-10 = 1024 in both paths, pw8_recip_*_dyadic) and go
+ * through the same exact path.
  *
  * CAP: |result| > 1e64 is a runtime #Error! in both paths and both
  * exponent signs (literal owb/owb2/owc bisects; field-valued 10^80,
@@ -337,11 +337,14 @@ function arithmetic(
  */
 const POW_CAP = new Decimal("1e64");
 const POW_SCALE = 42;
-// Verified flush/keep boundary bracket for folded deep fractions: all
-// flushed rows round to zero at 39 places (< 5e-40), the smallest kept row
-// is 0.5^76 ≈ 1.32e-23.
-const POW_FOLD_FLUSH = new Decimal("5e-40");
-const POW_FOLD_KEEP = new Decimal("1.3e-23");
+// A folded result flushes to zero when its first significant digit sits
+// beyond place 39 — truncation, not rounding: 0.5^130 ≈ 7.35e-40 flushes
+// even though it would round up to 1e-39, while 0.5^129 ≈ 1.47e-39 keeps
+// all 18 digits (pw8b straddle).
+const POW_FOLD_FLUSH = new Decimal("1e-39");
+// Exact runtime results carry at most 43 significant digits (pw8_prec
+// bisect: 43 computes, 44 errors).
+const POW_EXACT_SIG_LIMIT = 43;
 
 function powProduct(a: Decimal, b: Decimal, folded: boolean): EvalResult {
   const raw = a.pow(b);
@@ -356,30 +359,36 @@ function powProduct(a: Decimal, b: Decimal, folded: boolean): EvalResult {
     if (sig.abs().lessThan(POW_FOLD_FLUSH)) {
       return num(0);
     }
-    if (sig.abs().lessThan(POW_FOLD_KEEP)) {
-      throw new UnsupportedError("^");
-    }
     return num(sig);
   }
   if (raw.abs().greaterThan(POW_CAP)) {
     return error("#Error! (^ result exceeds 1e64)");
   }
-  // Values below 10 need at most 1 + 42 significant digits at scale 42 —
-  // inside the verified 43-digit carry. Larger values may need more than
-  // decimal.js's 40-sig carry can even represent, so their true significance
-  // is computed exactly (BigInt) rather than read off the rounded value.
+  // Values below 10 fit scale 42 inside the 43-digit budget by
+  // construction. Larger values may not, and decimal.js's rounded 40-sig
+  // carry cannot even measure their true significance — so they go through
+  // an exact BigInt path (terminating values) or round like the org does
+  // (non-terminating reciprocals).
   if (raw.e >= 1) {
-    const exact = b.isNegative() ? null : exactPow(a, b.toNumber());
+    const exact = exactPow(a, b);
+    if (exact === "nonterminating") {
+      // The org rounds non-terminating reciprocals on a 40-plus-digit carry
+      // rather than erroring (0.3^-5 through 0.3^-72 compute digit-exactly
+      // against a >=40-sig rounding), up to a magnitude line at 1e38:
+      // 38 integer digits compute and 39 error — adjacent pw8c/pw8d probes,
+      // Oracle NUMBER's precision-38 ceiling showing through.
+      if (raw.e >= 38) {
+        return error("#Error! (^ result exceeds the numeric precision limit)");
+      }
+      return num(raw);
+    }
     if (exact === null) {
       throw new UnsupportedError("^");
     }
     const scaled = exact.toDecimalPlaces(POW_SCALE, Decimal.ROUND_HALF_UP);
     const sigCount = scaled.isZero() ? 0 : scaled.precision();
-    if (sigCount >= 47) {
+    if (sigCount > POW_EXACT_SIG_LIMIT) {
       return error("#Error! (^ result exceeds the numeric precision limit)");
-    }
-    if (sigCount > 43) {
-      throw new UnsupportedError("^");
     }
     return num(scaled);
   }
@@ -387,22 +396,52 @@ function powProduct(a: Decimal, b: Decimal, folded: boolean): EvalResult {
 }
 
 /**
- * Exact a^b for a non-negative integer exponent, as an unrounded Decimal
- * (the constructor does not round; only operations do). Null when the exact
- * form would be unreasonably large to compute — such results are far outside
- * anything org-verified anyway.
+ * Exact a^b as an unrounded Decimal (the constructor does not round; only
+ * operations do). Negative exponents are exact when the reciprocal
+ * terminates — the base's significand has no prime factors beyond 2 and 5;
+ * "nonterminating" reports the (infinite) cases the org rounds instead.
+ * Null means the exact form is unreasonably large to compute, so the true
+ * significance cannot be verified at all.
  */
-function exactPow(a: Decimal, b: number): Decimal | null {
+function exactPow(a: Decimal, b: Decimal): Decimal | "nonterminating" | null {
   const fixed = a.toFixed();
   const neg = fixed.startsWith("-");
-  const digits = (neg ? fixed.slice(1) : fixed).replace(".", "");
+  const digitStr = (neg ? fixed.slice(1) : fixed).replace(".", "");
   const k = a.decimalPlaces();
-  if (b > 5000 || k * b > 10_000) {
+  const m = Math.abs(b.toNumber());
+  if (m > 5000 || k * m > 10_000) {
     return null;
   }
-  const n = BigInt(digits) ** BigInt(b);
-  const scale = k * b;
-  const sign = neg && b % 2 === 1 ? "-" : "";
+  const sign = neg && m % 2 === 1 ? "-" : "";
+  if (!b.isNegative()) {
+    const n = BigInt(digitStr) ** BigInt(m);
+    return decimalFromScaled(sign, n, k * m);
+  }
+  // a^-m = 10^(k·m) / n^m, terminating iff n = 2^i · 5^j.
+  let n = BigInt(digitStr);
+  let twos = 0;
+  let fives = 0;
+  while (n % 2n === 0n) {
+    n /= 2n;
+    twos += 1;
+  }
+  while (n % 5n === 0n) {
+    n /= 5n;
+    fives += 1;
+  }
+  if (n !== 1n) {
+    return "nonterminating";
+  }
+  const extra = m * Math.max(twos, fives);
+  if (k * m + extra > 10_000) {
+    return null;
+  }
+  const denom = BigInt(digitStr) ** BigInt(m);
+  const scaled = 10n ** BigInt(k * m + extra) / denom;
+  return decimalFromScaled(sign, scaled, extra);
+}
+
+function decimalFromScaled(sign: string, n: bigint, scale: number): Decimal {
   let s = n.toString();
   if (scale === 0) {
     return new Decimal(sign + s);
@@ -552,6 +591,22 @@ function isTextType(v: SfValue): boolean {
   );
 }
 
+/**
+ * The org's value domain has no empty-text state distinct from blank: every
+ * text-producing operation that comes out empty reads back as blank and
+ * ISBLANK sees blank (org-verified, pw8_be_* riders — including "" & "",
+ * TRIM(" "), UPPER("") and SUBSTITUTE deleting everything). Operation
+ * results normalize accordingly. A bare "" literal is left as-is — the two
+ * states are indistinguishable anyway (ISBLANK("") is true and blank text
+ * compares as "").
+ */
+function normalizeEmptyText(v: EvalResult): EvalResult {
+  if (!isError(v) && !v.blank && isTextType(v) && asText(v) === "") {
+    return blank(v.type);
+  }
+  return v;
+}
+
 function strcmp(a: string, b: string): number {
   if (a < b) {
     return -1;
@@ -642,7 +697,7 @@ function evalCall(node: FunctionCall, env: EvalEnv): EvalResult {
 
   const special = SPECIAL_FORMS[spec.name];
   if (special) {
-    return special(node.args, env, evaluate);
+    return normalizeEmptyText(special(node.args, env, evaluate));
   }
 
   const args: SfValue[] = [];
@@ -677,5 +732,5 @@ function evalCall(node: FunctionCall, env: EvalEnv): EvalResult {
   if (!impl) {
     throw new UnsupportedError(spec.name);
   }
-  return impl(args, env);
+  return normalizeEmptyText(impl(args, env));
 }

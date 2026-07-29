@@ -268,6 +268,16 @@ describe("engine: three-valued comparison under blank semantics (oracle-verified
 });
 
 describe("engine: blank propagation through functions (oracle-verified)", () => {
+  it("normalizes empty text results to blank (org-verified, pw8_be_*)", () => {
+    // The org has no empty-text state distinct from blank — every
+    // empty-producing operation reads back blank through ISBLANK.
+    expect(b('ISBLANK("" & "")')).toBe(true);
+    expect(b('ISBLANK(TRIM(" "))')).toBe(true);
+    expect(b('ISBLANK(UPPER(""))')).toBe(true);
+    expect(b('ISBLANK(SUBSTITUTE("a", "a", ""))')).toBe(true);
+    expect(b('ISBLANK(MID("ab", 1, 0))')).toBe(true);
+  });
+
   it("propagates blanks typed by the function's return type", () => {
     // A blank flowing out of a Text function keeps text semantics: it
     // absorbs into `+` concatenation and compares as "" — the org-verified
@@ -482,14 +492,50 @@ describe("engine: ^ semantics (org-verified, wave-4/5 bisects)", () => {
     ).toBe(true);
   });
 
-  it("refuses the unverified slivers rather than guessing", () => {
-    // A folded deep fraction inside the unprobed flush/keep bracket
-    // (5e-40, 1.32e-23).
-    expect(() => ev("TEXT(0.5 ^ 120)")).toThrow(UnsupportedError);
-    // A runtime result of 44 significant digits — between the verified
-    // 43-digit compute (#18) and the verified 47-digit error (7^55).
+  it("applies the org's flush, precision, and rounding rules (wave 8)", () => {
+    // Folded deep fractions keep all 18 digits down to the 39-place
+    // rounding line (pw8_flush bisect)…
+    expect(s("TEXT(0.5 ^ 120)")).toBe(
+      "0.000000000000000000000000000000000000752316384526264005",
+    );
+    expect(s("TEXT(0.5 ^ 129)")).toBe(
+      "0.00000000000000000000000000000000000000146936793852785938",
+    );
+    // …exact runtime results error past 43 significant digits (pw8_prec
+    // bisect: 44 errors where 43 computes)…
+    expect(
+      isError(ev("N1 ^ N2", { fields: { N1: num("7"), N2: num("52") } })),
+    ).toBe(true);
+    // …terminating reciprocals go through the exact path in both
+    // compile paths (pw8_recip_*_dyadic)…
+    expect(s("TEXT(0.5 ^ -10)")).toBe("1024");
+    expect(
+      s("TEXT(N1 ^ N2)", { fields: { N1: num("0.5"), N2: num("-10") } }),
+    ).toBe("1024");
+    // …and non-terminating reciprocals round instead of erroring, rendered
+    // through the TEXT 39/40-sig budget (pw8_recip_rt_nonterm, pw8c/pw8d) —
+    // up to the 1e38 magnitude line, where they error.
+    expect(
+      s("TEXT(N1 ^ N2)", { fields: { N1: num("0.3"), N2: num("-5") } }),
+    ).toBe("411.522633744855967078189300411522633745");
+    expect(
+      s("TEXT(N1 ^ N2)", { fields: { N1: num("0.3"), N2: num("-72") } }),
+    ).toBe("44388417295477256308998152433814286774.75");
+    expect(
+      isError(ev("N1 ^ N2", { fields: { N1: num("0.3"), N2: num("-74") } })),
+    ).toBe(true);
+    // Terminating reciprocals share the exact path's 43-digit limit
+    // (pw8b_recip_big_term: 0.5^-145 = 2^145, 44 digits, errors).
+    expect(
+      isError(ev("N1 ^ N2", { fields: { N1: num("0.5"), N2: num("-145") } })),
+    ).toBe(true);
+  });
+
+  it("refuses only what cannot be verified exactly", () => {
+    // A base so close to 1 that the exact form is too large to compute —
+    // the true significance of the result cannot be confirmed.
     expect(() =>
-      ev("N1 ^ N2", { fields: { N1: num("7"), N2: num("52") } }),
+      ev("N1 ^ N2", { fields: { N1: num("1.001"), N2: num("7000") } }),
     ).toThrow(UnsupportedError);
   });
 });

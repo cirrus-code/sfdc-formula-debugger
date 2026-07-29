@@ -1272,6 +1272,358 @@
       "formula": "IF(ISBLANK(VALUE(\" \")), \"BLANKRESULT\", \"VALUERESULT\")",
       "returns": "Text",
       "expectSaveError": "maybe"
+    },
+    {
+      "id": "pw8_flush_05_80",
+      "question": "Wave-8 flush bisect: 0.5^80 ≈ 8.3e-25 — kept 18 digits ⇒ boundary below 8.3e-25; 0 ⇒ above.",
+      "formula": "TEXT(0.5 ^ 80)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw8_flush_05_100",
+      "question": "Wave-8 flush bisect: 0.5^100 ≈ 7.9e-31.",
+      "formula": "TEXT(0.5 ^ 100)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw8_flush_05_120",
+      "question": "Wave-8 flush bisect: 0.5^120 ≈ 7.5e-37.",
+      "formula": "TEXT(0.5 ^ 120)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw8_flush_05_129",
+      "question": "Wave-8 flush bisect: 0.5^129 ≈ 1.5e-39 — the last magnitude above the rounds-to-zero-at-39-places line (5e-40). Kept ⇒ the flush IS the 39-place rounding; 0 ⇒ a higher floor.",
+      "formula": "TEXT(0.5 ^ 129)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw8_prec_7_52",
+      "question": "Wave-8 precision bisect: field 7^52 = 44 sig digits. Digits ⇒ limit ≥ 44; null ⇒ limit is 44.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "7"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "52"
+        }
+      }
+    },
+    {
+      "id": "pw8_prec_7_53",
+      "question": "Wave-8 precision bisect: field 7^53 = 45 sig digits.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "7"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "53"
+        }
+      }
+    },
+    {
+      "id": "pw8_prec_7_54",
+      "question": "Wave-8 precision bisect: field 7^54 = 46 sig digits.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "7"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "54"
+        }
+      }
+    },
+    {
+      "id": "pw8_recip_lit_dyadic",
+      "question": "Wave-8: literal 0.5^-10 = 1024 exactly (terminating reciprocal ≥ 10) — computes, or errors like large non-terminating reciprocals would?",
+      "formula": "TEXT(0.5 ^ -10)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw8_recip_rt_dyadic",
+      "question": "Wave-8: field 0.5^-10 — runtime terminating reciprocal.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.5"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-10"
+        }
+      }
+    },
+    {
+      "id": "pw8_recip_rt_nonterm",
+      "question": "Wave-8: field 0.3^-5 ≈ 411.52… — non-terminating, needs 45 sigs at scale 42; probes the precision limit from the negative-exponent side.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-5"
+        }
+      }
+    },
+    {
+      "id": "pw8_be_left0",
+      "formula": "IF(ISBLANK(LEFT(\"ab\", 0)), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "question": "Wave-8 blank-vs-empty: does a zero-length LEFT yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+    },
+    {
+      "id": "pw8_be_mid0",
+      "formula": "IF(ISBLANK(MID(\"ab\", 1, 0)), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "question": "Wave-8 blank-vs-empty: does a zero-length MID yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+    },
+    {
+      "id": "pw8_be_right0",
+      "formula": "IF(ISBLANK(RIGHT(\"ab\", 0)), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "question": "Wave-8 blank-vs-empty: does a zero-length RIGHT yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+    },
+    {
+      "id": "pw8_be_trim",
+      "formula": "IF(ISBLANK(TRIM(\" \")), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "question": "Wave-8 blank-vs-empty: does TRIM of pure whitespace yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+    },
+    {
+      "id": "pw8_be_substitute",
+      "formula": "IF(ISBLANK(SUBSTITUTE(\"a\", \"a\", \"\")), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "question": "Wave-8 blank-vs-empty: does SUBSTITUTE that deletes everything yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+    },
+    {
+      "id": "pw8_be_upper",
+      "formula": "IF(ISBLANK(UPPER(\"\")), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "question": "Wave-8 blank-vs-empty: does UPPER of an empty literal yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+    },
+    {
+      "id": "pw8_be_concat",
+      "formula": "IF(ISBLANK(\"\" & \"\"), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "question": "Wave-8 blank-vs-empty: does concatenating two empty strings yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+    },
+    {
+      "id": "pw8_be_text_blank",
+      "formula": "IF(ISBLANK(TEXT(pw8bn__c)), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "question": "Wave-8 blank-vs-empty: TEXT of a blank Number field — blank (oracle, testTextFunctionWithCustomDate analogue) or empty text?",
+      "fields": {
+        "pw8bn__c": {
+          "type": "Number",
+          "value": null
+        }
+      }
+    },
+    {
+      "id": "pw8b_flush_05_130",
+      "question": "Wave-8b flush boundary: 0.5^130 ≈ 7.35e-40, just ABOVE the 5e-40 rounds-to-zero-at-39-places line — kept ⇒ the line is the rule.",
+      "formula": "TEXT(0.5 ^ 130)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw8b_flush_05_131",
+      "question": "Wave-8b flush boundary: 0.5^131 ≈ 3.67e-40, just BELOW 5e-40 — 0 ⇒ the line is the rule.",
+      "formula": "TEXT(0.5 ^ 131)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw8b_recip_big_term",
+      "question": "Wave-8b: field 0.5^-145 = 2^145 (44 digits, terminating) — null ⇒ the 43-sig limit binds terminating reciprocals like positive exponents; digits ⇒ reciprocals escape it.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.5"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-145"
+        }
+      }
+    },
+    {
+      "id": "pw8b_recip_big_nonterm",
+      "question": "Wave-8b: field 0.3^-81 ≈ 1.7e42 (non-terminating) — digits ⇒ big non-terminating reciprocals round like 0.3^-5; null ⇒ a magnitude line exists for them.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-81"
+        }
+      }
+    },
+    {
+      "id": "pw8c_nonterm_19",
+      "question": "Wave-8c non-terminating reciprocal bisect: field 0.3^-19 ≈ 1e9 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e9. Straddles the 40-integer-digit hypothesis at m=76/78.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-19"
+        }
+      }
+    },
+    {
+      "id": "pw8c_nonterm_40",
+      "question": "Wave-8c non-terminating reciprocal bisect: field 0.3^-40 ≈ 1e20 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e20. Straddles the 40-integer-digit hypothesis at m=76/78.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-40"
+        }
+      }
+    },
+    {
+      "id": "pw8c_nonterm_60",
+      "question": "Wave-8c non-terminating reciprocal bisect: field 0.3^-60 ≈ 1e31 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e31. Straddles the 40-integer-digit hypothesis at m=76/78.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-60"
+        }
+      }
+    },
+    {
+      "id": "pw8c_nonterm_76",
+      "question": "Wave-8c non-terminating reciprocal bisect: field 0.3^-76 ≈ 1e39 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e39. Straddles the 40-integer-digit hypothesis at m=76/78.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-76"
+        }
+      }
+    },
+    {
+      "id": "pw8c_nonterm_78",
+      "question": "Wave-8c non-terminating reciprocal bisect: field 0.3^-78 ≈ 1e40 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e40. Straddles the 40-integer-digit hypothesis at m=76/78.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-78"
+        }
+      }
+    },
+    {
+      "id": "pw8d_nonterm_64",
+      "question": "Wave-8d: field 0.3^-64 — 34 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-64"
+        }
+      }
+    },
+    {
+      "id": "pw8d_nonterm_68",
+      "question": "Wave-8d: field 0.3^-68 — 36 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-68"
+        }
+      }
+    },
+    {
+      "id": "pw8d_nonterm_72",
+      "question": "Wave-8d: field 0.3^-72 — 38 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-72"
+        }
+      }
+    },
+    {
+      "id": "pw8d_nonterm_74",
+      "question": "Wave-8d: field 0.3^-74 — 39 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-74"
+        }
+      }
     }
   ]
 }

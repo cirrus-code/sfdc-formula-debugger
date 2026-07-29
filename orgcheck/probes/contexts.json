@@ -1,47 +1,99 @@
 {
   "$comment": "Wave-2 manifest: per-context availability probes. The function matrix itself is derived from src/registry/functions.ts (one registry — rule 8); this file holds only what cannot be derived: invocation overrides for functions whose minimal call needs shaping, the global-variable probes, and the runtime validation-rule probes. Placeholders: {T:Type} resolves to a typed input field on containers that can reference fields, else a literal; {F:Type} requires a real field reference (probe is untestable in containers without fields).",
-
   "invocationOverrides": {
-    "CASE": { "formula": "CASE({T:Number}, 1, \"a\", \"b\")", "returns": "Text" },
-    "ISPICKVAL": { "formula": "ISPICKVAL({F:Picklist}, \"a\")", "returns": "Boolean" },
-    "IN": { "formula": "IN({T:Text}, \"a\", \"b\")", "returns": "Boolean" },
-    "TEXT": { "formula": "TEXT({T:Number})", "returns": "Text" },
-    "TRUNC": { "formula": "TRUNC({T:Number}, 0)", "returns": "Number" },
+    "CASE": {
+      "formula": "CASE({T:Number}, 1, \"a\", \"b\")",
+      "returns": "Text"
+    },
+    "ISPICKVAL": {
+      "formula": "ISPICKVAL({F:Picklist}, \"a\")",
+      "returns": "Boolean"
+    },
+    "IN": {
+      "formula": "IN({T:Text}, \"a\", \"b\")",
+      "returns": "Boolean"
+    },
+    "TEXT": {
+      "formula": "TEXT({T:Number})",
+      "returns": "Text"
+    },
+    "TRUNC": {
+      "formula": "TRUNC({T:Number}, 0)",
+      "returns": "Number"
+    },
     "VLOOKUP": {
       "formula": "VLOOKUP($ObjectType.FxRt__c.Fields.Gate__c, $ObjectType.FxRt__c.Fields.Name, {T:Text})",
       "returns": "Text",
-      "taint": ["$ObjectType"],
+      "taint": [
+        "$ObjectType"
+      ],
       "$comment": "VLOOKUP resolves only custom-object fields, and the match field must be the object's Name field — standard-object references reject with field-does-not-exist."
     },
-    "PRIORVALUE": { "formula": "PRIORVALUE({F:Text})", "returns": "Text" },
-    "ISCHANGED": { "formula": "ISCHANGED({F:Text})", "returns": "Boolean" },
+    "PRIORVALUE": {
+      "formula": "PRIORVALUE({F:Text})",
+      "returns": "Text"
+    },
+    "ISCHANGED": {
+      "formula": "ISCHANGED({F:Text})",
+      "returns": "Boolean"
+    },
     "DISTANCE": {
       "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")",
       "returns": "Number",
-      "taint": ["GEOLOCATION"]
+      "taint": [
+        "GEOLOCATION"
+      ]
     },
     "GEOLOCATION": {
       "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")",
       "returns": "Number",
-      "taint": ["DISTANCE"],
+      "taint": [
+        "DISTANCE"
+      ],
       "$comment": "A bare GEOLOCATION() has no context-legal standalone position; the pair is probed jointly, conflation marked by taint both ways."
     },
-    "JUNCTIONIDLIST": { "formula": "JUNCTIONIDLIST({T:Text}, {T:Text})", "returns": "Text" },
-    "UNIXTIMESTAMP": { "formula": "UNIXTIMESTAMP({T:Datetime})", "returns": "Number" }
+    "JUNCTIONIDLIST": {
+      "formula": "JUNCTIONIDLIST({T:Text}, {T:Text})",
+      "returns": "Text"
+    },
+    "UNIXTIMESTAMP": {
+      "formula": "UNIXTIMESTAMP({T:Datetime})",
+      "returns": "Number"
+    }
   },
-
   "globals": [
-    { "name": "$User", "formula": "$User.Alias", "returns": "Text" },
-    { "name": "$Profile", "formula": "$Profile.Name", "returns": "Text" },
-    { "name": "$UserRole", "formula": "$UserRole.Name", "returns": "Text" },
-    { "name": "$Organization", "formula": "$Organization.Name", "returns": "Text" },
+    {
+      "name": "$User",
+      "formula": "$User.Alias",
+      "returns": "Text"
+    },
+    {
+      "name": "$Profile",
+      "formula": "$Profile.Name",
+      "returns": "Text"
+    },
+    {
+      "name": "$UserRole",
+      "formula": "$UserRole.Name",
+      "returns": "Text"
+    },
+    {
+      "name": "$Organization",
+      "formula": "$Organization.Name",
+      "returns": "Text"
+    },
     {
       "name": "$Setup",
       "formula": "$Setup.FxSet__c.Val__c",
       "returns": "Text",
       "support": "FxSet__c"
     },
-    { "name": "$Label", "formula": "$Label.FxLbl", "returns": "Text", "support": "FxLbl" },
+    {
+      "name": "$Label",
+      "formula": "$Label.FxLbl",
+      "returns": "Text",
+      "support": "FxLbl"
+    },
     {
       "name": "$Permission",
       "formula": "$Permission.FxPerm",
@@ -54,16 +106,25 @@
       "returns": "Text",
       "support": "FxMeta__mdt"
     },
-    { "name": "$System", "formula": "$System.OriginDateTime", "returns": "Datetime" },
-    { "name": "$Api", "formula": "$Api.Session_ID", "returns": "Text" },
+    {
+      "name": "$System",
+      "formula": "$System.OriginDateTime",
+      "returns": "Datetime"
+    },
+    {
+      "name": "$Api",
+      "formula": "$Api.Session_ID",
+      "returns": "Text"
+    },
     {
       "name": "$Flow",
       "formula": "$Flow.CurrentDate",
       "returns": "Date",
-      "containers": ["flow_formula"]
+      "containers": [
+        "flow_formula"
+      ]
     }
   ],
-
   "flowValueProbes": [
     {
       "id": "fv_htmlencode",
@@ -102,7 +163,6 @@
       "question": "Wave-3: BR() rendering seen from a flow interview (cross-check the formula-field probe)."
     }
   ],
-
   "fieldUpdateProbes": [
     {
       "id": "wfu_canary",
@@ -135,7 +195,6 @@
       "question": "Wave-4: text = case sensitivity at field-update runtime."
     }
   ],
-
   "approvalRuntimeProbes": [
     {
       "id": "ae_canary",
@@ -222,7 +281,6 @@
         "NO_PROCESS": "case-sensitive, same as formula fields"
       }
     },
-
     {
       "id": "as_canary",
       "context": "approval_step",
@@ -300,9 +358,52 @@
       "interpret": {
         "SUBMITTED": "Pending/1 means case-INsensitive; Approved/0 means case-sensitive"
       }
+    },
+    {
+      "id": "ae_sc_and",
+      "context": "approval_entry",
+      "object": "FxApEsa__c",
+      "formula": "AND(1 = 2, (1 / 0) = 1)",
+      "question": "Wave-8: does AND short-circuit past a runtime error in entry criteria (VR: yes)? Isolated object — if evaluation is eager, this criteria would poison every other submission on it.",
+      "interpret": {
+        "NO_PROCESS": "AND short-circuits — the false first operand ends evaluation and the criteria reads false",
+        "REFUSED": "eager evaluation — the div-by-zero fires despite the false first operand"
+      }
+    },
+    {
+      "id": "ae_sc_or",
+      "context": "approval_entry",
+      "object": "FxApEso__c",
+      "formula": "OR(1 = 1, (1 / 0) = 1)",
+      "question": "Wave-8: does OR short-circuit past a runtime error in entry criteria (VR: yes)?",
+      "interpret": {
+        "SUBMITTED": "OR short-circuits — the true first operand accepts without evaluating the error",
+        "REFUSED": "eager evaluation"
+      }
+    },
+    {
+      "id": "as_sc_and",
+      "context": "approval_step",
+      "object": "FxApSsa__c",
+      "formula": "AND(1 = 2, (1 / 0) = 1)",
+      "question": "Wave-8: AND short-circuit in step criteria — compare against as_false's Approved/0 skip baseline.",
+      "interpret": {
+        "SUBMITTED": "read instanceStatus/workitems: Approved/0 means the criteria short-circuited to false (step skipped)",
+        "REFUSED": "eager evaluation — the error blocks the submit"
+      }
+    },
+    {
+      "id": "as_sc_or",
+      "context": "approval_step",
+      "object": "FxApSso__c",
+      "formula": "OR(1 = 1, (1 / 0) = 1)",
+      "question": "Wave-8: OR short-circuit in step criteria.",
+      "interpret": {
+        "SUBMITTED": "Pending/1 means the criteria short-circuited to true (step entered)",
+        "REFUSED": "eager evaluation"
+      }
     }
   ],
-
   "runtimeProbes": [
     {
       "id": "rt_canary_fired",
