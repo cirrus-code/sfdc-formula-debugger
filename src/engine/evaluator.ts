@@ -32,6 +32,7 @@ import {
   concatString,
   dateFromEpoch,
   epochOfDate,
+  isFoldedNumericLiteral,
 } from "./builtins.ts";
 
 export interface EvalEnv {
@@ -216,8 +217,11 @@ function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
     case "-":
     case "*":
     case "/":
-    case "^":
       return arithmetic(node.op, l, r, env);
+    case "^":
+      // The org computes literal-only `^` in a distinct compile-time path
+      // (see powProduct); foldedness is a property of the AST, not the values.
+      return arithmetic(node.op, l, r, env, isFoldedNumericLiteral(node));
     case "=":
     case "==": {
       const eq = tryEqual(l, r);
@@ -245,6 +249,7 @@ function arithmetic(
   l: SfValue,
   r: SfValue,
   env: EvalEnv,
+  foldedPow = false,
 ): EvalResult {
   // A blank operand in date-family arithmetic nulls the result in BOTH
   // modes — the "blanks as zeroes" coercion is numeric-only (org-verified,
@@ -284,52 +289,84 @@ function arithmetic(
       if (!b.isInteger()) {
         return error("#Error! (^ requires an integer exponent)");
       }
-      return powProduct(a, b);
+      return powProduct(a, b, foldedPow);
     default:
       return assertNever(op);
   }
 }
 
 /**
- * `^` per the org (wave-4 probes). Results carry decimal scale 40: 99^-1
- * renders exactly 40 decimal places (owc_99_neg1), and 10^-80 and 0.5^200
- * collapse to 0 (owm_neg_exp, owc_half_pow) even though the same values
- * reached through `/` keep their full scale (owc_div_1e80). Negative
- * exponents have no magnitude cap and never take the double path below
- * (10^-80 evaluates; its 10^80 reciprocal would error). Positive exponents
- * error above 1e64: 10^64 computes, 10^65 / 2^213 / 9^68 error (owb, owb2,
- * owc bisects). Within the cap an INTEGER base runs through an IEEE double
- * org-side — TEXT(2^100) renders the double's 17-digit repr, and 3^40 came
- * back one ulp below the correctly rounded double — so when the exact value
- * survives a double round-trip unchanged we return it, and otherwise refuse
- * rather than guess the org's final-ulp digits. Fractional bases stay
- * decimal (1.00596^240 renders 39 exact digits, testExponentiationOperator#18).
+ * `^` per the org (wave-4/5 probe bisects). The operator has TWO org-side
+ * code paths, split by whether the compiler constant-folds it (both operands
+ * numeric literals — see isFoldedNumericLiteral):
+ *
+ * FOLDED, b ≥ 0: the exact value rounded to 18 SIGNIFICANT digits, HALF_UP —
+ * digit-exact across nine probes (3^34 exact at 17 digits, 3^39/7^25/6^30/
+ * 2^90/2^100/3^40/1.5^350/0.7^80), refuting the earlier IEEE-double reading
+ * of 2^100 and 3^40 (0.7^80's double diverges from the org; the exact-18-sig
+ * value matches). A tail clamp zeroes deep fractions: place 30 survives
+ * (pw5_scale_07_80) and place 40 zeroes (pw5_scale_05_132), so the clamp
+ * lies in [30, 39] decimal places — values the bracket leaves ambiguous are
+ * refused. Results with |value| > 1e64 are runtime errors (10^64 computes;
+ * 10^65, 2^213, 9^68, (10^40)^2 error) — the cap is `^`-only ((10^60)^3 via
+ * `*` computes). (0-10)^65 also errors, but that operand is not provably
+ * folded, so it does not pin which path enforces the cap.
+ *
+ * RUNTIME (any field operand), b ≥ 0: full decimal precision —
+ * 1.00596^240 renders 39 exact significant digits
+ * (testExponentiationOperator#18), which no 18-digit path could produce.
+ * Magnitudes below Oracle NUMBER's 1e-130 floor flush to zero
+ * ((1e-13)^1000 = 0, #20); the region between 1e-130 and our shallowest
+ * verified rendering (~1e-39) is unprobed and refused, as is runtime
+ * overflow past 1e64.
+ *
+ * b < 0 (both paths): decimal at scale 42 — 3^-25, 7^-20, 9^-30 all end at
+ * place 42 digit-exactly; 99^-1's 40 rendered places are the TEXT 39-sig
+ * budget capping a scale-42 value; field-valued (-20)^-40 → 0 (#6) shows
+ * runtime agrees. 10^-80 evaluates (no cap on tiny), but reciprocals larger
+ * than 1e64 are unprobed and refused. 0^negative reads back null — blank vs
+ * #Error! is ambiguous through the readback channel — so it refuses.
  */
 const POW_CAP = new Decimal("1e64");
-const POW_SCALE = 40;
+const POW_NEG_SCALE = 42;
+// Oracle NUMBER cannot represent magnitudes below 1e-130; the org's numeric
+// substrate flushes them to zero (testExponentiationOperator#20).
+const ORACLE_UNDERFLOW = new Decimal("1e-130");
+const RUNTIME_VERIFIED_FLOOR = new Decimal("1e-39");
 
-function powProduct(a: Decimal, b: Decimal): EvalResult {
-  const exact = a
-    .pow(b)
-    .toDecimalPlaces(POW_SCALE, Decimal.ROUND_HALF_UP);
-  if (!exact.isFinite()) {
-    // decimal.js yields ±Infinity for 0 ^ negative; the org's outcome for
-    // that edge is unverified, so refuse rather than pick an error shape.
+function powProduct(a: Decimal, b: Decimal, folded: boolean): EvalResult {
+  const raw = a.pow(b);
+  if (!raw.isFinite()) {
     throw new UnsupportedError("^");
   }
   if (b.isNegative()) {
-    return num(exact);
-  }
-  if (exact.abs().greaterThan(POW_CAP)) {
-    return error("#Error! (^ result exceeds 1e64)");
-  }
-  if (a.isInteger()) {
-    const viaDouble = new Decimal(exact.toNumber());
-    if (!viaDouble.equals(exact)) {
+    if (raw.abs().greaterThan(POW_CAP)) {
       throw new UnsupportedError("^");
     }
+    return num(raw.toDecimalPlaces(POW_NEG_SCALE, Decimal.ROUND_HALF_UP));
   }
-  return num(exact);
+  if (folded) {
+    const sig = raw.toSignificantDigits(18, Decimal.ROUND_HALF_UP);
+    if (sig.abs().greaterThan(POW_CAP)) {
+      return error("#Error! (^ result exceeds 1e64)");
+    }
+    const r30 = sig.toDecimalPlaces(30, Decimal.ROUND_HALF_UP);
+    const r39 = sig.toDecimalPlaces(39, Decimal.ROUND_HALF_UP);
+    if (!r30.equals(r39)) {
+      throw new UnsupportedError("^");
+    }
+    return num(r30);
+  }
+  if (raw.abs().greaterThan(POW_CAP)) {
+    throw new UnsupportedError("^");
+  }
+  if (!raw.isZero() && raw.abs().lessThan(ORACLE_UNDERFLOW)) {
+    return num(0);
+  }
+  if (!raw.isZero() && raw.abs().lessThan(RUNTIME_VERIFIED_FLOOR)) {
+    throw new UnsupportedError("^");
+  }
+  return num(raw);
 }
 
 const DAY_MS = 86_400_000;

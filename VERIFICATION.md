@@ -368,21 +368,35 @@ formerly-refusing functions, now simulated with golden coverage:
   confirmed for a real prefix (`001…` → `…AAA`) but the function *validates*
   its input against the org's key-prefix registry (a 15-char non-ID passes
   through unchanged, `casesafeid_mixed`) — org state a client cannot know.
-- ✅ **`^` fully bisected (wave 4)**: results carry decimal **scale 40** —
-  `99^-1` renders exactly 40 decimal places, and `10^-80` / `0.5^200`
-  collapse to 0 even though the same values reached through `/` keep full
-  scale (`owc_99_neg1`, `owm_neg_exp`, `owc_half_pow` vs `owc_div_1e80`).
-  Positive exponents cap on **result magnitude at 1e64**: `10^64` computes;
-  `10^65`, `2^213` (≈1.3e64) and `9^68` error (`owb`/`owb2`/`owc` bisects).
-  The cap is `^`-only (`(10^60)*(10^60)*(10^60)` = 1e180 computes) and does
-  not apply to negative exponents (`10^-80` evaluates even though its 10^80
-  reciprocal would error). Within the cap an **integer base runs through an
-  IEEE double**: `TEXT(2^100)` renders the double's 17-digit repr, not the
-  exact 31-digit integer, and `3^40` reads back one ulp below the correctly
-  rounded double — so the evaluator returns integer-base results only when
-  the exact value survives a double round-trip unchanged, and refuses
-  otherwise (rule 1). Fractional bases stay exact decimal (`1.00596^240`
-  renders 39 exact digits). The numeric-rendering quarantine is now empty.
+- ✅ **`^` fully bisected (waves 4+5)**: the operator has TWO code paths,
+  split by compile-time constant folding of all-literal operands.
+  **Folded (literal `^` literal), positive exponent: the exact value rounded
+  to 18 significant digits, HALF_UP** — digit-exact across nine wave-5
+  probes (`pw5_dbl_*`: 3^34 comes back exact at 17 digits, which no IEEE
+  double can produce; 3^39/7^25/6^30/2^90/1.5^350/0.7^80 all match
+  exact-18-sig and NOT the double — 0.7^80's double diverges in digit 16).
+  This retracts wave 4's IEEE-double reading of `2^100`/`3^40`: both values
+  coincidentally equal exact-18-sig, and the discriminating probes picked
+  exact-18-sig. Folded fractional results render literal-style (leading zero
+  kept: `TEXT(0.7^80)` = `0.000…`), and a tail clamp zeroes deep fractions —
+  place 30 survives, place 40 zeroes, so the clamp sits in [30, 39] (exact
+  place unpinned; the ambiguous sliver refuses).
+  **Runtime (any field operand), positive exponent: full decimal precision**
+  — field-valued `1.00596^240` renders 39 exact significant digits
+  (`testExponentiationOperator#18`). Magnitudes below Oracle NUMBER's 1e-130
+  floor flush to 0 (`(1e-13)^1000` = 0, #20); between 1e-130 and ~1e-39
+  unprobed (refuses).
+  **Negative exponents, both paths: decimal at scale 42** — `3^-25`,
+  `7^-20`, `9^-30` all end digit-exactly at place 42; `99^-1`'s 40 rendered
+  places are the TEXT 39-sig budget capping a scale-42 value; field-valued
+  `(-20)^-40` → 0 (#6) confirms runtime agrees; `10^-80` → 0.
+  **Cap: results past 1e64 are runtime errors** for literal probes (`10^64`
+  computes; `10^65`/`2^213`/`9^68`/`(10^40)^2` error; `(0-10)^65` errors
+  too but is path-ambiguous); the cap is `^`-only (1e180 via `*` computes)
+  and does not bind tiny negatives. Runtime overflow is unprobed (refuses).
+  **Edges**: `0^0` = 1 in both paths (`pw5_zero_zero`, #1–#3); `0^negative`
+  reads back null — blank vs `#Error!` ambiguous through the channel —
+  refuses pending a rider. The numeric-rendering quarantine remains empty.
 - Flow-context runtime facts: **div-by-zero yields null in a running flow**
   (vs `#Error!` in formula fields and a blocked save in validation rules),
   and **flow formulas reject string literals containing backslashes** at
@@ -510,25 +524,35 @@ ISPICKVAL/INCLUDES coercion ✅, flow-interview runtime channel ✅ (built —
 `flowValueProbes` in `orgcheck/probes/contexts.json`), and the refuse-list
 graduations above.
 
-Wave 4 (2026-07-29) closed: `^` overflow bisect ✅ (scale 40, 1e64 result
-cap, integer-base double path — see the org-pass section), source/compiled
-size limits ✅ (3,900 source / 15,000 compiled, exact), Text output
-truncation at 1,300 chars ✅, WFU runtime channel ✅ (`wfu_*` probes: blocked
-save on div-by-zero, blank mode, case-sensitive `=`), DST closed by analysis
-(datetimes are GMT instants; the org applies no zone arithmetic a client
-must reproduce). Still open:
+Wave 4 (2026-07-29) closed: `^` overflow bisect ✅ (1e64 result cap;
+wave 4's scale-40/IEEE-double model was corrected by wave 5 — see the
+org-pass section), source/compiled size limits ✅ (3,900 source / 15,000
+compiled, exact), Text output truncation at 1,300 chars ✅, WFU runtime
+channel ✅ (`wfu_*` probes: blocked save on div-by-zero, blank mode,
+case-sensitive `=`), DST closed by analysis (datetimes are GMT instants;
+the org applies no zone arithmetic a client must reproduce).
+
+Wave 5 (2026-07-29) closed: the `^` fold/runtime split (18-sig folded, full
+precision runtime, scale-42 negatives — see the org-pass section; the wave-4
+IEEE-double reading is retracted), `0^0` = 1, the negative-base cap
+behavior, and the fractional-base cap (`1.5^400` errors). Still open (pw6
+rider candidates):
 
 - `CASESAFEID` — refusal is likely permanent (org-state prefix validation),
   but a UI-side note could explain the suffix algorithm.
-- `0.5^200` reads back `0`, consistent with the scale-40 rule; more
-  fractional-base/large-exponent pairs (e.g. `1.1^900`) would confirm the
-  rule is scale-40 rounding rather than a separate underflow-to-zero.
-- `0 ^ negative` — unprobed; the evaluator refuses rather than pick an
-  error shape.
+- The folded tail clamp's exact place in [30, 39] — a literal probe whose
+  18-sig value ends between places 31–39 (e.g. `0.23^25`, ends at 33)
+  discriminates; the sliver currently refuses.
+- Runtime `^` overflow (field-valued `10^80`) and the runtime deep-fraction
+  region between 1e-130 and 1e-39.
+- `0 ^ negative` — null readback is blank-vs-error ambiguous; an
+  `IF(ISBLANK(0^-1), …)` rider discriminates. The evaluator refuses.
+- The leading-zero rendering mechanism: fold-based (only `^` results render
+  literal-style) vs scale-based — `TEXT(1/4)` discriminates (".25" = fold
+  model, "0.25" = scale-threshold model), plus a field-valued `0.7^80`.
 - ~~Registry function coverage~~ — closed 2026-07-28: audited against the
   official reference (101 functions registered; 35 added, of which 16
-  corpus-backed and simulated — see the function-port-2 section). Remaining
-  gaps here: golden rows for the refuse-list functions whose semantics are
-  client-reproducible in principle (`CASESAFEID`, the encode family, `BR`,
-  `INCLUDES`, `PICKLISTCOUNT`, `FORMATDURATION`) so they can graduate to
-  simulated.
+  corpus-backed and simulated — see the function-port-2 section). The wave-3
+  graduations closed the client-reproducible refuse list (encode family,
+  `BR`, `INCLUDES`, `PICKLISTCOUNT`, `FORMATDURATION`); `CASESAFEID` is the
+  one deliberate holdout (org-state prefix validation).

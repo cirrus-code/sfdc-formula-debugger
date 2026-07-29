@@ -26,6 +26,33 @@ export type SpecialForm = (
   evaluate: Evaluate,
 ) => EvalResult;
 
+/**
+ * The product's compiler constant-folds `^` when both operands are numeric
+ * literals (parenthesized or nested `^` included), and folded results behave
+ * like literals everywhere downstream — different arithmetic (see powProduct)
+ * AND literal-style TEXT rendering: TEXT(0.7 ^ 80) keeps its leading zero
+ * exactly like TEXT(0.5), while runtime values drop it (org-verified,
+ * pw5_scale_07_80 vs testExponentiationOperator#18). Other operators show no
+ * folding signature (TEXT(1/3) renders as a computed value), so only `^`
+ * chains qualify.
+ */
+export function isFoldedNumericLiteral(e: Expr): boolean {
+  switch (e.kind) {
+    case "NumberLit":
+      return true;
+    case "Paren":
+      return isFoldedNumericLiteral(e.expr);
+    case "BinaryOp":
+      return (
+        e.op === "^" &&
+        isFoldedNumericLiteral(e.left) &&
+        isFoldedNumericLiteral(e.right)
+      );
+    default:
+      return false;
+  }
+}
+
 // --- Coercion helpers ----------------------------------------------------
 
 const ZERO = new Decimal(0);
@@ -568,7 +595,7 @@ export const SPECIAL_FORMS: Record<string, SpecialForm> = {
     // ".99", org-verified (semantics:text_percent_field), not the ×100
     // display convention.
     if (v.type === "Number" || v.type === "Currency" || v.type === "Percent") {
-      return text(renderProductNumber(v.data, args[0]!.kind === "NumberLit"));
+      return text(renderProductNumber(v.data, isFoldedNumericLiteral(args[0]!)));
     }
     if (v.type === "Time") {
       // TEXT(time) always renders the full HH:MM:SS.mmm (oracle-verified,

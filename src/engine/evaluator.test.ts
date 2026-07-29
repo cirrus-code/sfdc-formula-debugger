@@ -7,6 +7,7 @@ import {
   asText,
   blank,
   isError,
+  num,
   UnsupportedError,
   type BlankMode,
   type SfValue,
@@ -361,7 +362,7 @@ describe("engine: ported functions (corpus-verified)", () => {
   });
 });
 
-describe("engine: ^ semantics (org-verified, wave-4 bisect)", () => {
+describe("engine: ^ semantics (org-verified, wave-4/5 bisects)", () => {
   it("computes exact integer powers up to the 1e64 result cap", () => {
     expect(s("TEXT(10 ^ 64)")).toBe(`1${"0".repeat(64)}`);
     expect(s("TEXT(10 ^ 61)")).toBe(`1${"0".repeat(61)}`);
@@ -377,31 +378,72 @@ describe("engine: ^ semantics (org-verified, wave-4 bisect)", () => {
     );
   });
 
-  it("negative exponents compute at scale 40, uncapped", () => {
+  it("folded literal powers round to 18 significant digits", () => {
+    // Exact where 18 digits suffice (pw5_dbl_3_34)…
+    expect(s("TEXT(3 ^ 34)")).toBe("16677181699666569");
+    // …rounded HALF_UP where they don't (pw5_dbl_3_39, owc_3_40, owm_2_100).
+    expect(s("TEXT(3 ^ 39)")).toBe("4052555153018976270");
+    expect(s("TEXT(3 ^ 40)")).toBe("12157665459056928800");
+    expect(s("TEXT(2 ^ 100)")).toBe("1267650600228229400000000000000");
+    // A folded fractional base renders literal-style, leading zero kept
+    // (pw5_scale_07_80).
+    expect(s("TEXT(0.7 ^ 80)")).toBe("0.000000000000405362155971443868");
+  });
+
+  it("negative exponents compute at scale 42 in both paths", () => {
+    // 42 places shown outright (pw5_scale_3_neg25)…
+    expect(s("TEXT(3 ^ -25)")).toBe(
+      ".000000000001180235387157383256511216967589",
+    );
+    // …while 99^-1's scale-42 value hits the TEXT 39-sig budget at 40 places
+    // (owc_99_neg1).
     expect(s("TEXT(99 ^ -1)")).toBe(
       ".0101010101010101010101010101010101010101",
     );
-    // 1e-80 collapses to 0 at scale 40 — via `/` it would keep full scale.
+    // 1e-80 zeroes at scale 42 — the same value via `/` keeps full scale.
     expect(s("TEXT(10 ^ -80)")).toBe("0");
-    expect(s("TEXT(1 / (10 ^ 40) / (10 ^ 40))")).toBe(
-      `.${"0".repeat(79)}1`,
-    );
+    expect(s("TEXT(1 / (10 ^ 40) / (10 ^ 40))")).toBe(`.${"0".repeat(79)}1`);
   });
 
-  it("fractional-base results collapse at scale 40 too", () => {
+  it("folded deep fractions zero out past the tail clamp", () => {
     expect(s("TEXT(0.5 ^ 200)")).toBe("0");
+    expect(s("TEXT(0.5 ^ 132)")).toBe("0");
+    expect(s("TEXT(0.1 ^ 41)")).toBe("0");
   });
 
-  it("refuses integer-base results the org routes through an IEEE double", () => {
-    // TEXT(2^100) org-renders the double's 17-digit repr, and 3^40 one ulp
-    // below the correctly rounded double — final-ulp digits we cannot
-    // faithfully reproduce, so both refuse rather than guess.
-    expect(() => ev("3 ^ 40")).toThrow(UnsupportedError);
-    expect(() => ev("2 ^ 100")).toThrow(UnsupportedError);
+  it("field-valued ^ runs at full decimal precision", () => {
+    const fields = {
+      N1: num("1.00596"),
+      N2: num("240"),
+    };
+    // testExponentiationOperator#18: 39 exact significant digits — no
+    // 18-digit path could produce these.
+    expect(s("TEXT(N1 ^ N2)", { fields })).toBe(
+      "4.16265990153128261843019338536618499848",
+    );
+    // #6: runtime negative exponents share the scale-42 rule.
+    expect(n("N1 ^ N2", { fields: { N1: num("-20"), N2: num("-40") } })).toBe(
+      "0",
+    );
+    // #20: magnitudes below Oracle NUMBER's 1e-130 floor flush to zero.
+    expect(
+      n("N1 ^ N2", { fields: { N1: num("0.0000000000001"), N2: num("1000") } }),
+    ).toBe("0");
+    // #1: 0^0 is 1 at runtime, matching the folded pw5_zero_zero.
+    expect(n("N1 ^ N2", { fields: { N1: num("0"), N2: num("0") } })).toBe("1");
+    expect(n("0 ^ 0")).toBe("1");
   });
 
-  it("refuses 0 ^ negative (unprobed org edge)", () => {
+  it("refuses the unverified slivers rather than guessing", () => {
+    // 0^negative reads back null in the org — blank vs #Error! ambiguous.
     expect(() => ev("0 ^ -1")).toThrow(UnsupportedError);
+    // A folded value whose 18-sig tail lands in the unpinned [30, 39]-place
+    // clamp bracket.
+    expect(() => ev("TEXT(0.23 ^ 25)")).toThrow(UnsupportedError);
+    // Runtime overflow past 1e64 is unprobed (the cap rows are all literal).
+    expect(() =>
+      ev("N1 ^ N2", { fields: { N1: num("10"), N2: num("80") } }),
+    ).toThrow(UnsupportedError);
   });
 });
 

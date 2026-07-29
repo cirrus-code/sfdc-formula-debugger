@@ -978,6 +978,240 @@
       "returns": "Text",
       "expectSaveError": "maybe",
       "noCorpus": true
+    },
+    {
+      "id": "pw5_zero_zero",
+      "question": "Wave-5 ^ edges: 0^0 — 1 (Java/decimal convention), error, or deploy-reject?",
+      "formula": "TEXT(0 ^ 0)",
+      "returns": "Text",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "pw5_zero_neg",
+      "question": "Wave-5 ^ edges: 0^-1 — runtime error (reciprocal of 0), null, or deploy-reject? Evaluator currently refuses.",
+      "formula": "TEXT(0 ^ -1)",
+      "returns": "Text",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "pw5_zero_neg2",
+      "question": "Wave-5 ^ edges: 0^-2 — same as 0^-1 or sign-dependent?",
+      "formula": "TEXT(0 ^ -2)",
+      "returns": "Text",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "pw5_negbase_odd",
+      "question": "Wave-5 ^ edges: negative base, odd exponent — expect -8.",
+      "formula": "TEXT((0 - 2) ^ 3)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_negbase_cap",
+      "question": "Wave-5 ^ cap: (0-10)^65 = -1e65 — does the 1e64 cap apply to |result| (null) or only positive results (renders)?",
+      "formula": "TEXT((0 - 10) ^ 65)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_scale_3_neg25",
+      "question": "Wave-5 ^ scale: 3^-25 ≈ 1.18e-12 — scale-40 truncates to 28 sig digits (ends at dp40); precision-40 renders 39 (TEXT parity budget). THE negative-exponent scale discriminator.",
+      "formula": "TEXT(3 ^ -25)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_scale_7_neg20",
+      "question": "Wave-5 ^ scale: 7^-20 ≈ 1.25e-17 — scale-40 → 23 sig digits; precision-40 → 39/40.",
+      "formula": "TEXT(7 ^ -20)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_scale_9_neg30",
+      "question": "Wave-5 ^ scale: 9^-30 ≈ 2.35e-29 — scale-40 → 12 sig digits; precision-40 → 39/40. Unmistakable midpoint.",
+      "formula": "TEXT(9 ^ -30)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_scale_07_80",
+      "question": "Wave-5 ^ scale, fractional base: 0.7^80 ≈ 4.06e-13 — scale-40 → 28 sig digits; exact/precision-40 → 39/40.",
+      "formula": "TEXT(0.7 ^ 80)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_scale_05_132",
+      "question": "Wave-5 ^ scale: 0.5^132 ≈ 1.837e-40 — scale-40 HALF_UP → .0…02 (one digit at dp40); exact → long string.",
+      "formula": "TEXT(0.5 ^ 132)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_scale_05_135",
+      "question": "Wave-5 ^ scale: 0.5^135 ≈ 2.3e-41 — scale-40 → 0 (like 0.5^200); exact → digits.",
+      "formula": "TEXT(0.5 ^ 135)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_scale_01_41",
+      "question": "Wave-5 ^ scale: 0.1^41 = 1e-41 exactly — scale-40 → 0; any exact path → .0…01 (41 dp).",
+      "formula": "TEXT(0.1 ^ 41)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_frac_cap",
+      "question": "Wave-5 ^ cap: 1.5^400 ≈ 2.7e70 — does the 1e64 result cap bind fractional bases too (null) or only integer bases (renders)? Evaluator currently caps all bases.",
+      "formula": "TEXT(1.5 ^ 400)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_frac_big",
+      "question": "Wave-5 ^ fractional path: 1.5^350 ≈ 3.3e61 (under cap) — decimal renders the exact leading 39/40 digits; a double path would show ~17 digits + zeros.",
+      "formula": "TEXT(1.5 ^ 350)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_dbl_3_34",
+      "question": "Wave-5 ^ double rule: 3^34 = 16677181699666569 exact (just past 2^53). Correctly-rounded-double-at-18-sig → …568; exact decimal → …569.",
+      "formula": "TEXT(3 ^ 34)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_dbl_3_39",
+      "question": "Wave-5 ^ double rule: 3^39 exact …267; correctly-rounded double …256 at 18 sig → …260.",
+      "formula": "TEXT(3 ^ 39)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_dbl_7_25",
+      "question": "Wave-5 ^ double rule: 7^25 = 1341068619663964900807 exact — double-at-18-sig prediction differs in the tail.",
+      "formula": "TEXT(7 ^ 25)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_dbl_6_30",
+      "question": "Wave-5 ^ double rule: 6^30 ≈ 2.21e23 — third independent 18-sig-vs-exact case.",
+      "formula": "TEXT(6 ^ 30)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw5_dbl_2_90",
+      "question": "Wave-5 ^ double rule: 2^90 is double-EXACT (28 digits). 18-sig rendering → …380270…; JS shortest-repr (17) → …380300…. Discriminates 18-sig from shortest-repr.",
+      "formula": "TEXT(2 ^ 90)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw6_clamp_023_25",
+      "question": "Wave-6 rider: folded tail clamp — 0.23^25 ≈ 1.12e-16, 18-sig ends at place 33. Truncated ⇒ clamp ∈[30,32]; full ⇒ ∈[33,39].",
+      "formula": "TEXT(0.23 ^ 25)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw6_paren_lit",
+      "question": "Wave-6 rider: does a parenthesized literal render literal-style? \"0.5\" ⇒ parens fold away; \".5\" ⇒ computed-style.",
+      "formula": "TEXT((0.5))",
+      "returns": "Text"
+    },
+    {
+      "id": "pw6_div_quarter",
+      "question": "Wave-6 rider: leading-zero mechanism — \".25\" ⇒ fold-based (division never folds); \"0.25\" ⇒ scale-threshold rendering.",
+      "formula": "TEXT(1 / 4)",
+      "returns": "Text"
+    },
+    {
+      "id": "pw6_zeroneg_blank",
+      "question": "Wave-6 rider: 0^-1 disambiguation — null ⇒ runtime error; BLANKRESULT ⇒ blank.",
+      "formula": "IF(ISBLANK(0 ^ -1), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "pw6_rt_int",
+      "question": "Wave-6 rider: field-valued 3^40 — exact 12157665459056928801 ⇒ runtime is full decimal precision; …800 ⇒ 18-sig applies at runtime too.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "40"
+        }
+      }
+    },
+    {
+      "id": "pw6_rt_frac",
+      "question": "Wave-6 rider: field-valued 0.7^80 — long 39/40-sig render without leading zero ⇒ runtime full precision + computed-style rendering; 18 digits with leading zero ⇒ folding is value-based, not syntax-based.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.7"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "80"
+        }
+      }
+    },
+    {
+      "id": "pw6_rt_neg",
+      "question": "Wave-6 rider: field-valued 3^-25 — 42 places ⇒ runtime negative exponents share scale 42 (predicted from #6).",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "3"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "-25"
+        }
+      }
+    },
+    {
+      "id": "pw6_rt_cap",
+      "question": "Wave-6 rider: field-valued 10^80 — null ⇒ the 1e64 cap binds at runtime; digits ⇒ cap is fold-only.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "10"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "80"
+        }
+      }
+    },
+    {
+      "id": "pw6_rt_deep",
+      "question": "Wave-6 rider: field-valued 0.5^132 ≈ 1.8e-40 — long render ⇒ runtime keeps deep fractions (clamp is fold-only); 0 ⇒ a runtime scale clamp exists between 1e-40 and 1e-130.",
+      "formula": "TEXT(pw6na__c ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6na__c": {
+          "type": "Number",
+          "value": "0.5"
+        },
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "132"
+        }
+      }
+    },
+    {
+      "id": "pw6_rt_mixed",
+      "question": "Wave-6 rider: literal base, field exponent (0.7 ^ field=80) — runtime-style ⇒ one field operand blocks folding.",
+      "formula": "TEXT(0.7 ^ pw6nb__c)",
+      "returns": "Text",
+      "fields": {
+        "pw6nb__c": {
+          "type": "Number",
+          "value": "80"
+        }
+      }
     }
   ]
 }
