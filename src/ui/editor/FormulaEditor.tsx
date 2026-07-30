@@ -9,7 +9,7 @@ import {
 } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { lintGutter } from "@codemirror/lint";
-import { completionKeymap } from "@codemirror/autocomplete";
+import { completionKeymap, snippet } from "@codemirror/autocomplete";
 // Deep import — keeps the engine-dependent simplifier out of the eager bundle.
 import { format } from "../../features/formatter.ts";
 import { t } from "../../i18n/index.ts";
@@ -20,11 +20,15 @@ import { sfCompletion } from "./completion.ts";
 import { sfHover } from "./hover.ts";
 import { contextField, setContext } from "./contextField.ts";
 
-/** Imperative handle so the parent can trigger a format from a toolbar button
- * or replace the document (the simplifier's Apply). */
+/** Imperative handle so the parent can trigger a format from a toolbar button,
+ * replace the document (the simplifier's Apply), or insert a function template
+ * (the Insert-function picker). */
 export interface EditorHandle {
   format(): void;
   setText(text: string): void;
+  /** Apply a CodeMirror snippet template at the cursor, replacing any
+   * selection, and return focus to the editor so Tab walks the fields. */
+  insertSnippet(template: string): void;
 }
 
 interface FormulaEditorProps {
@@ -83,6 +87,15 @@ export function FormulaEditor({
           changes: { from: 0, to: view.state.doc.length, insert: text },
         });
       }
+    },
+    insertSnippet(template: string) {
+      const view = viewRef.current;
+      if (!view) {
+        return;
+      }
+      const { from, to } = view.state.selection.main;
+      snippet(template)(view, null, from, to);
+      view.focus();
     },
   }));
 

@@ -151,6 +151,46 @@ test("surfaces lint findings in the Problems panel", async () => {
     .toBeInTheDocument();
 });
 
+test("inserts a function template at the cursor from the picker", async () => {
+  const screen = await render(<App />);
+  await expect
+    .poll(() => screen.container.querySelector(".cm-content"))
+    .toBeTruthy();
+
+  await typeFormula(screen.container, "NOT(");
+  await screen
+    .getByRole("combobox", { name: "Insert function..." })
+    .selectOptions("IF");
+
+  // Inserted at the cursor (after the typed text), not replacing the document.
+  await expect
+    .poll(
+      () => screen.container.querySelector(".cm-content")?.textContent ?? "",
+    )
+    .toContain("NOT(IF(logical_test, value_if_true, value_if_false)");
+});
+
+test("the insert picker offers only functions available in the active context", async () => {
+  const screen = await render(<App />);
+  const options = () => {
+    const sel = screen.container.querySelector<HTMLSelectElement>(
+      'select[aria-label="Insert function..."]',
+    );
+    return sel ? Array.from(sel.options).map((o) => o.value) : [];
+  };
+
+  // POWER is custom-button/link-only in the registry; the default
+  // formula-field context must not offer it.
+  await expect.poll(() => options().length).toBeGreaterThan(1);
+  expect(options()).toContain("IF");
+  expect(options()).not.toContain("POWER");
+
+  await screen
+    .getByRole("combobox", { name: "Context" })
+    .selectOptions("custom_button_link");
+  await expect.poll(() => options()).toContain("POWER");
+});
+
 test("reformats the editor when Format is clicked", async () => {
   const screen = await render(<App />);
   await expect

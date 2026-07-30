@@ -24,9 +24,7 @@
     "VLOOKUP": {
       "formula": "VLOOKUP($ObjectType.FxRt__c.Fields.Gate__c, $ObjectType.FxRt__c.Fields.Name, {T:Text})",
       "returns": "Text",
-      "taint": [
-        "$ObjectType"
-      ],
+      "taint": ["$ObjectType"],
       "$comment": "VLOOKUP resolves only custom-object fields, and the match field must be the object's Name field — standard-object references reject with field-does-not-exist."
     },
     "PRIORVALUE": {
@@ -40,16 +38,12 @@
     "DISTANCE": {
       "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"mi\")",
       "returns": "Number",
-      "taint": [
-        "GEOLOCATION"
-      ]
+      "taint": ["GEOLOCATION"]
     },
     "GEOLOCATION": {
       "formula": "DISTANCE(GEOLOCATION(1, 1), GEOLOCATION(2, 2), \"km\")",
       "returns": "Number",
-      "taint": [
-        "DISTANCE"
-      ],
+      "taint": ["DISTANCE"],
       "$comment": "A bare GEOLOCATION() has no context-legal standalone position; the pair is probed jointly, conflation marked by taint both ways."
     },
     "JUNCTIONIDLIST": {
@@ -120,9 +114,7 @@
       "name": "$Flow",
       "formula": "$Flow.CurrentDate",
       "returns": "Date",
-      "containers": [
-        "flow_formula"
-      ]
+      "containers": ["flow_formula"]
     }
   ],
   "flowValueProbes": [

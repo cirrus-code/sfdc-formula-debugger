@@ -90,8 +90,8 @@ rows.
   probes plus UI observation settle it (check the record page for `#Error!` by
   hand for those probes).
 - **Create vs update validation asymmetry** (wave-2 discovery): flows and
-  weblinks accept formula content lazily when the component is *created* but
-  validate fully on *update*. A first deploy of a fresh org can therefore
+  weblinks accept formula content lazily when the component is _created_ but
+  validate fully on _update_. A first deploy of a fresh org can therefore
   produce false acceptances for those types — always confirm through a second
   (upsert) deploy before trusting them. Active flows also require `<scale>`
   on Number/Currency variables at update time.
@@ -115,13 +115,13 @@ src/registry/functions.ts (the one registry, 101 fns) + probes/contexts.json
 ```
 
 - **Canary gating.** Per container: an ok-canary (must deploy) and a
-  bogus-function canary (must be *rejected* — proves the container actually
+  bogus-function canary (must be _rejected_ — proves the container actually
   compiles formulas). A container that swallows `FXBOGUSFN123(1)` validates
   nothing; its acceptances are meaningless and the whole container is
   reported unverifiable rather than encoded (rule 1 applied to the harness).
 - **Rejection taxonomy.** `Unknown function X` / `may not be used in this
-  type of formula` ⇒ unavailable. `Incorrect parameter type/number of
-  parameters` ⇒ **available** (the compiler resolved the function; the probe
+type of formula` ⇒ unavailable. `Incorrect parameter type/number of
+parameters` ⇒ **available** (the compiler resolved the function; the probe
   was ill-shaped — fix the invocation override). Anything else is conclusive
   only for taint-free probes.
 - **Taint tracking.** Field-capable containers pass typed input fields as
@@ -136,7 +136,7 @@ src/registry/functions.ts (the one registry, 101 fns) + probes/contexts.json
   single-record objects (`FxErr*`) so an eagerly-evaluated error cannot
   poison neighboring probes.
 - `--only <batchPrefix>` reruns a single container; `--compose-only
-  <batchId>` writes the package without deploying (XML inspection).
+<batchId>` writes the package without deploying (XML inspection).
 
 Still pending after wave 2: ISPICKVAL/picklist coercion value probes, DST
 probes under a non-GMT org TZ, compiled-size limit exploration, and runtime

@@ -12,6 +12,9 @@ export const ui = {
     formatTitle: "Format (Shift+Alt+F)",
     contextLabel: "Context",
     contextUnverifiedSuffix: " (unverified)",
+    insertFunction: "Insert function...",
+    insertFunctionTitle:
+      "Insert a function available in this context at the cursor",
   },
   problems: {
     label: "Problems",

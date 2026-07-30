@@ -19,6 +19,7 @@ import {
 } from "../i18n/index.ts";
 import { applyThemeVars, palette, product } from "../theme/theme.ts";
 import { FormulaEditor, type EditorHandle } from "./editor/FormulaEditor.tsx";
+import { InsertFunctionPicker } from "./InsertFunctionPicker.tsx";
 import { Panel } from "./Panel.tsx";
 import { offsetToLineCol } from "./util/position.ts";
 
@@ -135,14 +136,27 @@ export function App() {
         }}
       >
         <ContextPicker contextId={contextId} onChange={setContextId} />
-        <button
-          type="button"
-          className="btn"
-          onClick={() => editorRef.current?.format()}
-          title={t().ui.toolbar.formatTitle}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
+            minWidth: 0,
+          }}
         >
-          {t().ui.toolbar.format}
-        </button>
+          <InsertFunctionPicker
+            contextId={contextId}
+            onInsert={(template) => editorRef.current?.insertSnippet(template)}
+          />
+          <button
+            type="button"
+            className="btn"
+            onClick={() => editorRef.current?.format()}
+            title={t().ui.toolbar.formatTitle}
+          >
+            {t().ui.toolbar.format}
+          </button>
+        </div>
       </div>
 
       <div className="reticle rise rise-2">
