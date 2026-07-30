@@ -123,12 +123,13 @@ recorded in VERIFICATION.md). Current scope evaluates constant expressions
 generation (`MapFormulaContext`) for full corpus regeneration and WS4 fuzzing is
 the next extension.
 
-### WS4 — Differential fuzzing _("no excuse to be incorrect")_
+### WS4 — Differential fuzzing ✅ _(`oracle/fuzz/`, "no excuse to be incorrect")_
 
 A grammar-driven random formula generator (derived from `Formula.g4`) feeds both
 engines; diff results; triage each discrepancy into: (a) **our bug** → fix +
 capture the case as a permanent regression row; (b) **OSS ≠ product** →
-org-verify; (c) **intentional divergence** → allowlist. Runs as a periodic job;
+org-verify; (c) **intentional divergence** → allowlist. Runs weekly in
+`oracle.yml` (the job fails when the suspected-our-bug bucket is non-empty);
 every discrepancy becomes a corpus row.
 
 ### WS5 — CI conformance number ✅ _(`.github/workflows/`)_
@@ -137,27 +138,32 @@ Fast CI (`ci.yml`) runs our TS engine against the committed corpus on every
 push/PR — typecheck, lint, unit + conformance tests, browser smoke tests, build —
 and surfaces the pass rate (the **conformance number**, the project's headline metric) to the
 job summary. No JVM. A separate _scheduled_ workflow (`oracle.yml`) builds the
-JVM oracle as a canary; corpus regeneration/expansion via WS3/WS4 with a drift PR
-is the remaining automation.
+JVM oracle as a canary, re-runs the corpus extractor and opens a drift PR when
+the committed corpus diverges, and runs the WS4 differential fuzzer weekly.
 
 ## Status snapshot
 
-Oracle-tier conformance is **99.3%** (`src/engine/conformance.test.ts`,
-baseline locked at 0.98); **org-tier conformance is 100%** of comparable rows
-(`src/engine/org-conformance.test.ts`) with one quarantined Percent-TEXT row.
-Path so far: WS3 oracle rules 0.74 → 0.86; a corpus-driven semantics pass
+Both tiers are at **100%**, baselines locked at 1. The oracle tier
+(`src/engine/conformance.test.ts`) passes 6,312/6,312 comparable rows
+(1,394 quarantined as incomparable, 1,982 unsupported, 9,688 total); the org
+tier (`src/engine/org-conformance.test.ts`) passes 641/641 comparable rows
+(3 unsupported of 644, no quarantined rows). Oracle rows the real org has
+overruled are excluded from the comparable set by an evidence-backed
+allowlist in `conformance.test.ts`, each entry naming the org-verified row
+that supersedes it.
+Path here: WS3 oracle rules 0.74 → 0.86; a corpus-driven semantics pass
 (FLOOR/CEILING toward-zero, zero-mode numeric coercion, three-valued blank
 comparison, blank propagation, DATE bounds) → 0.97; a function port (TRUNC,
 MFLOOR/MCEILING, SUBSTR, INITCAP, REVERSE, ASCII, CHR, IFERROR) moved ~740
 rows out of "unsupported" into the comparable set; the field-valued oracle
-settled the numeric model → 0.99; the real-org passes (wave 1 semantics
-2026-07-26, wave 2 per-context availability + wave-1 riders 2026-07-28)
-settled TEXT() rendering (Oracle-NUMBER-parity digit budget, engine precision
-40), `&` precedence observability, and the per-context availability matrix
-(`corpus/org-availability.json`, enforced by
-`src/registry/org-availability.test.ts`). The remaining oracle-tier failures
-are rows the org has overruled (org wins) plus a small date-rendering tail —
-triaged in VERIFICATION.md's conformance backlog.
+settled the numeric model → 0.99; the real-org passes (waves 1–8,
+2026-07-26 → 2026-07-29) settled TEXT() rendering (Oracle-NUMBER-parity digit
+budget, engine precision 40), `&` precedence observability, the per-context
+availability matrix (`corpus/org-availability.json`, enforced by
+`src/registry/org-availability.test.ts`), the `^` fold/runtime model, and the
+empty-text-is-blank rule; corpus regeneration plus the org-overruled
+allowlist closed the last oracle-tier gap (2026-07-29). The closed backlog is
+recorded in VERIFICATION.md.
 
 ## Licensing
 

@@ -8,15 +8,15 @@ unsupported — it never guesses.
 
 Status legend: ❓ unverified · 🔬 verifying · ✅ verified (golden test id)
 
-**Org verification pass (`orgcheck/`):** wave 1 completed **2026-07-26**,
-wave 1 riders + **wave 2 (per-context)** completed **2026-07-28**, all against
+**Org verification pass (`orgcheck/`):** waves 1–8 completed
+**2026-07-26 → 2026-07-29**, all against
 a real Developer Edition org. `corpus/org-verified.json` carries the org-tier
 semantic rows; `corpus/org-availability.json` carries the per-context
 function/global availability matrix (one save-probe per construct per
 context's own metadata container, canary-gated — see `orgcheck/README.md`).
 Deploy rejections themselves are verdicts. The org-conformance suite is at
-100% of comparable rows; availability agreement is enforced by
-`src/registry/org-availability.test.ts`.
+100% of comparable rows (641/641, baseline locked at 1); availability
+agreement is enforced by `src/registry/org-availability.test.ts`.
 
 ## Syntax / parsing
 
@@ -304,7 +304,8 @@ their per-context availability). Corpus-backed and simulated:
 - ✅ **`PI`** (Java Math.PI double, `ROUND(PI(), 12)` corpus-verified).
 
 Temporal semantics unlocked with them (conformance comparable set grew
-5,032 → 6,081 rows; oracle tier 99.3%, org tier 100%):
+5,032 → 6,081 rows; both tiers have since closed to 100% — see the
+conformance-backlog section):
 
 - ✅ **Date arithmetic**: `date ± n` truncates the fractional day toward zero
   (28 + 3.5 → Mar 2); `date − date` → whole days; `datetime ± n` in
@@ -536,14 +537,15 @@ intermediates against the real engine and settled the numeric-scale question:
   by the org pass: the product absorbs the blank (`"aaaa" + blank` → `"aaaa"`,
   probe rows `corpus:testAddConcatSimple#2/#3`) — org wins.
 
-## Conformance backlog (remaining gap to 100%)
+## Conformance backlog — closed 2026-07-29
 
-`src/engine/conformance.test.ts` (oracle tier) sits at 99.3% over 6,081
-comparable rows (42 failures — the org-overruled clusters plus the
-TEXT-of-blank-date tail); `src/engine/org-conformance.test.ts` (org tier) is
-at 100% of 517 comparable rows with a single quarantined row
-(`semantics:text_percent_field`). Remaining items, each needing its own
-verification before a fix:
+The gap to 100% is closed: `src/engine/conformance.test.ts` (oracle tier)
+passes 6,312/6,312 comparable rows and `src/engine/org-conformance.test.ts`
+(org tier) passes 641/641 comparable rows with no quarantined rows
+(`semantics:text_percent_field` was settled by the org pass), both baselines
+locked at 1. The org-overruled oracle clusters are excluded by the
+evidence-backed allowlist in `conformance.test.ts`, each entry naming the org
+row that supersedes it. The items below record how each gap was resolved:
 
 - ✅ **Date arithmetic** — implemented and corpus-verified (function-port-2
   section above); Java-style datetime renderings in the oracle remain
@@ -638,13 +640,16 @@ refusal itself is permanent (org-state prefix validation).
 The `^` operator now refuses in exactly one situation: an exact form too
 large to compute and verify (bases within ~1e-4 of 1 raised to
 multi-thousand exponents). Everything else about the operator is
-org-verified behavior. Remaining non-probe debts:
+org-verified behavior. Non-probe debts, all closed:
 
-- Oracle corpus regeneration (the `textarea`→Text fix is inert until
-  `salesforce-v2.json` is re-extracted; the extractor's `trim()` bug
-  destroys whitespace-bearing values; `phone`/`email`/`url` dataTypes
-  unmapped pending org probes).
-- WS5 remainder: scheduled fuzz runs and corpus-regeneration drift PRs.
+- ~~Oracle corpus regeneration~~ — closed 2026-07-29: `salesforce-v2.json`
+  re-extracted with the whitespace-preserving extractor (restoring 249 rows'
+  fidelity), the `textarea`→Text mapping live (98 rows newly comparable), and
+  `phone`/`email`/`url` mapped — their JVM-only empty-string-field state is
+  org-overruled (unreachable in the product, where whitespace-only text saves
+  as null).
+- ~~WS5 remainder~~ — closed 2026-07-29: `oracle.yml` runs the weekly
+  differential fuzz job and opens corpus-regeneration drift PRs.
 - ~~Registry function coverage~~ — closed 2026-07-28: audited against the
   official reference (101 functions registered; 35 added, of which 16
   corpus-backed and simulated — see the function-port-2 section). The wave-3

@@ -22,12 +22,14 @@ Paste or write a Salesforce formula and get instant, editor-grade feedback:
 
 A wrong simulated answer is worse than no answer. The evaluator either returns a
 result it can defend or refuses with an explicit `unsupported` error — it never
-guesses. Semantics are verified against Salesforce's own open-source
+guesses. Semantics are verified two ways: against Salesforce's own open-source
 [formula-engine](https://github.com/salesforce/formula-engine) used as an
-oracle: the conformance suite currently passes **98.9%** of comparable corpus
-cases, protected in CI by a locked baseline. See [CONFORMANCE.md](CONFORMANCE.md)
-for how the oracle pipeline works and [VERIFICATION.md](VERIFICATION.md) for
-every behavior's verification status.
+oracle — **100%** of 6,312 comparable corpus cases pass — and against a real
+Salesforce org, where **100%** of 641 comparable org-verified rows pass. Both
+suites are protected in CI by baselines locked at 100%: a future failing row
+must be triaged, never absorbed. See [CONFORMANCE.md](CONFORMANCE.md) for how
+the oracle pipeline works and [VERIFICATION.md](VERIFICATION.md) for every
+behavior's verification status.
 
 Numeric math uses [decimal.js](https://github.com/MikeMcl/decimal.js), mirroring
 Salesforce's decimal model — `0.1 + 0.2` equals `0.3`, and `ROUND(2.5)` is `3`.
@@ -78,3 +80,7 @@ covers the ground rules for changes.
 [formulon](https://github.com/leifg/formulon) (MIT) and test data from
 [salesforce/formula-engine](https://github.com/salesforce/formula-engine)
 (BSD-3-Clause) — see [NOTICE](NOTICE).
+
+Salesforce is a trademark of Salesforce, Inc. This project is an independent
+open-source tool and is not affiliated with, endorsed by, or sponsored by
+Salesforce.
