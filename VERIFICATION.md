@@ -61,7 +61,11 @@ left-associative, with unary tighter than everything.
   = 3, i.e. the first `*/` closes (probes `syntax:comment_basic`,
   `syntax:comment_nested`).
 - ✅ **`NULL`-prefixed identifiers parse in the product** (`Null_Check__c`,
-  probe `syntax:null_prefix_ident`) — the formulon defect is theirs alone.
+  probe `syntax:null_prefix_ident`) — the matching parse failure in
+  [formulon](https://github.com/leifg/formulon) (the MIT JavaScript formula
+  engine our evaluator was originally ported from — see DESIGN §4 and the
+  CONFORMANCE.md trust order) is that library's defect alone, not product
+  behavior.
 - ✅ **String-literal escapes** (oracle-verified 2026-07-29, engine v0.9.13,
   `LEN`/`FIND` probes; org unprobed but the grammar and engine agree). The
   grammar (`LexerRules.g4` `STRING_LITERAL`) accepts exactly nine escapes —
@@ -305,7 +309,7 @@ their per-context availability). Corpus-backed and simulated:
 
 Temporal semantics unlocked with them (conformance comparable set grew
 5,032 → 6,081 rows; both tiers have since closed to 100% — see the
-conformance-backlog section):
+"How the conformance gap closed" section):
 
 - ✅ **Date arithmetic**: `date ± n` truncates the fractional day toward zero
   (28 + 3.5 → Mar 2); `date − date` → whole days; `datetime ± n` in
@@ -530,14 +534,16 @@ intermediates against the real engine and settled the numeric-scale question:
   round HALF_UP to 32 _decimal places_ only at materialization — the final result
   and each value handed to a function or comparison — **not** after every op.
   Verified raw: `(1/9)*9 → 1.000…`, `FLOOR((1/9)*9) → 1`, `1/3 → 0.333…(32)`. Our
-  engine now mirrors this (`value.ts` precision 39; `evaluator.ts` `materialize`),
-  which flipped the whole `FLOOR/CEILING/TRUNC((x/y)*y)` cluster to pass.
+  engine mirrors this (`evaluator.ts` `materialize`; `value.ts` runs at
+  precision 40 — the oracle's 39 significant figures plus the carry digit the
+  org-verified TEXT() rendering needs, see the TEXT() entry above), which
+  flipped the whole `FLOOR/CEILING/TRUNC((x/y)*y)` cluster to pass.
 - ✅ **`+` concatenates text operands** (`"aaaa" + "bbbb"` → `"aaaabbbb"`). The
   oracle's blank half (blank text operand propagates to null) is contradicted
   by the org pass: the product absorbs the blank (`"aaaa" + blank` → `"aaaa"`,
   probe rows `corpus:testAddConcatSimple#2/#3`) — org wins.
 
-## Conformance backlog — closed 2026-07-29
+## How the conformance gap closed (2026-07-29)
 
 The gap to 100% is closed: `src/engine/conformance.test.ts` (oracle tier)
 passes 6,312/6,312 comparable rows and `src/engine/org-conformance.test.ts`
@@ -598,69 +604,49 @@ row that supersedes it. The items below record how each gap was resolved:
   contexts are Tier 1 now). `email_template` is structurally unverifiable at
   deploy (no compile check) and stays Tier 2 best-effort.
 
-## Open follow-ups
+## Verification history
 
-Wave 3 (2026-07-28) closed: FF short-circuit ✅, Percent TEXT ✅,
-ISPICKVAL/INCLUDES coercion ✅, flow-interview runtime channel ✅ (built —
-`flowValueProbes` in `orgcheck/probes/contexts.json`), and the refuse-list
-graduations above.
+The org pass ran as eight probe waves (2026-07-26 → 2026-07-29); every fact
+they settled is recorded in the sections above with its probe id. In brief:
+wave 1 established the deploy/readback channels and the formula-field
+semantics; wave 2 built the per-context availability matrix and the
+validation-rule runtime facts; wave 3 added the flow-interview runtime
+channel (`flowValueProbes` in `orgcheck/probes/contexts.json`) and graduated
+eight formerly-refusing functions; wave 4 added the workflow-field-update
+channel and pinned the source/compiled/output size limits; waves 5–8
+bisected the `^` operator's two code paths (retracting two interim models
+along the way), added the approval-process channels, and settled the
+empty-text-is-blank rule. DST was closed by analysis rather than probing:
+datetimes are GMT instants, and the org applies no zone arithmetic a client
+must reproduce.
 
-Wave 4 (2026-07-29) closed: `^` overflow bisect ✅ (1e64 result cap;
-wave 4's scale-40/IEEE-double model was corrected by wave 5 — see the
-org-pass section), source/compiled size limits ✅ (3,900 source / 15,000
-compiled, exact), Text output truncation at 1,300 chars ✅, WFU runtime
-channel ✅ (`wfu_*` probes: blocked save on div-by-zero, blank mode,
-case-sensitive `=`), DST closed by analysis (datetimes are GMT instants;
-the org applies no zone arithmetic a client must reproduce).
+Alongside the probe waves:
 
-Waves 5+6 (2026-07-29) closed: the `^` fold/runtime split (18-sig folded;
-runtime and all negatives at scale 42 — see the org-pass section; the
-wave-4 IEEE-double reading is retracted), `0^0` = 1, `0^negative` = runtime
-error, the cap in both paths (literal and field-valued), the fractional-
-base cap (`1.5^400` errors), the fold-based leading-zero rendering model
-(`TEXT(1/4)` = `.25`, `TEXT((0.5))` = `0.5`), and mixed-operand behavior
-(one field blocks folding). Still open:
-
-Wave 7 (2026-07-29) closed: the reciprocal cap ✅ (`0.1^-70` errors),
-`FIND` empty search term = 0 ✅ (our bug, fixed), and the
-`VALUE("")`/`VALUE(" ")` split ✅ (blank/error — the org overrules the
-oracle on whitespace).
-
-Wave 8 (2026-07-29) closed every remaining probe sliver: the folded flush
-line ✅ (truncation at 1e-39, adjacent-probe-pinned), the exact-result
-precision limit ✅ (43 significant digits, 43/44 adjacent), terminating
-reciprocals ✅ (exact path, same limit), non-terminating reciprocals ✅
-(≥ 40-sig rounding up to the 1e38 magnitude line, 38/39 adjacent),
-empty-text-is-blank ✅ (the whole WS4 blank-vs-empty cluster resolved by
-one rule; 18 oracle rows org-overruled), approval AND/OR short-circuit ✅,
-and approval `IFERROR` ✅ (closed by the availability matrix — it never
-compiles there). `CASESAFEID`'s explanatory note shipped earlier; the
-refusal itself is permanent (org-state prefix validation).
-
-The `^` operator now refuses in exactly one situation: an exact form too
-large to compute and verify (bases within ~1e-4 of 1 raised to
-multi-thousand exponents). Everything else about the operator is
-org-verified behavior. Non-probe debts, all closed:
-
-- ~~Oracle corpus regeneration~~ — closed 2026-07-29: `salesforce-v2.json`
+- **Oracle corpus regeneration** (2026-07-29): `salesforce-v2.json`
   re-extracted with the whitespace-preserving extractor (restoring 249 rows'
   fidelity), the `textarea`→Text mapping live (98 rows newly comparable), and
   `phone`/`email`/`url` mapped — their JVM-only empty-string-field state is
   org-overruled (unreachable in the product, where whitespace-only text saves
   as null).
-- ~~WS5 remainder~~ — closed 2026-07-29: `oracle.yml` runs the weekly
-  differential fuzz job and opens corpus-regeneration drift PRs.
-- ~~Registry function coverage~~ — closed 2026-07-28: audited against the
-  official reference (101 functions registered; 35 added, of which 16
-  corpus-backed and simulated — see the function-port-2 section). The wave-3
+- **Automation (WS5)**: `oracle.yml` runs the weekly differential fuzz job
+  and opens corpus-regeneration drift PRs.
+- **Registry function coverage** (2026-07-28): audited against the official
+  function reference — 101 functions registered; 35 added, of which 16
+  corpus-backed and simulated (see the function-port-2 section). The wave-3
   graduations closed the client-reproducible refuse list (encode family,
   `BR`, `INCLUDES`, `PICKLISTCOUNT`, `FORMATDURATION`); `CASESAFEID` is the
   one deliberate holdout (org-state prefix validation).
 
-## Pre-release audit (2026-07-29) — new unverified edges
+The `^` operator now refuses in exactly one situation: an exact form too
+large to compute and verify (bases within ~1e-4 of 1 raised to
+multi-thousand exponents). Everything else about the operator is
+org-verified behavior.
 
-Behaviors the audit made explicit. Each is either refused or chosen
-conservatively; all want an org probe before being called settled:
+## Open questions
+
+The remaining unverified edges (most surfaced by the 2026-07-29 pre-release
+audit). Each is either refused or chosen conservatively in the
+implementation; all want an org probe before being called settled:
 
 - **POWER()** — no corpus row in either tier pins whether it shares `^`'s
   rules (integer-only exponent, 1e64 cap, folded/runtime precision split).
@@ -684,3 +670,12 @@ conservatively; all want an org probe before being called settled:
   *literal* case has no probe row.
 - **Sub-1000-year TEXT(date) rendering** — years now pad to 4 digits
   ("0050-01-01", ISO/API shape). No corpus row covers years below 1000.
+- **String-literal escape decoding** — the accept/reject half is grammar-
+  and oracle-verified (syntax section above), but only the JVM oracle has
+  confirmed which escapes collapse on decode; worth an org probe.
+- **Display-boundary rounding per field scale** — the internal numeric model
+  is settled, but how values round at display boundaries for a field's
+  declared scale is unprobed (the one 🔬 entry above).
+- **`email_template` availability** — structurally unverifiable (its
+  metadata container never compile-checks merge formulas at deploy); stays
+  Tier 2 best-effort unless a new observation channel appears.

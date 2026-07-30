@@ -52,6 +52,9 @@ Six layers with strictly downward dependencies:
 └────────────────────────────────────────────────────────────┘
 ```
 
+Two leaf modules sit beside the stack, importable by every layer: `i18n/` (all user-facing
+strings; see `src/i18n/README.md`) and `theme/` (branding — product name, palette, fonts).
+
 Formulas are tiny (≤ ~5KB source), so there is no incremental parsing: every keystroke triggers
 a full lex + parse + analyze pass, which is microseconds. Simplicity over cleverness throughout.
 
@@ -62,7 +65,7 @@ a full lex + parse + analyze pass, which is microseconds. Simplicity over clever
 Hand-written scanner producing a flat token stream with spans. Token kinds: identifiers
 (including dotted paths and `$Global.Path` references as single tokens or trivially joinable
 sequences — parser's choice, but dotted paths end up as one AST reference), string literals
-(single and double quoted), number literals, operators (`+ - * / ^ & = <> < <= > >= == !=`),
+(single and double quoted), number literals, operators (`+ - * / ^ & = <> < <= > >= == != && ||`),
 punctuation, and trivia (whitespace, `/* */` comments). Trivia is retained and attached to
 tokens (leading/trailing) so the formatter can preserve comments. Lexing never fails: unknown
 characters become error tokens with diagnostics, and highlighting is driven purely by the token
@@ -74,10 +77,14 @@ recognized only as complete case-insensitive tokens.
 
 ### 3.2 Parser
 
-Recursive descent with Pratt-style precedence for binary operators. Salesforce precedence
-(highest to lowest): parentheses; unary `-`/`NOT`... (verify exact table against docs and encode
-as data); `^`; `* /`; `+ -`; `&`; comparisons; equality. `&&`/`||` are not Salesforce formula
-operators — `AND()`, `OR()`, `NOT()` are functions, though `=`/`<>` etc. are operators.
+Recursive descent with Pratt-style precedence for binary operators. The precedence table is
+transcribed from Salesforce's own open-source grammar and org-verified where the grammar alone
+couldn't settle product behavior (see CONFORMANCE.md). Tightest to loosest: parentheses; unary
+`-`/`NOT`; `* /`; `^`; `+ - &`; comparisons (`< <= > >=`); equality (`= <> == !=`); `&&`; `||`
+— all left-associative. Two org-confirmed surprises: `* /` binds tighter than `^`, and `^` is
+left-associative — both invert the usual math conventions. `&&`, `||`, `==`, and `!=` are
+undocumented but accepted and evaluated by the product (org-verified); we parse and evaluate
+them and flag each use with a `nonstandard-operator` warning.
 
 **Error recovery is the defining requirement.** Strategy:
 
@@ -121,9 +128,13 @@ diagnostics ("VLOOKUP is not available in flow formulas"), the simulation bounda
 evaluation dispatch. A registry self-consistency test validates every entry (simulatable ⇒
 evalImpl present, context ids exist, etc.).
 
-Function implementations and their tests are ported from formulon (MIT, with attribution),
-fixing its known defects (blank arithmetic, comments, reserved-prefix identifiers, div-by-zero,
-positionless errors) per CLAUDE.md.
+Function implementations and their tests are ported from
+[formulon](https://github.com/leifg/formulon) — a pre-existing MIT-licensed JavaScript
+implementation of the Salesforce formula language, credited in `NOTICE` — fixing its known
+defects along the way (blank arithmetic, comments, reserved-prefix identifiers, div-by-zero,
+positionless errors) per CLAUDE.md's porting notes. Where formulon appears elsewhere in these
+docs, it is as this seed baseline; it ranks below Salesforce's own engine and org verification
+in the trust order (CONFORMANCE.md).
 
 ## 5. Formula contexts
 
@@ -144,10 +155,13 @@ interface FormulaContext {
 
 Shipped contexts (all standard-formula-engine contexts, day one):
 
-- **Tier 1 (verified availability data):** formula field, validation rule, flow formula.
+- **Tier 1 (org-verified availability data):** formula field, validation rule, flow formula,
+  default value, workflow rule, workflow field update, approval process entry/step, custom
+  button/link, quick action predefined value — every context whose metadata container
+  compile-checks formulas (verification recorded in `VERIFICATION.md`).
 - **Tier 2 (best-effort config, visibly labeled "availability data unverified for this
-  context"):** default value, workflow rule, workflow field update, approval process
-  entry/step, custom button/link, email template merge context, quick action predefined value.
+  context"):** email template merge context — its metadata container never compile-checks
+  merge formulas at deploy, so availability there is structurally unverifiable.
 
 Tier is a data field; promoting a context to Tier 1 is a config change backed by verification
 work recorded in `VERIFICATION.md`. Report formulas are structurally excluded (different
@@ -189,8 +203,11 @@ Interprets the AST over a Salesforce value domain:
   simulation (but fully supported for parsing/highlighting/formatting/linting): `PRIORVALUE`,
   `ISCHANGED`, `ISNEW`, `ISCLONE`, `VLOOKUP`, `IMAGE`, `GETSESSIONID`, `CURRENCYRATE`, and
   resolution of org-state globals (`$CustomMetadata`, `$Setup`, `$Permission`,
-  `$ObjectType`…). `$User`, `$Profile`, and similar simple-record globals are simulatable as
-  user-fillable field groups like `$Record`.
+  `$ObjectType`…). The registry's `simulatable` flag, not this list, is the source of truth —
+  other functions also refuse where a faithful client-side value is impossible (e.g. the
+  transcendentals, `REGEX`, `CASESAFEID`), each with its rationale in `VERIFICATION.md`.
+  `$User`, `$Profile`, and similar simple-record globals are simulatable as user-fillable
+  field groups like `$Record`.
 
 ## 8. Features
 
@@ -259,17 +276,16 @@ theme module (`src/theme/`) so branding changes stay a one-file change. The tool
 
 - **Golden corpus** (`corpus/*.json`): `(formula, context, inputs, blankMode, expected)` rows.
   Sources, in trust order: real-org verification (authoritative), salesforce/formula-engine
-  JS-generation oracle output, formulon's adapted tests (seed). The corpus is the project's
+  oracle output, formulon's adapted tests (the seed — see §4). The corpus is the project's
   durable asset — language-agnostic, reusable by any future implementation.
 - **Conformance number** (corpus pass rate) reported in CI; it is the project's headline metric.
 - **Property tests** (fast-check): formatter idempotence + reparse-equality; simplifier
   equivalence incl. blanks/modes; lexer round-trip.
 - **Error-recovery suite:** malformed inputs asserting diagnostic count/positions/messages and
   recovered-AST shape.
-- **VERIFICATION.md** tracks every org-verified behavior and every open question (text `=` case
-  sensitivity per context, div-by-zero surfacing per context, blank propagation per operator per
-  mode, ADDMONTHS month-end, DST datetime math, TEXT() output formats, numeric precision
-  boundaries, Tier 2 availability matrices).
+- **VERIFICATION.md** is the verification ledger: every behavioral claim about Salesforce
+  semantics with its status (org-verified with probe id, oracle-verified, or open), plus the
+  remaining open questions. No claim ships as "supported" without an entry there.
 
 ## 11. Build order
 

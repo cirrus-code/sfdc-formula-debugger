@@ -130,7 +130,9 @@ those nearly verbatim. Their PEG grammar is reference-only — we write our own 
 - **Golden corpus:** a data file of `(formula, context, inputs, blankMode, expected)` triples is
   the durable, language-agnostic asset of this project. All evaluator work is corpus-driven.
   Seed it from formulon's tests; extend it with oracle output from
-  `github.com/salesforce/formula-engine` (its JS-generation path) and org-verified cases.
+  `github.com/salesforce/formula-engine` (its Java direct-eval path — never the
+  `toJavascript()` path, which mishandles div-by-zero; see CONFORMANCE.md) and org-verified
+  cases.
 - **Property tests:** formatter idempotence + reparse-equality; simplifier equivalence (random
   inputs including blanks, both blank modes, simplified vs original must agree); lexer
   round-trip (concat of token texts + trivia === source).
