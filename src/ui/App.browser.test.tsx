@@ -203,7 +203,10 @@ test("copies a permalink and restores formula, inputs, and result from it", asyn
     'input[placeholder="value"]',
   )!;
   await userEvent.fill(valueInput, "5");
-  await expect.element(first.getByText("10")).toBeInTheDocument();
+  // exact: the about copy contains "10" as a substring ("100%").
+  await expect
+    .element(first.getByText("10", { exact: true }))
+    .toBeInTheDocument();
 
   // Copy link writes the state into the URL hash — and only then; formula
   // text never leaves the page on its own.
@@ -219,7 +222,9 @@ test("copies a permalink and restores formula, inputs, and result from it", asyn
       () => second.container.querySelector(".cm-content")?.textContent ?? "",
     )
     .toBe("Amount * 2");
-  await expect.element(second.getByText("10")).toBeInTheDocument();
+  await expect
+    .element(second.getByText("10", { exact: true }))
+    .toBeInTheDocument();
 });
 
 test("renders without console errors", async () => {

@@ -15,8 +15,13 @@
 
 export const product = {
   name: "Formula Debugger",
-  /** Cross-link to the Cirrus platform the tool belongs to. */
-  platformUrl: "https://cirrus.tools" as string | null,
+  /**
+   * Cross-link to the Cirrus platform the tool belongs to. Dormant until the
+   * platform site is live — set to "https://cirrus.tools" to show the link.
+   */
+  platformUrl: null as string | null,
+  /** Public source repository, linked in the footer. */
+  repoUrl: "https://github.com/cirrus-code/sfdc-formula-analyzer",
 } as const;
 
 export const palette = {

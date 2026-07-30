@@ -194,27 +194,82 @@ export function App() {
         <ProblemsPanel source={source} diagnostics={diagnostics} />
       </div>
 
+      <section
+        className="rise rise-4"
+        aria-labelledby="about-label"
+        style={{ marginTop: "3rem" }}
+      >
+        <h2
+          id="about-label"
+          className="microcopy"
+          style={{ fontWeight: 600, marginBottom: "1.1rem" }}
+        >
+          {t().copy.about.label}
+        </h2>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(15rem, 1fr))",
+            gap: "1.5rem 2.25rem",
+          }}
+        >
+          {t().copy.about.sections.map((s) => (
+            <div key={s.heading}>
+              <h3
+                style={{
+                  fontSize: "0.78rem",
+                  fontWeight: 600,
+                  marginBottom: "0.4rem",
+                }}
+              >
+                {s.heading}
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.8rem",
+                  lineHeight: 1.65,
+                  color: palette.textMuted,
+                }}
+              >
+                {s.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <footer
         className="rise rise-4"
         style={{
           marginTop: "2.75rem",
           paddingTop: "1.1rem",
           borderTop: `1px solid ${palette.border}`,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          gap: "1rem",
-          flexWrap: "wrap",
           fontSize: "0.72rem",
           color: palette.textMuted,
         }}
       >
-        <span>{t().copy.footer}</span>
-        {product.platformUrl ? (
-          <a href={product.platformUrl}>
-            {t().ui.footer.platformLink(new URL(product.platformUrl).host)}
-          </a>
-        ) : null}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            gap: "1rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <span>{t().copy.footer}</span>
+          <span style={{ display: "flex", gap: "1.1rem" }}>
+            {product.platformUrl ? (
+              <a href={product.platformUrl}>
+                {t().ui.footer.platformLink(new URL(product.platformUrl).host)}
+              </a>
+            ) : null}
+            <a href={product.repoUrl}>{t().ui.footer.sourceLink}</a>
+          </span>
+        </div>
+        <p style={{ margin: "0.65rem 0 0", fontSize: "0.66rem", opacity: 0.7 }}>
+          {t().copy.disclaimer}
+        </p>
       </footer>
     </main>
   );

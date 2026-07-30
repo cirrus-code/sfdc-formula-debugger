@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Brand mark: LED "readout" (= and cursor block) on the ink field.
+       Colors mirror src/theme/theme.ts (bg / border / accent). -->
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="#070b14"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="13.5" fill="none" stroke="#202c49"/>
+  <rect x="14" y="23" width="24" height="6" rx="3" fill="#3fe0b0"/>
+  <rect x="14" y="35" width="24" height="6" rx="3" fill="#3fe0b0"/>
+  <rect x="42" y="35" width="8" height="6" rx="1.5" fill="#3fe0b0" opacity="0.55"/>
+</svg>

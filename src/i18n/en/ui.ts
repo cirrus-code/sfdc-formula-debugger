@@ -51,5 +51,6 @@ export const ui = {
   },
   footer: {
     platformLink: (host: string) => `${host} ↗`,
+    sourceLink: "GitHub ↗",
   },
 };
