@@ -350,8 +350,15 @@ function expandCorpusRef(
         const fields = r.fields.map((f) => {
           const type = corpusFieldType(f.type, f.name, ref);
           const alias = aliasByOriginal.get(f.name.toLowerCase())!;
-          registerField(alias, type, f.value === "" ? null : f.value);
-          return { name: alias, type, value: f.value === "" ? null : f.value };
+          // The org stores whitespace-only text as null (empty-text-is-blank,
+          // VERIFICATION.md corpus-regeneration note) — plan the value the
+          // record will actually hold so emitted rows carry faithful inputs.
+          const stored =
+            f.value !== null && type === "Text" && f.value.trim() === ""
+              ? null
+              : f.value;
+          registerField(alias, type, stored);
+          return { name: alias, type, value: stored };
         });
         const key = recordKeyFor(fields);
         if (!seen.has(key)) {

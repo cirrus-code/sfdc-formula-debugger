@@ -195,7 +195,9 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   },
   {
     name: "ISBLANK",
-    params: [req("value", "Unknown")],
+    // Any type EXCEPT Boolean: the product rejects ISBLANK(checkbox) at save
+    // ("Incorrect argument type", org-verified 2026-07-30).
+    params: [{ ...req("value", "Unknown"), rejectTypes: ["Boolean"] }],
     returnType: fixed("Boolean"),
     contexts: "all",
     simulatable: true,
@@ -204,7 +206,8 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   },
   {
     name: "ISNULL",
-    params: [req("value", "Unknown")],
+    // Same Boolean rejection as ISBLANK (org-verified, isnull_bool_arg).
+    params: [{ ...req("value", "Unknown"), rejectTypes: ["Boolean"] }],
     returnType: fixed("Boolean"),
     contexts: "all",
     simulatable: true,

@@ -28,13 +28,14 @@ import {
 import {
   BUILTINS,
   SPECIAL_FORMS,
+  assertGregorian,
+  assertRepresentableEpoch,
   boolCoerce,
   concatString,
   dateFromEpoch,
   epochOfDate,
+  GREGORIAN_CUTOVER_MS,
   isFoldedNumericLiteral,
-  isValidDate,
-  isValidEpochMs,
 } from "./builtins.ts";
 
 export interface EvalEnv {
@@ -133,9 +134,11 @@ function evaluate(node: Expr, env: EvalEnv): EvalResult {
       if (isError(operand)) {
         return operand;
       }
-      // Blank propagates through unary sign in blank mode; zero mode reads the
-      // blank as 0 (org-verified, semantics:unary_minus_blank).
-      if (operand.blank && env.blankMode === "blank") {
+      // Blank propagates through unary sign in BOTH modes: a blank numeric
+      // field was already materialized to 0 at read in zero mode
+      // (org-verified, semantics:unary_minus_blank), so a blank here is a
+      // typeless blank and stays null (semantics:null_literal_add [zero]).
+      if (operand.blank) {
         return blank("Number");
       }
       const d = toDecimal(operand);
@@ -212,23 +215,25 @@ function evalBinary(node: BinaryOp, env: EvalEnv): EvalResult {
         }
         return normalizeEmptyText(text(concatString(l) + concatString(r)));
       }
-      return arithmetic(node.op, l, r, env);
+      return arithmetic(node.op, l, r);
     case "-":
     case "*":
     case "/":
-      return arithmetic(node.op, l, r, env);
+      return arithmetic(node.op, l, r);
     case "^":
       // The org computes literal-only `^` in a distinct compile-time path
       // (see powProduct); foldedness is a property of the AST, not the values.
-      return arithmetic(node.op, l, r, env, isFoldedNumericLiteral(node));
+      return arithmetic(node.op, l, r, isFoldedNumericLiteral(node));
     case "=":
     case "==": {
-      const eq = tryEqual(l, r);
+      const beq = blankBooleanEqual(node, l, r);
+      const eq = beq !== undefined ? beq : tryEqual(l, r);
       return eq === null ? blank("Boolean") : bool(eq);
     }
     case "<>":
     case "!=": {
-      const eq = tryEqual(l, r);
+      const beq = blankBooleanEqual(node, l, r);
+      const eq = beq !== undefined ? beq : tryEqual(l, r);
       // A null equality (blank numeric operand) propagates: `<>` is not simply
       // the negation of `=` here — both are unknown, hence false in context.
       return eq === null ? blank("Boolean") : bool(!eq);
@@ -247,7 +252,6 @@ function arithmetic(
   op: "+" | "-" | "*" | "/" | "^",
   l: SfValue,
   r: SfValue,
-  env: EvalEnv,
   foldedPow = false,
 ): EvalResult {
   // A blank operand in date-family arithmetic nulls the result in BOTH
@@ -257,11 +261,12 @@ function arithmetic(
   if ((isDatelike(l) || isDatelike(r)) && (l.blank || r.blank)) {
     return blank(isDatelike(l) ? l.type : r.type);
   }
-  // In "blank" mode, a blank operand makes the whole result blank. This
-  // includes typeless blanks (a NULL literal, an unsupplied field, a CASE
-  // fallthrough), matching the UnaryOp branch — a typed and a typeless blank
-  // must not diverge (VERIFICATION.md, blank propagation).
-  if (env.blankMode === "blank" && (l.blank || r.blank)) {
+  // An operand still blank at the operator level nulls the result in BOTH
+  // modes: "treat blanks as zeroes" is a read-time field coercion (FieldRef
+  // above), so what reaches here blank is a typeless blank — a NULL literal,
+  // an unsupplied field, a CASE fallthrough — and the product leaves those
+  // null even in zero mode (org-verified, semantics:null_literal_add [zero]).
+  if (l.blank || r.blank) {
     return blank("Number");
   }
   if (isDatelike(l) || isDatelike(r)) {
@@ -478,29 +483,45 @@ function temporalArithmetic(
     return unsupportedMix;
   }
   const sign = op === "+" ? 1 : -1;
+  // Day-line arithmetic computes freely past year 9999 (org-verified,
+  // semantics:date_overflow_*: DATE(9999, 12, 31) + 1 = 10000-01-01) but
+  // refuses on the pre-cutover side, where the product's hybrid
+  // Julian/Gregorian calendar diverges from our proleptic day counting
+  // (assertGregorian; semantics:cutover_gap).
   if (l.type === "Date" && isNumericType(r)) {
+    assertGregorian(asDate(l), "date arithmetic");
     const days = toDecimal(r).truncated().toNumber();
     const epoch = epochOfDate(asDate(l)) + sign * days * DAY_MS;
-    // Out-of-range results must surface as a simulated error — new Date()
-    // would otherwise yield NaN parts or years past 9999 that DATE() itself
-    // rejects. The exact product boundary is unverified (VERIFICATION.md).
-    if (!Number.isFinite(epoch) || !isValidDate(dateFromEpoch(epoch))) {
-      return error("#Error! (date out of range)");
+    assertRepresentableEpoch(epoch, "date arithmetic");
+    if (epoch < GREGORIAN_CUTOVER_MS) {
+      assertGregorian(dateFromEpoch(epoch), "date arithmetic");
     }
     return dateValue(dateFromEpoch(epoch));
   }
   if (l.type === "Date" && r.type === "Date" && op === "-") {
+    assertGregorian(asDate(l), "date subtraction");
+    assertGregorian(asDate(r), "date subtraction");
     return num((epochOfDate(asDate(l)) - epochOfDate(asDate(r))) / DAY_MS);
   }
   if (l.type === "Datetime" && isNumericType(r)) {
+    if (asDatetimeMs(l) < GREGORIAN_CUTOVER_MS) {
+      assertGregorian(dateFromEpoch(asDatetimeMs(l)), "datetime arithmetic");
+    }
     const deltaMs = toDecimal(r).times(DAY_MS).toNumber();
     const ms = asDatetimeMs(l) + sign * Math.round(deltaMs);
-    if (!isValidEpochMs(ms)) {
-      return error("#Error! (datetime out of range)");
+    assertRepresentableEpoch(ms, "datetime arithmetic");
+    if (ms < GREGORIAN_CUTOVER_MS) {
+      assertGregorian(dateFromEpoch(ms), "datetime arithmetic");
     }
     return datetimeValue(ms);
   }
   if (l.type === "Datetime" && r.type === "Datetime" && op === "-") {
+    if (asDatetimeMs(l) < GREGORIAN_CUTOVER_MS) {
+      assertGregorian(dateFromEpoch(asDatetimeMs(l)), "datetime subtraction");
+    }
+    if (asDatetimeMs(r) < GREGORIAN_CUTOVER_MS) {
+      assertGregorian(dateFromEpoch(asDatetimeMs(r)), "datetime subtraction");
+    }
     return num(new Decimal(asDatetimeMs(l) - asDatetimeMs(r)).div(DAY_MS));
   }
   if (l.type === "Time" && isNumericType(r)) {
@@ -541,6 +562,50 @@ function asTimeMs(v: SfValue): number {
     throw new Error(`Expected a time, got ${v.type}`);
   }
   return v.data.millisOfDay;
+}
+
+function containsFieldRef(e: Expr): boolean {
+  switch (e.kind) {
+    case "FieldRef":
+      return true;
+    case "Paren":
+      return containsFieldRef(e.expr);
+    case "UnaryOp":
+      return containsFieldRef(e.operand);
+    case "BinaryOp":
+      return containsFieldRef(e.left) || containsFieldRef(e.right);
+    case "FunctionCall":
+      return e.args.some(containsFieldRef);
+    default:
+      return false;
+  }
+}
+
+/**
+ * Boolean equality with a blank operand splits by compile-time constant
+ * folding, like `^` (org-verified, begins_blank_subject_eqfalse vs
+ * bool_null_eqfalse_cal): at runtime a blank Boolean coerces to false — the
+ * null-checkbox-reads-false rule — so `nullBool = FALSE` is true, while in an
+ * all-literal (compile-folded) comparison the null stays three-valued and
+ * equals nothing. Returns undefined when this isn't a blank-Boolean case.
+ */
+function blankBooleanEqual(
+  node: BinaryOp,
+  l: SfValue,
+  r: SfValue,
+): boolean | null | undefined {
+  const isBoolish = (v: SfValue) =>
+    v.type === "Boolean" || (v.blank && v.type === "Unknown");
+  const realBool = (l.type === "Boolean" && !l.blank) || (r.type === "Boolean" && !r.blank);
+  if (!realBool || !(l.blank || r.blank) || !isBoolish(l) || !isBoolish(r)) {
+    return undefined;
+  }
+  if (!containsFieldRef(node)) {
+    return null;
+  }
+  const lb = l.blank ? false : boolCoerce(l);
+  const rb = r.blank ? false : boolCoerce(r);
+  return lb === rb;
 }
 
 /**
@@ -689,6 +754,9 @@ const BLANK_AWARE = new Set([
   // is true, CONTAINS(blank, y) is false, FIND(y, blank) is 0).
   "CONTAINS",
   "FIND",
+  // Per-argument: a blank search term coerces to "" (→ true) but a blank
+  // subject propagates null (org-verified, begins_blank_* probes).
+  "BEGINS",
 ]);
 
 function evalCall(node: FunctionCall, env: EvalEnv): EvalResult {

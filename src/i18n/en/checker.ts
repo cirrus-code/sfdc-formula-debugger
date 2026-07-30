@@ -39,6 +39,8 @@ export const checker = {
     expected: string,
     actual: string,
   ) => `${name} argument '${param}' expects ${expected}, got ${actual}.`,
+  argumentTypeRejected: (name: string, param: string, rejected: string) =>
+    `${name} does not accept ${rejected} for '${param}' — Salesforce rejects this formula at save.`,
   functionNotAvailable: (name: string, contextLabel: string) =>
     `${name} is not available in ${contextLabel}.`,
 };

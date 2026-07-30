@@ -25,6 +25,7 @@ export type DiagnosticCode =
   | "unknown-function"
   | "wrong-arity"
   | "argument-type-mismatch"
+  | "argument-type-rejected"
   | "operator-type-mismatch"
   | "function-not-available"
   | "return-type-mismatch"

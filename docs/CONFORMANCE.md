@@ -130,6 +130,21 @@ A Node extractor (`scripts/extract-corpus.ts`) converts it to
 `corpus/salesforce-v2.json`, taking the Java `formula`/`formulaNullAsNull`
 expected values (faithful for div-by-zero). See `corpus/README.md`.
 
+The engine repo also carries a legacy fixture set (`formulatests.xml` /
+`formulatests-math.xml` plus 113 `data/` input templates). Assessed
+2026-07-30: it is subsumed by V2. 404 of its 406 testcases were migrated
+(the legacy file's own header says as much), and the data templates map onto
+V2's inline rows at equal-or-better coverage (5,569 legacy rows vs 5,508 in
+V2; the only per-testcase surpluses sit on constant formulas —
+`IF(true,1,0)`, `ROUND(PI(),12)` — whose data files the formula never
+reads). Of the two unmigrated testcases, one is commented out and written in
+the weblink merge-field dialect (`{!…}`), outside our language. The one
+novel behavior — `testIfErrorDateTimeValueWithBadElse`: IFERROR whose
+fallback *also* errors — was captured through the WS3 harness
+(`oracle/probes.iferror-badelse.txt`) and locked as a golden test in
+`src/engine/evaluator.test.ts` (the fallback's error propagates; a clean
+first argument never evaluates the fallback).
+
 ### WS3 — JVM oracle harness (`oracle/`)
 
 A Maven harness reusing test-utils' `MockLocalizerContext` +
@@ -168,8 +183,9 @@ differential fuzzer weekly.
 Both conformance tiers are at **100%**, with ratchet baselines locked at 1. The
 oracle tier (`src/engine/conformance.test.ts`) passes 6,312/6,312 comparable
 rows (1,394 quarantined as incomparable, 1,982 unsupported, 9,688 total); the
-org tier (`src/engine/org-conformance.test.ts`) passes 641/641 comparable rows
-(3 unsupported of 644, no quarantined rows). Oracle rows the real org has
+org tier (`src/engine/org-conformance.test.ts`) passes 664/664 comparable rows
+(6 unsupported of 670 — honest refusals such as pre-Gregorian day-line rows —
+no quarantined rows). Oracle rows the real org has
 overruled are excluded from the comparable set by an evidence-backed allowlist
 in `conformance.test.ts`, each entry naming the org-verified row that
 supersedes it.

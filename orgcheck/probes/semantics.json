@@ -1624,6 +1624,329 @@
           "value": "-74"
         }
       }
+    },
+    {
+      "id": "begins_blank_needle",
+      "question": "❓ BEGINS with a blank search term: blank-aware coercion to \"\" (every string begins with \"\" → true, like CONTAINS) or generic null propagation (our current wrapper)? IF reads a null condition as false, so FALSEORNULL needs the isblank twin to split.",
+      "formula": "IF(BEGINS(\"abc\", customtext1__c), \"TRUERESULT\", \"FALSEORNULL\")",
+      "returns": "Text",
+      "fields": {
+        "customtext1__c": {
+          "type": "Text",
+          "value": null
+        }
+      },
+      "interpret": {
+        "TRUERESULT": "BEGINS coerces a blank search term to \"\" — blank-aware like CONTAINS/FIND; our null-propagating wrapper is wrong",
+        "FALSEORNULL": "false or null — read begins_blank_needle_isblank to split",
+        "null": "BEGINS(\"abc\", blank) is a runtime error — investigate"
+      }
+    },
+    {
+      "id": "begins_blank_needle_isblank",
+      "question": "❓ Twin of begins_blank_needle: does BEGINS(\"abc\", blank) return null (propagation) or a real boolean (coercion)?",
+      "formula": "IF(ISBLANK(BEGINS(\"abc\", customtext1__c)), \"BLANKRESULT\", \"NONBLANK\")",
+      "returns": "Text",
+      "fields": {
+        "customtext1__c": {
+          "type": "Text",
+          "value": null
+        }
+      },
+      "interpret": {
+        "BLANKRESULT": "BEGINS propagates a blank search term to null — matches our generic wrapper",
+        "NONBLANK": "BEGINS returns a real boolean for a blank search term — blank-aware",
+        "null": "the expression errored — investigate"
+      }
+    },
+    {
+      "id": "begins_blank_subject",
+      "question": "❓ BEGINS with a blank subject: blank-aware (\"\" begins with \"a\" is false, like CONTAINS(blank, y) = false) or null propagation?",
+      "formula": "IF(BEGINS(customtext1__c, \"a\"), \"TRUERESULT\", \"FALSEORNULL\")",
+      "returns": "Text",
+      "fields": {
+        "customtext1__c": {
+          "type": "Text",
+          "value": null
+        }
+      },
+      "interpret": {
+        "TRUERESULT": "BEGINS(blank, \"a\") is true — unexpected, investigate",
+        "FALSEORNULL": "false or null — read begins_blank_subject_isblank to split",
+        "null": "BEGINS(blank, \"a\") is a runtime error — investigate"
+      }
+    },
+    {
+      "id": "begins_blank_subject_isblank",
+      "question": "❓ Twin of begins_blank_subject: null (propagation) or real boolean (coercion)?",
+      "formula": "IF(ISBLANK(BEGINS(customtext1__c, \"a\")), \"BLANKRESULT\", \"NONBLANK\")",
+      "returns": "Text",
+      "fields": {
+        "customtext1__c": {
+          "type": "Text",
+          "value": null
+        }
+      },
+      "interpret": {
+        "BLANKRESULT": "BEGINS propagates a blank subject to null",
+        "NONBLANK": "BEGINS returns a real boolean for a blank subject — blank-aware like CONTAINS"
+      }
+    },
+    {
+      "id": "date_overflow_isblank",
+      "question": "❓ date + n past year 9999: runtime error (our conservative choice), blank, or a computed year-10000 date? Error propagates through ISBLANK → null readback.",
+      "formula": "IF(ISBLANK(DATE(9999, 12, 31) + 1), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "interpret": {
+        "null": "date arithmetic past year 9999 is a runtime error — matches our boundary",
+        "BLANKRESULT": "overflow yields blank, not an error",
+        "VALUERESULT": "the org computes dates past year 9999 — read date_overflow_text for the value"
+      }
+    },
+    {
+      "id": "date_overflow_text",
+      "question": "❓ Rendering twin of date_overflow_isblank: if year-10000 dates compute, what does TEXT() render?",
+      "formula": "TEXT(DATE(9999, 12, 31) + 1)",
+      "returns": "Text",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "date_underflow_isblank",
+      "question": "❓ date - n below year 1 (0001-01-01 - 5): runtime error, blank, or computed?",
+      "formula": "IF(ISBLANK(DATE(1, 1, 1) - 5), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "interpret": {
+        "null": "date arithmetic below year 1 is a runtime error — matches our boundary",
+        "BLANKRESULT": "underflow yields blank",
+        "VALUERESULT": "the org computes year-0 dates — read date_underflow_text"
+      }
+    },
+    {
+      "id": "date_underflow_text",
+      "question": "❓ Rendering twin of date_underflow_isblank.",
+      "formula": "TEXT(DATE(1, 1, 1) - 5)",
+      "returns": "Text",
+      "expectSaveError": "maybe"
+    },
+    {
+      "id": "date_year_zero",
+      "question": "❓ DATE()'s own lower bound: DATE(10000,…) errors (corpus-verified) and 1–9999 evaluate, but year 0 was never probed.",
+      "formula": "IF(ISBLANK(DATE(0, 1, 1)), \"BLANKRESULT\", TEXT(DATE(0, 1, 1)))",
+      "returns": "Text",
+      "interpret": {
+        "null": "DATE(0, …) is a runtime error — the supported range starts at year 1",
+        "BLANKRESULT": "DATE(0, …) yields blank"
+      }
+    },
+    {
+      "id": "addmonths_overflow_isblank",
+      "question": "❓ ADDMONTHS past year 9999: error, blank, or computed? Our implementation errors for internal consistency with DATE()'s range.",
+      "formula": "IF(ISBLANK(ADDMONTHS(DATE(9999, 12, 31), 1)), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "interpret": {
+        "null": "ADDMONTHS past year 9999 is a runtime error",
+        "BLANKRESULT": "overflow yields blank",
+        "VALUERESULT": "the org computes it — investigate the value"
+      }
+    },
+    {
+      "id": "datetime_overflow_isblank",
+      "question": "❓ datetime + n past year 9999: same question as date_overflow_isblank for the Datetime channel.",
+      "formula": "IF(ISBLANK(DATETIMEVALUE(\"9999-12-31 23:00:00\") + 1), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "interpret": {
+        "null": "datetime arithmetic past year 9999 is a runtime error",
+        "BLANKRESULT": "overflow yields blank",
+        "VALUERESULT": "the org computes datetimes past year 9999"
+      }
+    },
+    {
+      "id": "fromunixtime_overflow_isblank",
+      "question": "❓ FROMUNIXTIME far past year 9999 (300000000000s ≈ year 11476): error, blank, or computed?",
+      "formula": "IF(ISBLANK(FROMUNIXTIME(300000000000)), \"BLANKRESULT\", \"VALUERESULT\")",
+      "returns": "Text",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "null": "FROMUNIXTIME past year 9999 is a runtime error",
+        "BLANKRESULT": "overflow yields blank",
+        "VALUERESULT": "the org computes it — investigate the value"
+      }
+    },
+    {
+      "id": "null_literal_add",
+      "question": "❓ NULL literal in arithmetic: 'treat blanks as zeroes' is a read-time FIELD coercion, so does the zero mode coerce a bare NULL literal too, or does the literal propagate blank in both modes (our current choice)? No corpus row covers the literal.",
+      "formula": "NULL + 1",
+      "returns": "Number",
+      "blankMode": "both",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "1": "the NULL literal coerces to 0 in zero mode — literal and blank field agree",
+        "null": "the NULL literal propagates blank — zero-mode coercion is field-only"
+      }
+    },
+    {
+      "id": "null_literal_isblank",
+      "question": "❓ Twin of null_literal_add: splits blank (BLANKRESULT) from a runtime error (null readback), and renders the value if one computes.",
+      "formula": "IF(ISBLANK(NULL + 1), \"BLANKRESULT\", TEXT(NULL + 1))",
+      "returns": "Text",
+      "blankMode": "both",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "BLANKRESULT": "NULL + 1 is blank",
+        "null": "NULL + 1 is a runtime error — investigate"
+      }
+    },
+    {
+      "id": "text_date_y50",
+      "question": "❓ Sub-1000-year TEXT(date): 4-digit ISO padding (\"0050-01-02\", our choice) or unpadded? No corpus row covers years below 1000; also confirms DATE(50,…) evaluates at all.",
+      "formula": "TEXT(DATE(50, 1, 2))",
+      "returns": "Text",
+      "interpret": {
+        "0050-01-02": "TEXT(date) pads the year to 4 digits — matches our ISO/API-shape rendering",
+        "50-1-2": "unpadded rendering — ours is wrong",
+        "50-01-02": "month/day padded but year unpadded — ours is wrong",
+        "null": "DATE(50, …) errors or renders blank — investigate"
+      }
+    },
+    {
+      "id": "text_date_y950",
+      "question": "❓ Second sub-1000-year TEXT(date) point (3-digit year).",
+      "formula": "TEXT(DATE(950, 11, 3))",
+      "returns": "Text",
+      "interpret": {
+        "0950-11-03": "4-digit padding confirmed",
+        "950-11-03": "3-digit year kept — ours is wrong"
+      }
+    },
+    {
+      "id": "scale_readback_number",
+      "question": "❓ Display-boundary rounding: does the API readback of a Number(18,8) formula field round 1/3 to the declared scale (0.33333333) or return the full-precision value (scale is display-only)? Channel characterization — the TEXT twin shows the engine-internal rendering for contrast.",
+      "formula": "1 / 3",
+      "returns": "Number",
+      "noCorpus": true,
+      "interpret": {
+        "0.33333333": "readback rounds at the declared field scale — scale is a materialization boundary",
+        "0.3333333333": "readback carries more digits than the declared scale — scale is display/storage-layer only"
+      }
+    },
+    {
+      "id": "scale_readback_currency",
+      "question": "❓ Second scale point for scale_readback_number, via the Currency(18,2) formula-field type.",
+      "formula": "1 / 3",
+      "returns": "Currency",
+      "noCorpus": true,
+      "interpret": {
+        "0.33": "readback rounds at the declared Currency scale",
+        "0.3333333333": "full-precision readback — scale is display-layer only"
+      }
+    },
+    {
+      "id": "bool_null_not_cal",
+      "question": "❓ Calibration: does NOT() propagate an expression-level null Boolean (IF(FALSE, TRUE, NULL) synthesizes one)? NOT(null)=null → the outer IF reads false → ELSEBRANCH; NOT(null)=true → NOTTRUE. Needed to interpret begins_blank_subject_not (ISBLANK can't wrap a Boolean — org compile-rejects it).",
+      "formula": "IF(NOT(IF(FALSE, TRUE, NULL)), \"NOTTRUE\", \"ELSEBRANCH\")",
+      "returns": "Text",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "NOTTRUE": "NOT(null Boolean) = TRUE — null coerces to false under NOT",
+        "ELSEBRANCH": "NOT(null Boolean) is null — NOT propagates blank"
+      }
+    },
+    {
+      "id": "bool_null_eqfalse_cal",
+      "question": "❓ Calibration: expression-level null Boolean = FALSE — three-valued (false, like blank-numeric equality) or checkbox-coerced (true)?",
+      "formula": "IF(IF(FALSE, TRUE, NULL) = FALSE, \"EQFALSE\", \"NOTEQFALSE\")",
+      "returns": "Text",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "EQFALSE": "null Boolean = FALSE is true — null coerces to false in boolean equality",
+        "NOTEQFALSE": "null Boolean = FALSE is false — three-valued, null equals nothing"
+      }
+    },
+    {
+      "id": "begins_blank_subject_not",
+      "question": "❓ Splits begins_blank_subject's FALSEORNULL via the NOT lens (read with bool_null_not_cal): real false → NOT → true → NOTTRUE; null → per calibration.",
+      "formula": "IF(NOT(BEGINS(customtext1__c, \"a\")), \"NOTTRUE\", \"ELSEBRANCH\")",
+      "returns": "Text",
+      "fields": {
+        "customtext1__c": {
+          "type": "Text",
+          "value": null
+        }
+      },
+      "interpret": {
+        "NOTTRUE": "BEGINS(blank, \"a\") is a real FALSE (blank-aware, matching CONTAINS) — if the calibration shows NOT(null)=true this stays ambiguous",
+        "ELSEBRANCH": "BEGINS(blank, \"a\") is null (propagation) — given calibration NOT(null)=null"
+      }
+    },
+    {
+      "id": "begins_blank_subject_eqfalse",
+      "question": "❓ Second lens on begins_blank_subject (read with bool_null_eqfalse_cal).",
+      "formula": "IF(BEGINS(customtext1__c, \"a\") = FALSE, \"EQFALSE\", \"NOTEQFALSE\")",
+      "returns": "Text",
+      "fields": {
+        "customtext1__c": {
+          "type": "Text",
+          "value": null
+        }
+      },
+      "interpret": {
+        "EQFALSE": "BEGINS(blank, \"a\") = FALSE is true — real false OR coerced null, disambiguate via calibration",
+        "NOTEQFALSE": "BEGINS(blank, \"a\") = FALSE is false — null under three-valued equality, OR true (excluded by begins_blank_subject)"
+      }
+    },
+    {
+      "id": "isnull_bool_arg",
+      "question": "❓ ISBLANK(Boolean) is org compile-rejected (\"Incorrect argument type\", found via the failed begins twins). Does legacy ISNULL share the restriction?",
+      "formula": "IF(ISNULL(BEGINS(\"a\", \"a\")), \"NULLISH\", \"NOTNULL\")",
+      "returns": "Text",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "NOTNULL": "ISNULL accepts a Boolean argument (and BEGINS(\"a\",\"a\") is non-null)"
+      }
+    },
+    {
+      "id": "scale_half_boundary",
+      "question": "❓ Rounding MODE at the declared-scale readback boundary (scale_readback_* proved rounding happens at Number(18,8) but 1/3 can't distinguish the mode): exactly-half digit at scale 8.",
+      "formula": "0.123456785 * 1",
+      "returns": "Number",
+      "noCorpus": true,
+      "interpret": {
+        "0.12345679": "half-up (or half-even-up here) at the field-scale boundary",
+        "0.12345678": "truncation or half-down — split with scale_updigit_boundary"
+      }
+    },
+    {
+      "id": "scale_updigit_boundary",
+      "question": "❓ Companion to scale_half_boundary: 0.123456786 rounds up under any rounding but truncates to ...78 under truncation.",
+      "formula": "0.123456786 * 1",
+      "returns": "Number",
+      "noCorpus": true,
+      "interpret": {
+        "0.12345679": "the boundary rounds (not truncates); with scale_half_boundary=...79 ⇒ HALF_UP-family",
+        "0.12345678": "the boundary truncates"
+      }
+    },
+    {
+      "id": "cutover_gap",
+      "question": "❓ Pre-1582 date model, raised by date_underflow's Java-era \"0001-12-27\": is date arithmetic proleptic Gregorian (ISO) or Java's hybrid Julian/Gregorian with the 1582 cutover? DATE(1582,10,15) - 1: hybrid → \"1582-10-04\" (the 10-day gap), proleptic → \"1582-10-14\".",
+      "formula": "TEXT(DATE(1582, 10, 15) - 1)",
+      "returns": "Text",
+      "interpret": {
+        "1582-10-04": "hybrid Julian/Gregorian — the cutover gap is real; pre-1582 arithmetic is Julian",
+        "1582-10-14": "proleptic Gregorian — no cutover; our ISO model is faithful"
+      }
+    },
+    {
+      "id": "cutover_construct",
+      "question": "❓ Constructing INSIDE the cutover gap: DATE(1582, 10, 5) doesn't exist in the hybrid calendar (lenient Java rolls it to 10-15); proleptic renders it as-is.",
+      "formula": "TEXT(DATE(1582, 10, 5))",
+      "returns": "Text",
+      "expectSaveError": "maybe",
+      "interpret": {
+        "1582-10-15": "hybrid with lenient roll — gap dates normalize forward",
+        "1582-10-05": "proleptic Gregorian — the date exists as constructed",
+        "null": "constructing a gap date errors"
+      }
     }
   ]
 }

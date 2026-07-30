@@ -25,10 +25,10 @@ result it can defend or refuses with an explicit `unsupported` error — it neve
 guesses. Semantics are verified two ways: against Salesforce's own open-source
 [formula-engine](https://github.com/salesforce/formula-engine) used as an
 oracle — **100%** of 6,312 comparable corpus cases pass — and against a real
-Salesforce org, where **100%** of 641 comparable org-verified rows pass. Both
+Salesforce org, where **100%** of 664 comparable org-verified rows pass. Both
 suites are protected in CI by baselines locked at 100%: a future failing row
-must be triaged, never absorbed. See [CONFORMANCE.md](CONFORMANCE.md) for how
-the oracle pipeline works and [VERIFICATION.md](VERIFICATION.md) for every
+must be triaged, never absorbed. See [CONFORMANCE.md](docs/CONFORMANCE.md) for how
+the oracle pipeline works and [VERIFICATION.md](docs/VERIFICATION.md) for every
 behavior's verification status.
 
 Numeric math uses [decimal.js](https://github.com/MikeMcl/decimal.js), mirroring

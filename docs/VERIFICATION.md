@@ -15,7 +15,8 @@ semantic rows; `corpus/org-availability.json` carries the per-context
 function/global availability matrix (one save-probe per construct per
 context's own metadata container, canary-gated — see `orgcheck/README.md`).
 Deploy rejections themselves are verdicts. The org-conformance suite is at
-100% of comparable rows (641/641, baseline locked at 1); availability
+100% of comparable rows (664/664 after the 2026-07-30 closure pass,
+baseline locked at 1); availability
 agreement is enforced by `src/registry/org-availability.test.ts`.
 
 ## Syntax / parsing
@@ -67,17 +68,17 @@ left-associative, with unary tighter than everything.
   CONFORMANCE.md trust order) is that library's defect alone, not product
   behavior.
 - ✅ **String-literal escapes** (oracle-verified 2026-07-29, engine v0.9.13,
-  `LEN`/`FIND` probes; org unprobed but the grammar and engine agree). The
+  `LEN`/`FIND` probes; decode half org-verified 2026-07-30, probes
+  `syntax:esc_*_len` — all four org values match the oracle exactly). The
   grammar (`LexerRules.g4` `STRING_LITERAL`) accepts exactly nine escapes —
   `\n \r \t \N \R \T \" \' \\` — and any other backslash sequence is a
   syntax error (`"a\qb"` fails to compile; we diagnose `invalid-escape`
-  and recover). The engine _collapses only two_: `\\` → `\` and `\" `→ `"`
+  and recover). The product _collapses only two_: `\\` → `\` and `\" `→ `"`
   (`LEN("\\")` = 1, `LEN("a\"b")` = 3, in both quote styles). Every other
   accepted escape keeps both characters: `\n` is literal backslash-n
   (`LEN("a\nb")` = 4, never a newline), and `\'` keeps its backslash even
   inside single quotes (`LEN('a\'b')` = 4) while still not terminating the
-  string. Encoded in `parser.test.ts`; worth an org probe eventually since
-  only the JVM oracle has confirmed the decode half.
+  string. Encoded in `parser.test.ts`.
 
 ## Registry data — settled by the wave-2 per-context pass (2026-07-28)
 
@@ -495,6 +496,85 @@ The formula in the "…" rule or process is invalid due to the following:
   flows and weblinks — so the wave-2 approval availability verdicts carry
   no create-path caveat.
 
+## Open-question closure pass (2026-07-30)
+
+Two-round probe run against the standing open-questions list (the follow-up
+round triangulated boolean-null semantics after ISBLANK turned out not to
+wrap a Boolean). Every verdict below is encoded in the evaluator/checker and
+carried as org-tier corpus rows:
+
+- ✅ **BEGINS blank operands are asymmetric**: a blank search term coerces to
+  `""` — `BEGINS("abc", blank)` is TRUE, every string begins with the empty
+  string (probe `begins_blank_needle`) — while a blank subject propagates
+  null: `BEGINS(blank, "a")` reads as null through NOT (probes
+  `begins_blank_subject` + `begins_blank_subject_not`; a real false would
+  have surfaced as `NOT(...)` = true). So BEGINS is *not* simply blank-aware
+  like CONTAINS — the evaluator implements the split per-argument.
+- ✅ **ISBLANK and ISNULL compile-reject a Boolean argument** — "Incorrect
+  argument type for function 'ISBLANK()'" (deploy rejections of the
+  `begins_blank_*_isblank` twins and `isnull_bool_arg`). Encoded as
+  `rejectTypes` in the registry; the checker reports it as a save-blocking
+  error diagnostic (`argument-type-rejected`).
+- ✅ **NOT() propagates an expression-level null Boolean** (probes
+  `bool_null_not_cal` — folded — and `begins_blank_subject_not` — runtime:
+  both read the null through to the IF's false branch).
+- ✅ **Boolean equality splits by constant folding, like `^`**: at runtime a
+  blank Boolean coerces to false — `nullBool = FALSE` is TRUE (probe
+  `begins_blank_subject_eqfalse`, the null-checkbox-reads-false rule) —
+  while the all-literal folded comparison stays three-valued —
+  `IF(FALSE, TRUE, NULL) = FALSE` is false (probe `bool_null_eqfalse_cal`).
+  Two probe points; the evaluator keys the split on
+  contains-a-field-reference, mirroring the `^` fold model.
+- ✅ **The NULL literal propagates blank in BOTH blank modes** — `NULL + 1`
+  reads back null even in zero mode (probes `null_literal_add` [zero/blank],
+  `null_literal_isblank`): "treat blanks as zeroes" is a read-time *field*
+  coercion and never touches a typeless blank. The evaluator now propagates
+  expression-level blanks through arithmetic and unary minus in both modes
+  (typed blank numeric fields still materialize to 0 at read in zero mode).
+- ✅ **Date arithmetic has no ceiling at year 9999** — `DATE(9999, 12, 31) +
+  1` computes and `TEXT()` renders `"10000-01-01"` (probes
+  `date_overflow_isblank`/`_text`); ADDMONTHS, datetime arithmetic, and
+  `FROMUNIXTIME(300000000000)` (≈ year 11476) all compute past 9999
+  (`addmonths_overflow_isblank`, `datetime_overflow_isblank`,
+  `fromunixtime_overflow_isblank`). Only `DATE()`'s own arguments are
+  bounded: `DATE(0, 1, 1)` is a runtime error (`date_year_zero`), matching
+  the corpus-verified `DATE(10000, …)` error — the domain is years 1–9999.
+- ✅ **The product's calendar is Java's hybrid Julian/Gregorian** —
+  `DATE(1582, 10, 15) - 1` renders `"1582-10-04"`: the ten-day cutover gap
+  is real (probe `cutover_gap`). Construction keeps literal parts even
+  inside the gap (`TEXT(DATE(1582, 10, 5))` = `"1582-10-05"`,
+  `cutover_construct`), and sub-year-1 results render with no era marker —
+  `DATE(1, 1, 1) - 5` = `"0001-12-27"` (`date_underflow_text`), so 1 BC and
+  1 AD are indistinguishable in output. **Evaluator policy**: arithmetic
+  past 9999 computes (org-verified above); construction, parts-reads, and
+  TEXT of any in-range date stay supported; day-line computations
+  (arithmetic, diffs, WEEKDAY/DAYOFYEAR/ISOWEEK, ADDMONTHS,
+  UNIXTIMESTAMP/FROMUNIXTIME) **refuse on pre-cutover dates** rather than
+  run proleptic-Gregorian math the product contradicts, and results beyond
+  our representable range (year 275760) refuse rather than fake a
+  Salesforce error.
+- ✅ **TEXT(date) pads the year to 4 digits** — `TEXT(DATE(50, 1, 2))` =
+  `"0050-01-02"`, `TEXT(DATE(950, 11, 3))` = `"0950-11-03"` (probes
+  `text_date_y50`/`text_date_y950`), confirming our ISO/API-shape rendering
+  (5-digit years render naturally: `"10000-01-01"`).
+- ✅ **Declared field scale rounds HALF_UP at the API/storage boundary** —
+  a Number(18,8) formula field holding `1/3` reads back `0.33333333` and a
+  Currency(18,2) reads `0.33`, while their TEXT() twins render the full
+  engine-internal 40-digit value (probes `scale_readback_number`/
+  `_currency`); `0.123456785` and `0.123456786` both read back `0.12345679`
+  at scale 8 (`scale_half_boundary`/`scale_updigit_boundary` — the
+  exactly-half case rounds up, so the mode is HALF_UP-family, not
+  truncation). Display-boundary rounding is therefore a field-boundary
+  materialization the simulator's TEXT/value channels already model
+  correctly; the raw-field readback shape is a channel fact, not an
+  expression-level one.
+- ✅ **Whitespace-only text stores as null on records** — re-confirmed
+  operationally: the corpus row `testSimpleSubstitute#8` plans a `" "`
+  search term, the org stores null, and SUBSTITUTE no-ops (org readback
+  "Replace Space"). `orgcheck/src/generate.ts` now plans whitespace-only
+  Text inputs as null so emitted rows carry the value the record actually
+  holds.
+
 ## Function port (unsupported → simulated)
 
 Ported and corpus-verified (golden tests in `evaluator.test.ts`):
@@ -547,9 +627,9 @@ intermediates against the real engine and settled the numeric-scale question:
 
 The gap to 100% is closed: `src/engine/conformance.test.ts` (oracle tier)
 passes 6,312/6,312 comparable rows and `src/engine/org-conformance.test.ts`
-(org tier) passes 641/641 comparable rows with no quarantined rows
-(`semantics:text_percent_field` was settled by the org pass), both baselines
-locked at 1. The org-overruled oracle clusters are excluded by the
+(org tier) passes every comparable row (664/664 after the 2026-07-30
+closure pass) with no quarantined rows (`semantics:text_percent_field` was
+settled by the org pass), both baselines locked at 1. The org-overruled oracle clusters are excluded by the
 evidence-backed allowlist in `conformance.test.ts`, each entry naming the org
 row that supersedes it. The items below record how each gap was resolved:
 
@@ -594,10 +674,12 @@ row that supersedes it. The items below record how each gap was resolved:
   every `TEXT(datetime)` rendering GMT regardless of org TZ. Datetime math is
   UTC-based, unaffected by org timezone. Only the oracle's Java-style
   datetime renderings remain incomparable (quarantined).
-- 🔬 **Numeric precision/scale limits** — internal model resolved and refined:
+- ✅ **Numeric precision/scale limits** — internal model resolved and refined:
   40-sig-fig carry, 32-place materialization, Oracle-NUMBER-parity TEXT
-  rendering (org-pass sections above); rounding at display boundaries per
-  field scale remains open.
+  rendering (org-pass sections above). Display-boundary rounding settled
+  2026-07-30: the declared field scale rounds HALF_UP at the API/storage
+  boundary while TEXT() sees the pre-materialization value (closure-pass
+  section, `scale_*` probes).
 - ✅ **Per-context function and global availability** — org-verified for every
   context whose container compile-checks formulas
   (`corpus/org-availability.json`; registry `contexts`/globals updated; those
@@ -606,19 +688,22 @@ row that supersedes it. The items below record how each gap was resolved:
 
 ## Verification history
 
-The org pass ran as eight probe waves (2026-07-26 → 2026-07-29); every fact
-they settled is recorded in the sections above with its probe id. In brief:
-wave 1 established the deploy/readback channels and the formula-field
-semantics; wave 2 built the per-context availability matrix and the
-validation-rule runtime facts; wave 3 added the flow-interview runtime
-channel (`flowValueProbes` in `orgcheck/probes/contexts.json`) and graduated
-eight formerly-refusing functions; wave 4 added the workflow-field-update
-channel and pinned the source/compiled/output size limits; waves 5–8
-bisected the `^` operator's two code paths (retracting two interim models
-along the way), added the approval-process channels, and settled the
-empty-text-is-blank rule. DST was closed by analysis rather than probing:
-datetimes are GMT instants, and the org applies no zone arithmetic a client
-must reproduce.
+The org pass ran as eight probe waves (2026-07-26 → 2026-07-29) plus an
+open-question closure pass (2026-07-30); every fact they settled is recorded
+in the sections above with its probe id. In brief: wave 1 established the
+deploy/readback channels and the formula-field semantics; wave 2 built the
+per-context availability matrix and the validation-rule runtime facts;
+wave 3 added the flow-interview runtime channel (`flowValueProbes` in
+`orgcheck/probes/contexts.json`) and graduated eight formerly-refusing
+functions; wave 4 added the workflow-field-update channel and pinned the
+source/compiled/output size limits; waves 5–8 bisected the `^` operator's
+two code paths (retracting two interim models along the way), added the
+approval-process channels, and settled the empty-text-is-blank rule; the
+closure pass settled BEGINS blank semantics, the NULL literal, the temporal
+boundaries (no 9999 ceiling; hybrid Julian/Gregorian calendar), boolean-null
+equality, escape decoding, and field-scale boundary rounding. DST was closed
+by analysis rather than probing: datetimes are GMT instants, and the org
+applies no zone arithmetic a client must reproduce.
 
 Alongside the probe waves:
 
@@ -650,32 +735,31 @@ implementation; all want an org probe before being called settled:
 
 - **POWER()** — no corpus row in either tier pins whether it shares `^`'s
   rules (integer-only exponent, 1e64 cap, folded/runtime precision split).
-  Now `simulatable: false` (it previously simulated through decimal.js's
-  `pow`, which leaked non-finite values and fake precision). Probe POWER
-  against `^` on the same inputs next org run. Note its availability data
-  says `custom_button_link` only.
-- **BEGINS(blank operands)** — follows the generic null-propagation wrapper
-  (returns blank), while its siblings CONTAINS/FIND are org-verified
-  blank-aware (coerce to ""). Zero blank-operand BEGINS rows exist in either
-  corpus; the asymmetry is _suspicious but unprobed_, so behavior was left
-  alone. Probe `BEGINS("abc", blank)` / `BEGINS(blank, "a")`.
-- **Temporal overflow boundaries** — date/datetime arithmetic, ADDMONTHS and
-  FROMUNIXTIME now error outside year 1–9999 instead of producing NaN dates
-  or years DATE() itself rejects. The _products'_ exact boundary and error
-  surfacing are unverified; ours is chosen for internal consistency with
-  DATE()'s validated range.
-- **Typeless blanks in blank-mode arithmetic** — `NULL + 1`, unsupplied
-  fields, and CASE fallthroughs now propagate blank like typed blank fields
-  (matching the unary branch; corpora bit-identical either way). The NULL
-  _literal_ case has no probe row.
-- **Sub-1000-year TEXT(date) rendering** — years now pad to 4 digits
-  ("0050-01-01", ISO/API shape). No corpus row covers years below 1000.
-- **String-literal escape decoding** — the accept/reject half is grammar-
-  and oracle-verified (syntax section above), but only the JVM oracle has
-  confirmed which escapes collapse on decode; worth an org probe.
-- **Display-boundary rounding per field scale** — the internal numeric model
-  is settled, but how values round at display boundaries for a field's
-  declared scale is unprobed (the one 🔬 entry above).
+  `simulatable: false` (it previously simulated through decimal.js's `pow`,
+  which leaked non-finite values and fake precision). **Structurally
+  unobservable by the current harness** (analysis 2026-07-30): its only
+  accepting context is custom buttons/links, and none of the five runtime
+  channels reach that context — every channel's own context (formula
+  fields, validation rules, flows, field updates, approvals) compile-rejects
+  POWER, and a weblink's URL formula is merged client-side at click time
+  with no API that returns the evaluated result. The refusal stands until a
+  button-rendering channel exists.
+- **Pre-cutover (Julian) day-line simulation** — the 2026-07-30 pass proved
+  the product's hybrid Julian/Gregorian calendar (closure-pass section);
+  day-line computations on pre-1582-10-15 dates currently refuse.
+  Implementing hybrid arithmetic (Julian leap rules, the ten-day gap,
+  weekday continuity) is well-defined and possible if demand appears, but
+  sub-year-1 results render era-degenerate output (`"0001-12-27"` for a
+  1 BC date), so that zone likely stays refused permanently.
+- **Boolean-equality fold model** — the runtime-coerce vs folded-three-valued
+  split rests on two probe points (`begins_blank_subject_eqfalse`,
+  `bool_null_eqfalse_cal`). More lenses (field-based null Boolean vs
+  `= TRUE`, `<>` variants, folded comparisons with one field far away)
+  would firm the contains-a-field-reference discriminator.
+- **Arithmetic upper bound** — org-verified to compute through at least
+  ≈ year 11476 (`fromunixtime_overflow_isblank`); whether the product has
+  any ceiling at all is unprobed. We refuse past our representable
+  year 275760.
 - **`email_template` availability** — structurally unverifiable (its
   metadata container never compile-checks merge formulas at deploy); stays
   Tier 2 best-effort unless a new observation channel appears.

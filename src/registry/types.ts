@@ -35,6 +35,12 @@ export interface ParamSpec {
    * an argument assignable to any listed type.
    */
   readonly altTypes?: readonly SfType[];
+  /**
+   * Types the product rejects at save even when `type` is `Unknown` —
+   * ISBLANK/ISNULL take anything EXCEPT a Boolean ("Incorrect argument type",
+   * org-verified). The checker reports these as save-blocking.
+   */
+  readonly rejectTypes?: readonly SfType[];
   /** A variadic tail param absorbs all remaining arguments. */
   readonly variadic?: boolean;
   readonly optional?: boolean;

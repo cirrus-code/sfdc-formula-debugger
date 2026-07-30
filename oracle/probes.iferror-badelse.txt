@@ -1,0 +1,7 @@
+# testIfErrorDateTimeValueWithBadElse (legacy formulatests.xml — never migrated to V2):
+# IFERROR whose fallback ALSO errors. Both branches are invalid DATETIMEVALUE input.
+DATETIME	IFERROR(DATETIMEVALUE("sample "),DATETIMEVALUE("sample "))
+# control: bad try, good else (expected: fallback value)
+DATETIME	IFERROR(DATETIMEVALUE("sample "),DATETIMEVALUE("2005-11-15 17:00:00"))
+# control: good try (expected: try value)
+DATETIME	IFERROR(DATETIMEVALUE("2005-11-15 17:00:00"),DATETIMEVALUE("sample "))

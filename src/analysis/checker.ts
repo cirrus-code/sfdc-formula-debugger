@@ -269,6 +269,17 @@ class Checker {
         return;
       }
       const actual = argTypes[i]!;
+      // A rejected type blocks the save in the product even when the param is
+      // otherwise Unknown-typed (ISBLANK/ISNULL vs Boolean, org-verified).
+      if (param.rejectTypes?.includes(actual)) {
+        this.report(
+          "argument-type-rejected",
+          "error",
+          arg.span,
+          t().checker.argumentTypeRejected(spec.name, param.name, actual),
+        );
+        return;
+      }
       const accepted = [param.type, ...(param.altTypes ?? [])];
       if (!accepted.some((t) => isAssignable(actual, t))) {
         this.report(

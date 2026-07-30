@@ -381,6 +381,22 @@ describe("engine: ported functions (corpus-verified)", () => {
       UnsupportedError,
     );
   });
+
+  // Oracle-verified via the legacy testIfErrorDateTimeValueWithBadElse fixture
+  // (formulatests.xml — never migrated to formulaTestV2, so absent from the
+  // extracted corpus): IFERROR catches only the first argument's error; a
+  // failing fallback propagates its own error, and a clean first argument
+  // never evaluates the fallback at all.
+  it("IFERROR with a failing fallback propagates the fallback's error", () => {
+    const both = ev('IFERROR(DATETIMEVALUE("sample "), DATETIMEVALUE("sample "))');
+    expect(isError(both)).toBe(true);
+    expect(
+      s('TEXT(IFERROR(DATETIMEVALUE("sample "), DATETIMEVALUE("2005-11-15 17:00:00")))'),
+    ).toBe("2005-11-15 17:00:00Z");
+    expect(
+      s('TEXT(IFERROR(DATETIMEVALUE("2005-11-15 17:00:00"), DATETIMEVALUE("sample ")))'),
+    ).toBe("2005-11-15 17:00:00Z");
+  });
 });
 
 describe("engine: ^ semantics (org-verified, pw* probe bisects)", () => {
@@ -637,11 +653,14 @@ describe("engine: VALUE/ISNUMBER reject non-decimal syntax", () => {
   });
 });
 
-describe("engine: early years survive epoch round-trips (no Date.UTC remap)", () => {
-  it("keeps DATE(50,…) arithmetic in year 50, not 1950", () => {
-    expect(s("TEXT(DATE(50, 1, 1) + 1)")).toBe("0050-01-02");
-    expect(n("YEAR(DATE(50, 1, 1) + 0)")).toBe("50");
-    expect(n("YEAR(ADDMONTHS(DATE(50, 1, 1), 1))")).toBe("50");
+describe("engine: early years survive construction and parts-reads (no Date.UTC remap)", () => {
+  // Org-verified (semantics:text_date_y50/y950, cutover_construct):
+  // construction keeps literal parts and TEXT pads the year to 4 digits.
+  it("keeps DATE(50,…) parts in year 50, not 1950", () => {
+    expect(s("TEXT(DATE(50, 1, 2))")).toBe("0050-01-02");
+    expect(s("TEXT(DATE(950, 11, 3))")).toBe("0950-11-03");
+    expect(n("YEAR(DATE(50, 1, 1))")).toBe("50");
+    expect(s("TEXT(DATE(1582, 10, 5))")).toBe("1582-10-05");
   });
 
   it("reads a four-digit sub-100 year in DATETIMEVALUE", () => {
@@ -649,17 +668,41 @@ describe("engine: early years survive epoch round-trips (no Date.UTC remap)", ()
       "50",
     );
   });
+
+  // The product's day-line runs on Java's hybrid Julian/Gregorian calendar
+  // (org-verified, semantics:cutover_gap: DATE(1582, 10, 15) - 1 renders
+  // "1582-10-04"). Our proleptic day counting diverges there, so day-line
+  // computations on pre-cutover dates refuse rather than guess.
+  it("refuses day-line computations on pre-cutover (Julian) dates", () => {
+    expect(() => ev("DATE(50, 1, 1) + 1")).toThrow(UnsupportedError);
+    expect(() => ev("DATE(1582, 10, 15) - 1")).toThrow(UnsupportedError);
+    expect(() => ev("ADDMONTHS(DATE(50, 1, 1), 1)")).toThrow(UnsupportedError);
+    expect(() => ev("WEEKDAY(DATE(1582, 10, 14))")).toThrow(UnsupportedError);
+    expect(() => ev("DATE(1583, 1, 1) - DATE(1582, 1, 1)")).toThrow(
+      UnsupportedError,
+    );
+  });
 });
 
-describe("engine: out-of-range temporal results are simulated errors", () => {
-  it("errors instead of yielding NaN or impossible years", () => {
-    expect(isError(ev("DATE(2020, 1, 1) + 400000000"))).toBe(true);
-    expect(isError(ev("DATE(2020, 1, 1) - 800000"))).toBe(true);
-    expect(isError(ev("DATE(2020, 1, 1) + 4000000"))).toBe(true);
-    expect(isError(ev("NOW() + 400000000"))).toBe(true);
-    expect(isError(ev("ADDMONTHS(DATE(1, 1, 1), -1)"))).toBe(true);
-    expect(isError(ev("ADDMONTHS(DATE(9999, 12, 1), 2)"))).toBe(true);
-    expect(isError(ev("FROMUNIXTIME(99999999999999)"))).toBe(true);
+describe("engine: temporal range edges", () => {
+  // Org-verified (semantics:date_overflow_*, addmonths_overflow_isblank,
+  // fromunixtime_overflow_isblank): the product's date arithmetic crosses
+  // year 9999 freely — only DATE()'s own arguments are bounded to 1–9999.
+  it("computes past year 9999 like the product", () => {
+    expect(s("TEXT(DATE(9999, 12, 31) + 1)")).toBe("10000-01-01");
+    expect(s("TEXT(ADDMONTHS(DATE(9999, 12, 1), 2))")).toBe("10000-02-01");
+    expect(isError(ev("DATE(2020, 1, 1) + 4000000"))).toBe(false);
+    expect(isError(ev("FROMUNIXTIME(300000000000)"))).toBe(false);
+  });
+
+  // Beyond our representation (or into the Julian zone) we refuse — an
+  // honest limit, never a fake Salesforce #Error!.
+  it("refuses results beyond the representable range", () => {
+    expect(() => ev("DATE(2020, 1, 1) + 400000000")).toThrow(UnsupportedError);
+    expect(() => ev("DATE(2020, 1, 1) - 800000")).toThrow(UnsupportedError);
+    expect(() => ev("NOW() + 400000000")).toThrow(UnsupportedError);
+    expect(() => ev("ADDMONTHS(DATE(1, 1, 1), -1)")).toThrow(UnsupportedError);
+    expect(() => ev("FROMUNIXTIME(99999999999999)")).toThrow(UnsupportedError);
   });
 
   it("still computes in-range results", () => {
@@ -683,22 +726,29 @@ describe("engine: ADDMONTHS preserves Datetime type and time-of-day", () => {
   });
 });
 
-describe("engine: typeless blanks propagate through arithmetic in blank mode", () => {
-  it("treats NULL and unsupplied fields like typed blank fields", () => {
-    for (const src of [
-      "NULL + 1",
-      "1 + NULL",
-      "NULL * 5",
-      "Missing__c + 1",
-      "CASE(1, 2, 3) + 1",
-    ]) {
-      const r = ev(src, { blankMode: "blank" });
-      expect(isError(r)).toBe(false);
-      expect((r as SfValue).blank).toBe(true);
+describe("engine: typeless blanks propagate through arithmetic in BOTH modes", () => {
+  // Org-verified (semantics:null_literal_add [zero]): NULL + 1 is null even
+  // in zero mode — "treat blanks as zeroes" is a read-time FIELD coercion
+  // and never reaches a typeless blank.
+  it("treats NULL, unsupplied fields, and CASE fallthroughs as propagating blanks", () => {
+    for (const mode of ["blank", "zero"] as const) {
+      for (const src of [
+        "NULL + 1",
+        "1 + NULL",
+        "NULL * 5",
+        "CASE(1, 2, 3) + 1",
+      ]) {
+        const r = ev(src, { blankMode: mode });
+        expect(isError(r)).toBe(false);
+        expect((r as SfValue).blank).toBe(true);
+      }
+      expect((ev("-NULL", { blankMode: mode }) as SfValue).blank).toBe(true);
     }
-    // Consistent with the unary branch, and unchanged in zero mode.
-    expect((ev("-NULL", { blankMode: "blank" }) as SfValue).blank).toBe(true);
-    expect(n("NULL + 1", { blankMode: "zero" })).toBe("1");
+    // An unsupplied field is typeless too — but a *typed* blank numeric field
+    // still coerces at read in zero mode (the org's field-level toggle).
+    expect(
+      (ev("Missing__c + 1", { blankMode: "blank" }) as SfValue).blank,
+    ).toBe(true);
   });
 });
 

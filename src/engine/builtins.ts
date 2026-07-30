@@ -13,6 +13,7 @@ import {
   isError,
   num,
   text,
+  UnsupportedError,
   type DateParts,
   type EvalResult,
   type SfValue,
@@ -189,10 +190,11 @@ function daysInMonth(y: number, m: number): number {
   ]!;
 }
 
-// Salesforce rejects DATE() outside a supported year range: DATE(10000, …) is a
-// runtime error while four-digit years evaluate. The exact upper bound (4000 vs
-// 9999) is a NEEDS-VERIFICATION item; 9999 is the widest bound consistent with
-// the corpus (VERIFICATION.md).
+// Salesforce rejects DATE() outside years 1–9999: DATE(10000, …) errors per
+// the corpus and DATE(0, …) errors in the org (semantics:date_year_zero),
+// while DATE(9999, …) evaluates. This is DATE()'s own argument domain only —
+// date *arithmetic* crosses 9999 freely in the product (org-verified,
+// semantics:date_overflow_*: DATE(9999, 12, 31) + 1 renders "10000-01-01").
 const MIN_YEAR = 1;
 const MAX_YEAR = 9999;
 
@@ -226,12 +228,53 @@ function utcEpoch(
   return d.getTime();
 }
 
-/** Epoch bounds matching the supported DATE() year range. */
-const MIN_EPOCH_MS = utcEpoch(MIN_YEAR, 1, 1);
-const MAX_EPOCH_MS = utcEpoch(MAX_YEAR, 12, 31, 23, 59, 59) + 999;
+/**
+ * The product's calendar is Java's hybrid Julian/Gregorian (org-verified,
+ * semantics:cutover_gap: DATE(1582, 10, 15) - 1 renders "1582-10-04" — the
+ * ten-day cutover gap is real). Our day-line arithmetic is proleptic
+ * Gregorian, which agrees with the hybrid calendar exactly from the cutover
+ * (1582-10-15) forward. Day-line computations touching earlier dates —
+ * arithmetic, diffs, weekday/day-of-year, month moves, epoch conversions —
+ * would need Julian day counting, and below year 1 an era model whose TEXT
+ * rendering is degenerate (DATE(1, 1, 1) - 5 renders "0001-12-27": no era
+ * marker, so 1 BC and 1 AD are indistinguishable). Those refuse rather than
+ * guess (rule 1). Construction and parts-reads are calendar-free — the
+ * product keeps and renders literal parts even inside the cutover gap
+ * (semantics:cutover_construct: TEXT(DATE(1582, 10, 5)) = "1582-10-05") — so
+ * DATE()/DATEVALUE()/TEXT()/YEAR()… stay available for any in-range parts.
+ */
+export const GREGORIAN_CUTOVER_MS = utcEpoch(1582, 10, 15);
 
-export function isValidEpochMs(ms: number): boolean {
-  return Number.isFinite(ms) && ms >= MIN_EPOCH_MS && ms <= MAX_EPOCH_MS;
+export function isPreGregorian(p: DateParts): boolean {
+  return (
+    p.year < 1582 ||
+    (p.year === 1582 && (p.month < 10 || (p.month === 10 && p.day < 15)))
+  );
+}
+
+/** Refuse a day-line computation on a pre-cutover date (see above). */
+export function assertGregorian(p: DateParts, what: string): void {
+  if (isPreGregorian(p)) {
+    throw new UnsupportedError(
+      `${what} before 1582-10-15 (Julian-calendar dates)`,
+    );
+  }
+}
+
+/**
+ * JS Date ceiling (+275760-09-13). The product computes past year 9999 with
+ * no ceiling the org pass could find (semantics:date_overflow_*,
+ * fromunixtime_overflow ≈ year 11476), so beyond our own representation we
+ * refuse — an honest limit, never a fake Salesforce #Error!.
+ */
+export const MAX_EPOCH_MS = 8.64e15;
+
+export function assertRepresentableEpoch(ms: number, what: string): void {
+  if (!Number.isFinite(ms) || Math.abs(ms) > MAX_EPOCH_MS) {
+    throw new UnsupportedError(
+      `${what} beyond the representable date range (year 275760)`,
+    );
+  }
 }
 
 // LocalTime-style: seconds appear only when seconds or millis are nonzero,
@@ -396,7 +439,16 @@ export const BUILTINS: Record<string, Builtin> = {
   UPPER: ([a, loc]) => caseWithLocale(a!, loc, true),
   LOWER: ([a, loc]) => caseWithLocale(a!, loc, false),
   CONTAINS: ([a, b]) => bool(dstr(a!).includes(dstr(b!))),
-  BEGINS: ([a, b]) => bool(dstr(a!).startsWith(dstr(b!))),
+  BEGINS: ([a, b]) => {
+    // A blank search term coerces to "" — every string begins with "" —
+    // while a blank subject propagates null (org-verified,
+    // begins_blank_needle TRUERESULT; begins_blank_subject + _not: the
+    // subject-blank result reads as null through NOT, never a real false).
+    if (a!.blank) {
+      return blank("Boolean");
+    }
+    return bool(dstr(a!).startsWith(dstr(b!)));
+  },
   FIND: ([search, txt, start]) => {
     const needle = dstr(search!);
     // An empty (or blank) search term finds nothing — 0, not position 1
@@ -566,16 +618,24 @@ export const BUILTINS: Record<string, Builtin> = {
   MINUTE: ([a]) => timeField(a!, (ms) => Math.floor(ms / 60_000) % 60),
   SECOND: ([a]) => timeField(a!, (ms) => Math.floor(ms / 1000) % 60),
   MILLISECOND: ([a]) => timeField(a!, (ms) => ms % 1000),
+  // Day-line reads (weekday, ordinal day, ISO weeks) diverge from the
+  // product's hybrid calendar before the cutover — assertGregorian refuses
+  // there, while the parts-reads YEAR/MONTH/DAY stay calendar-free.
   // 1 = Sunday … 7 = Saturday (corpus: 2005-12-31, a Saturday, is 7).
-  WEEKDAY: ([a]) => dateField(a!, (p) => utcDate(p).getUTCDay() + 1),
+  WEEKDAY: ([a]) =>
+    dateField(a!, (p) => {
+      assertGregorian(p, "WEEKDAY");
+      return utcDate(p).getUTCDay() + 1;
+    }),
   DAYOFYEAR: ([a]) =>
-    dateField(
-      a!,
-      (p) => (epochOfDate(p) - utcEpoch(p.year, 1, 1)) / 86_400_000 + 1,
-    ),
+    dateField(a!, (p) => {
+      assertGregorian(p, "DAYOFYEAR");
+      return (epochOfDate(p) - utcEpoch(p.year, 1, 1)) / 86_400_000 + 1;
+    }),
   // ISO-8601: the week containing the date's Thursday; week 1 holds Jan 4.
   ISOWEEK: ([a]) =>
     dateField(a!, (p) => {
+      assertGregorian(p, "ISOWEEK");
       const t = isoThursday(p);
       return (
         Math.floor(
@@ -583,12 +643,21 @@ export const BUILTINS: Record<string, Builtin> = {
         ) + 1
       );
     }),
-  ISOYEAR: ([a]) => dateField(a!, (p) => isoThursday(p).getUTCFullYear()),
+  ISOYEAR: ([a]) =>
+    dateField(a!, (p) => {
+      assertGregorian(p, "ISOYEAR");
+      return isoThursday(p).getUTCFullYear();
+    }),
   UNIXTIMESTAMP: ([a]) => {
     if (a!.blank) {
       return blank("Number");
     }
     if (a!.type === "Datetime") {
+      // A pre-cutover epoch is our proleptic construction, ten days off the
+      // product's hybrid instant — refuse rather than expose it.
+      if (a!.data.epochMillis < GREGORIAN_CUTOVER_MS) {
+        assertGregorian(dateFromEpoch(a!.data.epochMillis), "UNIXTIMESTAMP");
+      }
       return num(Math.floor(a!.data.epochMillis / 1000));
     }
     // A Time input counts seconds since midnight (testUnixTimestampWithTime).
@@ -596,15 +665,22 @@ export const BUILTINS: Record<string, Builtin> = {
       return num(Math.floor(a!.data.millisOfDay / 1000));
     }
     const p = datePartsOf(a!);
-    return p
-      ? num(epochOfDate(p) / 1000)
-      : error("#Error! (UNIXTIMESTAMP: not a date)");
+    if (!p) {
+      return error("#Error! (UNIXTIMESTAMP: not a date)");
+    }
+    assertGregorian(p, "UNIXTIMESTAMP");
+    return num(epochOfDate(p) / 1000);
   },
   FROMUNIXTIME: ([a]) => {
     const ms = Math.round(dnum(a!).times(1000).toNumber());
-    return isValidEpochMs(ms)
-      ? datetimeValue(ms)
-      : error("#Error! (FROMUNIXTIME: out of range)");
+    // The product computes far-future timestamps (org-verified,
+    // fromunixtime_overflow ≈ year 11476); pre-cutover ones fall into the
+    // Julian zone and refuse.
+    assertRepresentableEpoch(ms, "FROMUNIXTIME");
+    if (ms < GREGORIAN_CUTOVER_MS) {
+      assertGregorian(dateFromEpoch(ms), "FROMUNIXTIME");
+    }
+    return datetimeValue(ms);
   },
   YEAR: ([a]) => dateField(a!, (p) => p.year),
   MONTH: ([a]) => dateField(a!, (p) => p.month),
@@ -613,23 +689,27 @@ export const BUILTINS: Record<string, Builtin> = {
     // Type-preserving: a Datetime keeps its type and time-of-day — the month
     // math applies to the GMT date parts only (oracle-verified,
     // testAddMonthsDateTime: 2004-12-31 11:32 + 3 → 2005-03-31 11:32).
+    // Results past year 9999 compute (org-verified,
+    // addmonths_overflow_isblank); pre-cutover inputs or results refuse.
     if (a!.type === "Datetime" && !a!.blank) {
       const ms = a!.data.epochMillis;
       const parts = dateFromEpoch(ms);
+      assertGregorian(parts, "ADDMONTHS");
       const moved = addMonths(parts, toInt(n!));
-      if (!isValidDate(moved)) {
-        return error("#Error! (ADDMONTHS: date out of range)");
-      }
-      return datetimeValue(epochOfDate(moved) + (ms - epochOfDate(parts)));
+      assertGregorian(moved, "ADDMONTHS");
+      const movedMs = epochOfDate(moved) + (ms - epochOfDate(parts));
+      assertRepresentableEpoch(movedMs, "ADDMONTHS");
+      return datetimeValue(movedMs);
     }
     const p = datePartsOf(a!);
     if (!p) {
       return error("#Error! (ADDMONTHS: not a date)");
     }
+    assertGregorian(p, "ADDMONTHS");
     const moved = addMonths(p, toInt(n!));
-    return isValidDate(moved)
-      ? dateValue(moved)
-      : error("#Error! (ADDMONTHS: date out of range)");
+    assertGregorian(moved, "ADDMONTHS");
+    assertRepresentableEpoch(epochOfDate(moved), "ADDMONTHS");
+    return dateValue(moved);
   },
 };
 
