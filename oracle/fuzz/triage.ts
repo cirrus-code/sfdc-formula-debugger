@@ -202,6 +202,27 @@ const RULES: readonly Rule[] = [
   {
     bucket: "org-probe-candidate",
     rationale:
+      "Our `^` refused on the runtime path's 43-significant-digit exact ceiling (org-verified, pw7_rt_bigsig/pw8_prec bisects) while the oracle constant-folded the whole constant base to an 18-significant-digit value. Where the product compiler's fold boundary sits for a base computed from literals is unverified (VERIFICATION.md open questions, fold boundary) — org probe, not an evaluator change.",
+    match: (d) =>
+      d.formula.includes("^") &&
+      oursErrored(d) &&
+      d.ours.includes("precision limit") &&
+      !oracleErrored(d),
+  },
+  {
+    bucket: "org-probe-candidate",
+    rationale:
+      "TEXT() output consumed by another text function (LEN, FIND, …): the org-verified rendering divergence (leading zero dropped, 39/40-digit budget vs the oracle's 32-place materialization) propagates into a value the rendering-kinship checks cannot connect. The oracle cannot settle a TEXT-derived measure — org probe.",
+    match: (d) =>
+      /\b(?:LEN|FIND|MID|LEFT|RIGHT|SUBSTITUTE|CONTAINS|BEGINS|LOWER|UPPER|TRIM|VALUE)\s*\(.*TEXT\s*\(/.test(
+        d.formula,
+      ) &&
+      !oursErrored(d) &&
+      !oracleErrored(d),
+  },
+  {
+    bucket: "org-probe-candidate",
+    rationale:
       'Blank vs empty text. The org readback channel cannot tell `""` from null, so this needs a blank-aware org probe, not an oracle verdict.',
     match: (d) =>
       (d.oracle === "null" && d.ours === "") ||
@@ -246,6 +267,12 @@ const RULES: readonly Rule[] = [
     rationale:
       "The oracle raises where we compute. An OSS-only error shape has already been overruled once (`MOD(x, 0)`), so this needs an org probe.",
     match: (d) => oracleErrored(d) && oursIsValue(d),
+  },
+  {
+    bucket: "org-probe-candidate",
+    rationale:
+      'The oracle raises where we propagate blank — an OSS-only error over a blank-valued expression (e.g. `VALUE("")` feeding null into a NumberFormatException). OSS-only error shapes have been overruled before (`MOD(x, 0)`), and the org readback channel can confirm blank directly — org probe.',
+    match: (d) => oracleErrored(d) && d.ours === "blank",
   },
 ];
 

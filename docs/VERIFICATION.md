@@ -508,7 +508,7 @@ carried as org-tier corpus rows:
   string (probe `begins_blank_needle`) — while a blank subject propagates
   null: `BEGINS(blank, "a")` reads as null through NOT (probes
   `begins_blank_subject` + `begins_blank_subject_not`; a real false would
-  have surfaced as `NOT(...)` = true). So BEGINS is *not* simply blank-aware
+  have surfaced as `NOT(...)` = true). So BEGINS is _not_ simply blank-aware
   like CONTAINS — the evaluator implements the split per-argument.
 - ✅ **ISBLANK and ISNULL compile-reject a Boolean argument** — "Incorrect
   argument type for function 'ISBLANK()'" (deploy rejections of the
@@ -527,12 +527,12 @@ carried as org-tier corpus rows:
   contains-a-field-reference, mirroring the `^` fold model.
 - ✅ **The NULL literal propagates blank in BOTH blank modes** — `NULL + 1`
   reads back null even in zero mode (probes `null_literal_add` [zero/blank],
-  `null_literal_isblank`): "treat blanks as zeroes" is a read-time *field*
+  `null_literal_isblank`): "treat blanks as zeroes" is a read-time _field_
   coercion and never touches a typeless blank. The evaluator now propagates
   expression-level blanks through arithmetic and unary minus in both modes
   (typed blank numeric fields still materialize to 0 at read in zero mode).
 - ✅ **Date arithmetic has no ceiling at year 9999** — `DATE(9999, 12, 31) +
-  1` computes and `TEXT()` renders `"10000-01-01"` (probes
+1` computes and `TEXT()` renders `"10000-01-01"` (probes
   `date_overflow_isblank`/`_text`); ADDMONTHS, datetime arithmetic, and
   `FROMUNIXTIME(300000000000)` (≈ year 11476) all compute past 9999
   (`addmonths_overflow_isblank`, `datetime_overflow_isblank`,
@@ -763,3 +763,28 @@ implementation; all want an org probe before being called settled:
 - **`email_template` availability** — structurally unverifiable (its
   metadata container never compile-checks merge formulas at deploy); stays
   Tier 2 best-effort unless a new observation channel appears.
+- **Constant-fold boundary for computed-from-literal operands** — the WS4
+  fuzzer (seed 1, 2026-07-31) caught the OSS engine constant-folding whole
+  constant expressions where our model folds only bare literals
+  (`isFoldedNumericLiteral`): `SQRT(1234.5 - 12.125) ^ 3` and
+  `(1000 / 1.5 * 7) ^ 2` come back 18-significant-digit folded from the
+  oracle while we take the runtime path (43-sig exact ceiling → refusal),
+  and `LEN(TEXT(ROUND(0.1, 2)))` reads 3 there (conventional `"0.1"`)
+  against our product-render 2 (`".1"`). Indirect org evidence favors our
+  narrow model — org-verified `TEXT(4/3)` renders at the 39-digit runtime
+  budget, not 18-sig folded — but the boundary itself is unprobed. Probes
+  staged: `semantics:pow_fold_boundary_arith`,
+  `semantics:pow_fold_boundary_func`,
+  `semantics:text_measure_leading_zero`. Until settled, fuzz triage routes
+  both shapes to org-probe-candidate rather than suspected our-bug.
+- **`VALUE("")` — blank or error** — the WS4 fuzzer (seed 1, 2026-07-31) has
+  the oracle throwing `NumberFormatException` ("Character N …" — null
+  apparently stringified into `"NaN"` before parsing) for
+  `ABS(0) / CEILING(VALUE(""))` where we propagate blank end to end. The
+  error shape smells like an OSS-engine blank-handling artifact, and the org
+  has overruled OSS-only errors before (`MOD(x, 0)` = x), but whether the
+  product returns blank or an error — and whether a blank divisor stays
+  blank or coerces into a division by zero — is unprobed. Probes staged:
+  `semantics:value_empty_text`, `semantics:value_empty_text_composed`
+  (bisectable pair). Fuzz triage routes oracle-error-over-our-blank to
+  org-probe-candidate.

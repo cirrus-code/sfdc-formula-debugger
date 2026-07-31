@@ -1947,6 +1947,56 @@
         "1582-10-05": "proleptic Gregorian — the date exists as constructed",
         "null": "constructing a gap date errors"
       }
+    },
+    {
+      "id": "pow_fold_boundary_arith",
+      "question": "🔬 fold boundary (WS4 fuzz seed 1): is a literal-arithmetic `^` base compiler-folded (18-sig, OSS behavior) or runtime (43-sig exact ceiling → error, our model)?",
+      "formula": "(1000 / 1.5 * 7) ^ 2",
+      "returns": "Number",
+      "interpret": {
+        "21777777.7777777778": "folded: constant arithmetic reaches the literal path (18 significant digits) — our bare-literal fold model is too narrow",
+        "#Error!": "runtime: a computed base keeps the 43-significant-digit exact ceiling — matches our implementation"
+      }
+    },
+    {
+      "id": "pow_fold_boundary_func",
+      "question": "🔬 fold boundary (WS4 fuzz seed 1): does folding reach THROUGH a function call? OSS folds SQRT(1234.5 - 12.125) ^ 3 to 18-sig; discriminates function-of-literal from plain literal-arithmetic folding (pow_fold_boundary_arith).",
+      "formula": "SQRT(1234.5 - 12.125) ^ 3",
+      "returns": "Number",
+      "interpret": {
+        "42737.2613545133959": "folded through the function call (18 significant digits)",
+        "#Error!": "runtime: a function result is a computed base; the 43-significant-digit exact ceiling applies — matches our implementation"
+      }
+    },
+    {
+      "id": "text_measure_leading_zero",
+      "question": "🔬 confirm the indirectly-observed TEXT render (WS4 fuzz seed 1): LEN(TEXT(ROUND(0.1, 2))) — product '.1' per the org-verified text_* leading-zero drop, vs the oracle's conventional '0.1'. Also settles whether ROUND(literal, literal) stays a computed TEXT operand.",
+      "formula": "LEN(TEXT(ROUND(0.1, 2)))",
+      "returns": "Number",
+      "interpret": {
+        "2": "product render '.1': a computed TEXT operand drops the leading zero — matches our implementation",
+        "3": "conventional '0.1': the compiler folds ROUND(0.1, 2) into a literal for TEXT — our bare-NumberLit fold model is too narrow"
+      }
+    },
+    {
+      "id": "value_empty_text",
+      "question": "🔬 VALUE(\"\") (WS4 fuzz seed 1): we propagate blank; the OSS oracle throws NumberFormatException (\"Character N …\" — null apparently stringified into \"NaN\" before parsing, an engine artifact?). Does the product return blank or error?",
+      "formula": "VALUE(\"\")",
+      "returns": "Number",
+      "interpret": {
+        "null": "blank: VALUE of empty text propagates blank — the oracle's NumberFormatException is an OSS artifact; matches our implementation",
+        "#Error!": "the product errors like the OSS engine — our blank propagation is wrong; corpus row + evaluator fix"
+      }
+    },
+    {
+      "id": "value_empty_text_composed",
+      "question": "🔬 the full fuzz hit: ABS(0) / CEILING(VALUE(\"\")) — blank propagation through CEILING and a blank divisor (blank-vs-zero divisor behavior rides along). Bisect against value_empty_text if this errors.",
+      "formula": "ABS(0) / CEILING(VALUE(\"\"))",
+      "returns": "Number",
+      "interpret": {
+        "null": "blank propagates through CEILING and division — matches our implementation",
+        "#Error!": "an error surfaces — either VALUE(\"\") itself errors (see value_empty_text) or a blank divisor is coerced and divides by zero"
+      }
     }
   ]
 }

@@ -169,6 +169,40 @@ describe("triage", () => {
     ).toBe("org-probe-candidate");
   });
 
+  it("sends a TEXT() rendering measured through LEN/FIND to an org probe", () => {
+    expect(
+      triage({
+        ...base,
+        formula: 'FIND(LOWER("0" & "0"), TEXT((7 / 1000)))',
+        oracle: "3",
+        ours: "2",
+      }).bucket,
+    ).toBe("org-probe-candidate");
+  });
+
+  it("sends the `^` fold-boundary refusal to an org probe", () => {
+    expect(
+      triage({
+        ...base,
+        formula: "(SQRT(1234.5 - 12.125)) ^ 3",
+        oracle: "42737.2613545133959",
+        ours: "#Error(#Error! (^ result exceeds the numeric precision limit))",
+      }).bucket,
+    ).toBe("org-probe-candidate");
+  });
+
+  it("sends an oracle-only error over our blank to an org probe", () => {
+    expect(
+      triage({
+        ...base,
+        formula: '(ABS(0) / CEILING(VALUE("")))',
+        oracle:
+          'Error: NumberFormatException: Character N is neither a decimal digit number, decimal point, nor "e" notation exponential mark.',
+        ours: "blank",
+      }).bucket,
+    ).toBe("org-probe-candidate");
+  });
+
   it("calls a plain value disagreement our bug", () => {
     expect(
       triage({ ...base, formula: "2 * 3", oracle: "7", ours: "6" }).bucket,
