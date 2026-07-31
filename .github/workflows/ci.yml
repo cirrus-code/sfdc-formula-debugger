@@ -22,6 +22,10 @@ jobs:
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            extra-substituters = https://devenv.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
 
       - name: Cache pnpm store
         uses: actions/cache@v6
@@ -31,23 +35,23 @@ jobs:
           restore-keys: pnpm-${{ runner.os }}-
 
       - name: Install dependencies
-        run: nix develop --command pnpm install --frozen-lockfile
+        run: nix develop --no-pure-eval --command pnpm install --frozen-lockfile
 
       - name: Typecheck
-        run: nix develop --command pnpm run typecheck
+        run: nix develop --no-pure-eval --command pnpm run typecheck
 
       - name: Lint
-        run: nix develop --command pnpm run lint
+        run: nix develop --no-pure-eval --command pnpm run lint
 
       - name: Unit + conformance tests
         env:
           CONF_DUMP: conformance.json
-        run: nix develop --command pnpm run test
+        run: nix develop --no-pure-eval --command pnpm run test
 
       - name: Report conformance number
         if: always()
         run: |
-          nix develop --command node -e '
+          nix develop --no-pure-eval --command node -e '
             const fs = require("fs");
             if (!fs.existsSync("conformance.json")) process.exit(0);
             const d = JSON.parse(fs.readFileSync("conformance.json", "utf8"));
@@ -60,7 +64,7 @@ jobs:
           '
 
       - name: Browser smoke tests
-        run: nix develop --command pnpm run test:browser
+        run: nix develop --no-pure-eval --command pnpm run test:browser
 
       - name: Production build
-        run: nix develop --command pnpm run build
+        run: nix develop --no-pure-eval --command pnpm run build

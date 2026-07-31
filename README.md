@@ -43,7 +43,7 @@ link", and then only into the URL hash. No analytics events contain formula text
 ## Development
 
 Requires [pnpm](https://pnpm.io) and a recent Node (a Nix flake with the full
-dev environment is included — `nix develop`, or `direnv allow`).
+dev environment is included — `direnv allow`, or `nix develop --no-pure-eval`).
 
 ```
 pnpm install

@@ -6,7 +6,7 @@ rules, because its entire value is accuracy.
 ## Setup
 
 ```
-nix develop   # or: direnv allow — provides Node, pnpm, prettier
+direnv allow   # or: nix develop --no-pure-eval — provides Node, pnpm, prettier
 pnpm install
 ```
 
@@ -18,6 +18,17 @@ pnpm install
 | `pnpm typecheck`    | `tsc --noEmit` (strict mode)          |
 | `pnpm lint`         | ESLint                                |
 | `pnpm format`       | Prettier                              |
+
+The shell is a [devenv](https://devenv.sh) environment (flake-parts mode), so
+every project task is also runnable through devenv from inside the shell:
+
+- `devenv tasks run <ns:name>` — the `app:*` equivalents of the pnpm commands
+  above, plus `corpus:extract`, `fuzz:run`, `fuzz:typecheck`, and the
+  `orgcheck:*` org-verification harness tasks. The JVM oracle's `oracle:*`
+  tasks live in the `.#oracle` shell (see `oracle/README.md`). The full
+  inventory is in `flake.nix`.
+- `devenv up` — the Vite dev server as a managed process.
+- `devenv test` — the pre-PR gauntlet (typecheck + lint + test).
 
 ## Ground rules
 
@@ -52,5 +63,6 @@ before substantial changes. The short version:
 
 ## Before opening a PR
 
-Run `pnpm typecheck && pnpm lint && pnpm test` and `pnpm format`. Keep PRs
-focused; note any VERIFICATION.md entries your change touches.
+Run `pnpm typecheck && pnpm lint && pnpm test` (or `devenv test`) and
+`pnpm format`. Keep PRs focused; note any VERIFICATION.md entries your change
+touches.

@@ -8,8 +8,13 @@ it is not part of the app build, and the shipped product never depends on a JVM.
 Requires a JDK + Maven. Use the Nix devShell:
 
 ```
-nix develop .#oracle
+nix develop --no-pure-eval .#oracle
 ```
+
+Everything below is also wrapped as devenv tasks inside that shell:
+`devenv tasks run oracle:smoke` (clones + installs formula-engine on first run,
+then builds the harness and evaluates the example probes),
+`devenv tasks run oracle:build`, and `oracle-probe FILE` for ad-hoc probe files.
 
 ## One-time: build formula-engine from source
 

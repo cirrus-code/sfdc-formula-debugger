@@ -2,7 +2,8 @@
 # Build Salesforce's formula-engine from the pinned tag, compile the oracle
 # harness, and evaluate the example probes. Fails if the harness cannot produce
 # oracle output — a canary that the offline conformance oracle still builds and
-# runs (CONFORMANCE.md WS3/WS5). Run inside `nix develop .#oracle`.
+# runs (CONFORMANCE.md WS3/WS5). Run inside `nix develop --no-pure-eval .#oracle`
+# (or as the `oracle:smoke` devenv task).
 set -euo pipefail
 
 cd "$(dirname "$0")"

@@ -28,6 +28,10 @@ jobs:
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            extra-substituters = https://devenv.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
 
       - name: Cache pnpm store
         uses: actions/cache@v6
@@ -37,10 +41,10 @@ jobs:
           restore-keys: pnpm-${{ runner.os }}-
 
       - name: Install dependencies
-        run: nix develop --command pnpm install --frozen-lockfile
+        run: nix develop --no-pure-eval --command pnpm install --frozen-lockfile
 
       - name: Build
-        run: nix develop --command pnpm run build
+        run: nix develop --no-pure-eval --command pnpm run build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

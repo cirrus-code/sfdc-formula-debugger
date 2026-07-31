@@ -20,6 +20,10 @@ jobs:
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            extra-substituters = https://devenv.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
 
       - name: Cache Maven repository
         uses: actions/cache@v6
@@ -28,7 +32,7 @@ jobs:
           key: maven-${{ runner.os }}-formula-engine-0.9.13
 
       - name: Build formula-engine + harness, run smoke probes
-        run: nix develop .#oracle --command bash oracle/ci-smoke.sh
+        run: nix develop --no-pure-eval .#oracle --command bash oracle/ci-smoke.sh
 
       - name: Save oracle build for the fuzz job
         uses: actions/upload-artifact@v6
@@ -50,10 +54,14 @@ jobs:
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            extra-substituters = https://devenv.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
 
       - name: Regenerate the oracle corpus
         run: |
-          nix develop --command bash -c '
+          nix develop --no-pure-eval --command bash -c '
             pnpm install --frozen-lockfile
             node --experimental-strip-types scripts/extract-corpus.ts'
 
@@ -82,6 +90,10 @@ jobs:
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            extra-substituters = https://devenv.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
 
       - name: Restore oracle build
         uses: actions/download-artifact@v7
@@ -93,7 +105,7 @@ jobs:
         env:
           FUZZ_SEED: ${{ github.run_number }}
         run: |
-          nix develop --command bash -c '
+          nix develop --no-pure-eval --command bash -c '
             pnpm install --frozen-lockfile
             node oracle/fuzz/run.mjs --seed "$FUZZ_SEED" \
               --count 3000 --out fuzz-report.md'

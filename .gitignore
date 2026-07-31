@@ -5,8 +5,9 @@ node_modules/
 dist/
 dist-ssr/
 
-# Nix / direnv
+# Nix / direnv / devenv
 .direnv/
+.devenv/
 
 # Editor / OS
 *.local
@@ -19,3 +20,5 @@ coverage/
 __screenshots__/
 # Ephemeral conformance dump (CONF_DUMP) written by the conformance test in CI.
 conformance.json
+# Ephemeral WS4 differential-fuzz report (fuzz:run task / weekly CI job).
+fuzz-report.md
