@@ -24,8 +24,8 @@ export type BinaryOperator =
   | ">="
   | "=="
   | "!="
-  // Undocumented but org-verified as accepted by the product (VERIFICATION.md):
-  // infix AND/OR, below equality precedence per the OSS grammar.
+  // Infix AND/OR — documented, org-verified product operators
+  // (VERIFICATION.md), below equality precedence per the OSS grammar.
   | "&&"
   | "||";
 

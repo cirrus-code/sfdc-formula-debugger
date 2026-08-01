@@ -111,10 +111,10 @@ transcripts, so it runs in the ordinary `vitest` pass; typecheck the fuzzer with
 
 ## Scope
 
-Rules verified through this harness so far (see git history and VERIFICATION.md):
+Rules verified through this harness (see VERIFICATION.md):
 Number arithmetic computes internally at **39 significant figures, HALF_UP**
 (`BigDecimalHelper.MC_PRECISION_INTERNAL`) and materializes results at a **scale
 of 32 decimal places, HALF_UP**; `^` rejecting non-integer exponents; `SQRT` at
 double precision; `MOD(x,0)` erroring; `ROUND` with negative digits; Percent
-÷100 / ×100; and case-sensitive text `=`. Field-valued + blank-mode probes now
-also derive blank-propagation behavior directly.
+÷100 / ×100; and case-sensitive text `=`. Field-valued + blank-mode probes
+derive blank-propagation behavior directly.

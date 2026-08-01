@@ -1,5 +1,5 @@
 {
-  "$comment": "Wave-2 manifest: per-context availability probes. The function matrix itself is derived from src/registry/functions.ts (one registry — rule 8); this file holds only what cannot be derived: invocation overrides for functions whose minimal call needs shaping, the global-variable probes, and the runtime validation-rule probes. Placeholders: {T:Type} resolves to a typed input field on containers that can reference fields, else a literal; {F:Type} requires a real field reference (probe is untestable in containers without fields).",
+  "$comment": "Per-context availability probes. The function matrix itself is derived from src/registry/functions.ts (one registry — rule 8); this file holds only what cannot be derived: invocation overrides for functions whose minimal call needs shaping, the global-variable probes, and the runtime validation-rule probes. Placeholders: {T:Type} resolves to a typed input field on containers that can reference fields, else a literal; {F:Type} requires a real field reference (probe is untestable in containers without fields).",
   "invocationOverrides": {
     "CASE": {
       "formula": "CASE({T:Number}, 1, \"a\", \"b\")",
@@ -122,37 +122,37 @@
       "id": "fv_htmlencode",
       "formula": "HTMLENCODE('<a> & \"b\"') & '|' & HTMLENCODE(\"it's\")",
       "returns": "Text",
-      "question": "Wave-3: HTMLENCODE's exact entity set — angle brackets, ampersand, both quote kinds (flows are its only runtime-observable home)."
+      "question": "HTMLENCODE's exact entity set — angle brackets, ampersand, both quote kinds (flows are its only runtime-observable home)."
     },
     {
       "id": "fv_jsencode",
       "formula": "JSENCODE('a\"b') & '|' & JSENCODE(\"d'e\")",
       "returns": "Text",
-      "question": "Wave-3: JSENCODE's exact escapes (double quote, apostrophe; a literal backslash is a flow-formula syntax error, so it cannot be probed here)."
+      "question": "JSENCODE's exact escapes (double quote, apostrophe; a literal backslash is a flow-formula syntax error, so it cannot be probed here)."
     },
     {
       "id": "fv_jsinhtmlencode",
       "formula": "JSINHTMLENCODE('a\"b<e>') & '|' & JSINHTMLENCODE(\"d'e\")",
       "returns": "Text",
-      "question": "Wave-3: JSINHTMLENCODE composition order and entity set."
+      "question": "JSINHTMLENCODE composition order and entity set."
     },
     {
       "id": "fv_urlencode",
       "formula": "URLENCODE('a b&c/d?e=f+g')",
       "returns": "Text",
-      "question": "Wave-3: URLENCODE — space as %20 or +, and which reserved characters escape."
+      "question": "URLENCODE — space as %20 or +, and which reserved characters escape."
     },
     {
       "id": "fv_divzero",
       "formula": "1 / 0",
       "returns": "Number",
-      "question": "Wave-3: div-by-zero surfacing in a running flow — interview error or null?"
+      "question": "Div-by-zero surfacing in a running flow — interview error or null?"
     },
     {
       "id": "fv_br",
       "formula": "'a' & BR() & 'b'",
       "returns": "Text",
-      "question": "Wave-3: BR() rendering seen from a flow interview (cross-check the formula-field probe)."
+      "question": "BR() rendering seen from a flow interview (cross-check the formula-field probe)."
     }
   ],
   "fieldUpdateProbes": [
@@ -166,25 +166,25 @@
       "id": "wfu_divzero",
       "target": "Number",
       "formula": "1 / 0",
-      "question": "Wave-4: div-by-zero in an executing field update — blocked save, silent skip, or null write? (FF: #Error!; VR: blocked save; flow: null.)"
+      "question": "Div-by-zero in an executing field update — blocked save, silent skip, or null write? (FF: #Error!; VR: blocked save; flow: null.)"
     },
     {
       "id": "wfu_blank_add",
       "target": "Number",
       "formula": "BlankN__c + 5",
-      "question": "Wave-4: which blank mode does a field-update formula execute under — blank+5 = 5 (zero mode) or null (blank mode)?"
+      "question": "Which blank mode does a field-update formula execute under — blank+5 = 5 (zero mode) or null (blank mode)?"
     },
     {
       "id": "wfu_blank_text",
       "target": "Text",
       "formula": "IF(BlankT__c = \"\", \"EMPTY_EQ\", \"NOT_EQ\")",
-      "question": "Wave-4: blank text = \"\" inside an executing field update (FF and VR: true)."
+      "question": "Blank text = \"\" inside an executing field update (FF and VR: true)."
     },
     {
       "id": "wfu_case_eq",
       "target": "Text",
       "formula": "IF(\"a\" = \"A\", \"INSENSITIVE\", \"SENSITIVE\")",
-      "question": "Wave-4: text = case sensitivity at field-update runtime."
+      "question": "Text = case sensitivity at field-update runtime."
     }
   ],
   "approvalRuntimeProbes": [
@@ -217,7 +217,7 @@
       "context": "approval_entry",
       "object": "FxApEz__c",
       "formula": "(1 / 0) = 1",
-      "question": "Wave-6: div-by-zero in an executing entry criteria — blocked submit, thrown exception, or silently criteria-false? (FF: #Error!; VR: blocked save; flow: null.)",
+      "question": "Div-by-zero in an executing entry criteria — blocked submit, thrown exception, or silently criteria-false? (FF: #Error!; VR: blocked save; flow: null.)",
       "interpret": {
         "NO_PROCESS": "the runtime error is swallowed and the criteria reads as false — indistinguishable from ae_false",
         "EXCEPTION": "the error surfaces as its own submit failure",
@@ -231,7 +231,7 @@
       "object": "FxApE__c",
       "gate": "ae_blank_add",
       "formula": "(BlankN__c + 5) = 5",
-      "question": "Wave-6: which blank mode does an entry criteria execute under — blank + 5 = 5 (zero mode) or blank (blank mode)?",
+      "question": "Which blank mode does an entry criteria execute under — blank + 5 = 5 (zero mode) or blank (blank mode)?",
       "interpret": {
         "SUBMITTED": "blank Number reads as 0 — zero-mode arithmetic",
         "NO_PROCESS": "blank + 5 is not 5 — blank-mode arithmetic (confirm against ae_blank_add_null)"
@@ -243,7 +243,7 @@
       "object": "FxApE__c",
       "gate": "ae_blank_add_null",
       "formula": "ISBLANK(BlankN__c + 5)",
-      "question": "Wave-6: the positive half of the blank-mode question — is blank + 5 itself blank? Exactly one of this and ae_blank_add must submit.",
+      "question": "The positive half of the blank-mode question — is blank + 5 itself blank? Exactly one of this and ae_blank_add must submit.",
       "interpret": {
         "SUBMITTED": "blank + 5 is blank — blank-mode arithmetic",
         "NO_PROCESS": "blank + 5 is a number — zero-mode arithmetic"
@@ -255,7 +255,7 @@
       "object": "FxApE__c",
       "gate": "ae_blank_text",
       "formula": "BlankT__c = \"\"",
-      "question": "Wave-6: does a blank Text field equal \"\" in an executing entry criteria (formula fields and validation rules: true)?",
+      "question": "Does a blank Text field equal \"\" in an executing entry criteria (formula fields and validation rules: true)?",
       "interpret": {
         "SUBMITTED": "blank text coerces to \"\" — same as formula fields and validation rules",
         "NO_PROCESS": "blank text does NOT equal \"\" here — differs from formula fields"
@@ -267,7 +267,7 @@
       "object": "FxApE__c",
       "gate": "ae_case_eq",
       "formula": "\"a\" = \"A\"",
-      "question": "Wave-6: text = case sensitivity in an executing entry criteria (formula fields: case-sensitive, org-verified).",
+      "question": "Text = case sensitivity in an executing entry criteria (formula fields: case-sensitive, org-verified).",
       "interpret": {
         "SUBMITTED": "case-INsensitive — differs from formula fields",
         "NO_PROCESS": "case-sensitive, same as formula fields"
@@ -300,7 +300,7 @@
       "context": "approval_step",
       "object": "FxApSz__c",
       "formula": "(1 / 0) = 1",
-      "question": "Wave-6: div-by-zero in an executing step criteria — thrown exception, or silently criteria-false (step skipped)?",
+      "question": "Div-by-zero in an executing step criteria — thrown exception, or silently criteria-false (step skipped)?",
       "interpret": {
         "REFUSED": "the submit was refused with the org's own error (capture the status code) — the step criteria did not read as false",
         "EXCEPTION": "the error surfaces as an Apex exception rather than a save result",
@@ -313,7 +313,7 @@
       "object": "FxApS__c",
       "gate": "as_blank_add",
       "formula": "(BlankN__c + 5) = 5",
-      "question": "Wave-6: which blank mode does a step criteria execute under?",
+      "question": "Which blank mode does a step criteria execute under?",
       "interpret": {
         "SUBMITTED": "Pending/1 means blank reads as 0 (zero mode); Approved/0 means blank-mode arithmetic"
       }
@@ -324,7 +324,7 @@
       "object": "FxApS__c",
       "gate": "as_blank_add_null",
       "formula": "ISBLANK(BlankN__c + 5)",
-      "question": "Wave-6: the positive half of the step blank-mode question. Exactly one of this and as_blank_add must reach the step.",
+      "question": "The positive half of the step blank-mode question. Exactly one of this and as_blank_add must reach the step.",
       "interpret": {
         "SUBMITTED": "Pending/1 means blank + 5 is blank (blank mode); Approved/0 means zero mode"
       }
@@ -335,7 +335,7 @@
       "object": "FxApS__c",
       "gate": "as_blank_text",
       "formula": "BlankT__c = \"\"",
-      "question": "Wave-6: blank Text = \"\" inside an executing step criteria.",
+      "question": "Blank Text = \"\" inside an executing step criteria.",
       "interpret": {
         "SUBMITTED": "Pending/1 means blank text coerces to \"\"; Approved/0 means it does not"
       }
@@ -346,7 +346,7 @@
       "object": "FxApS__c",
       "gate": "as_case_eq",
       "formula": "\"a\" = \"A\"",
-      "question": "Wave-6: text = case sensitivity inside an executing step criteria.",
+      "question": "Text = case sensitivity inside an executing step criteria.",
       "interpret": {
         "SUBMITTED": "Pending/1 means case-INsensitive; Approved/0 means case-sensitive"
       }
@@ -356,7 +356,7 @@
       "context": "approval_entry",
       "object": "FxApEsa__c",
       "formula": "AND(1 = 2, (1 / 0) = 1)",
-      "question": "Wave-8: does AND short-circuit past a runtime error in entry criteria (VR: yes)? Isolated object — if evaluation is eager, this criteria would poison every other submission on it.",
+      "question": "Does AND short-circuit past a runtime error in entry criteria (VR: yes)? Isolated object — if evaluation is eager, this criteria would poison every other submission on it.",
       "interpret": {
         "NO_PROCESS": "AND short-circuits — the false first operand ends evaluation and the criteria reads false",
         "REFUSED": "eager evaluation — the div-by-zero fires despite the false first operand"
@@ -367,7 +367,7 @@
       "context": "approval_entry",
       "object": "FxApEso__c",
       "formula": "OR(1 = 1, (1 / 0) = 1)",
-      "question": "Wave-8: does OR short-circuit past a runtime error in entry criteria (VR: yes)?",
+      "question": "Does OR short-circuit past a runtime error in entry criteria (VR: yes)?",
       "interpret": {
         "SUBMITTED": "OR short-circuits — the true first operand accepts without evaluating the error",
         "REFUSED": "eager evaluation"
@@ -378,7 +378,7 @@
       "context": "approval_step",
       "object": "FxApSsa__c",
       "formula": "AND(1 = 2, (1 / 0) = 1)",
-      "question": "Wave-8: AND short-circuit in step criteria — compare against as_false's Approved/0 skip baseline.",
+      "question": "AND short-circuit in step criteria — compare against as_false's Approved/0 skip baseline.",
       "interpret": {
         "SUBMITTED": "read instanceStatus/workitems: Approved/0 means the criteria short-circuited to false (step skipped)",
         "REFUSED": "eager evaluation — the error blocks the submit"
@@ -389,7 +389,7 @@
       "context": "approval_step",
       "object": "FxApSso__c",
       "formula": "OR(1 = 1, (1 / 0) = 1)",
-      "question": "Wave-8: OR short-circuit in step criteria.",
+      "question": "OR short-circuit in step criteria.",
       "interpret": {
         "SUBMITTED": "Pending/1 means the criteria short-circuited to true (step entered)",
         "REFUSED": "eager evaluation"

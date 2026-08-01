@@ -1,6 +1,6 @@
 # orgcheck/ — real-org verification harness
 
-Settles the 🔬/❓ questions in `VERIFICATION.md` against a **real Salesforce
+Settles `VERIFICATION.md`'s open questions against a **real Salesforce
 org** — the top of the trust order (`org-verified > formula-engine oracle >
 formulon`, CONFORMANCE.md). Where the JVM oracle (`oracle/`) answers "what does
 the open-source engine do", this answers "what does the _product_ do" — the
@@ -89,18 +89,18 @@ rows.
   the "div-by-zero surfacing" open question; the `divzero_*` / `iferror_*`
   probes plus UI observation settle it (check the record page for `#Error!` by
   hand for those probes).
-- **Create vs update validation asymmetry** (wave-2 discovery): flows and
+- **Create vs update validation asymmetry**: flows and
   weblinks accept formula content lazily when the component is _created_ but
   validate fully on _update_. A first deploy of a fresh org can therefore
   produce false acceptances for those types — always confirm through a second
   (upsert) deploy before trusting them. Active flows also require `<scale>`
   on Number/Currency variables at update time.
 
-## Wave 2 — per-context availability (`*-ctx` scripts)
+## Per-context availability (`*-ctx` scripts)
 
-Wave 2 asks a different question than wave 1: not "what does this formula
-evaluate to" but "does this **context's** compiler accept this construct at
-all". Each probe is one metadata component per (construct × context) — a
+The `*-ctx` scripts ask a different question than the value probes: not
+"what does this formula evaluate to" but "does this **context's** compiler
+accept this construct at all". Each probe is one metadata component per (construct × context) — a
 validation rule, workflow rule/field update, custom-field default value,
 Draft flow, global quick action, weblink, email template, or approval
 process — and the per-component deploy accept/reject, with its message, is
@@ -132,12 +132,13 @@ parameters` ⇒ **available** (the compiler resolved the function; the probe
 - **Runtime probes.** Gated active validation rules + `Database.insert`
   (allOrNone=false) + the debug channel settle div-by-zero surfacing,
   IFERROR catching, AND/OR short-circuit, case sensitivity, and blank
-  semantics inside validation rules. Error-capable probes get their own
-  single-record objects (`FxErr*`) so an eagerly-evaluated error cannot
-  poison neighboring probes.
+  semantics inside validation rules. Flow-interview, workflow-field-update,
+  and approval-process runtime channels work the same way
+  (`probes/contexts.json`); VERIFICATION.md records each verdict.
+  Error-capable probes get their own single-record objects (`FxErr*`) so an
+  eagerly-evaluated error cannot poison neighboring probes.
 - `--only <batchPrefix>` reruns a single container; `--compose-only
 <batchId>` writes the package without deploying (XML inspection).
 
-Still pending after wave 2: ISPICKVAL/picklist coercion value probes, DST
-probes under a non-GMT org TZ, compiled-size limit exploration, and runtime
-observation for non-VR contexts (flow interviews, field-update execution).
+The still-open questions — and the staged probes that would settle them —
+are tracked in `VERIFICATION.md` under "Open questions".

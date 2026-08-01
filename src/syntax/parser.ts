@@ -34,8 +34,8 @@ export interface ParseResult {
  * `&` (concat) shares the additive level with `+`/`-`, so `"x" & 1 + 2` parses
  * as `("x" & 1) + 2`, not `"x" & (1 + 2)`.
  *
- * `&&`/`||` are undocumented but accepted by the product (org-verified); the
- * grammar nests INFIX_OR below INFIX_AND below equality.
+ * `&&`/`||` are documented, org-verified product operators; the grammar
+ * nests INFIX_OR below INFIX_AND below equality.
  */
 export const BINARY_PRECEDENCE: Record<BinaryOperator, number> = {
   "*": 8,

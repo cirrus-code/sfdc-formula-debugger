@@ -83,8 +83,9 @@ couldn't settle product behavior (see CONFORMANCE.md). Tightest to loosest: pare
 `-`/`NOT`; `* /`; `^`; `+ - &`; comparisons (`< <= > >=`); equality (`= <> == !=`); `&&`; `||`
 — all left-associative. Two org-confirmed surprises: `* /` binds tighter than `^`, and `^` is
 left-associative — both invert the usual math conventions. `&&`, `||`, `==`, and `!=` are
-undocumented but accepted and evaluated by the product (org-verified); we parse and evaluate
-them and flag each use with a `nonstandard-operator` warning.
+documented, org-verified product operators (`==`/`!=` are interchangeable with `=`/`<>`); we
+parse and evaluate them and flag each use with a stylistic `nonstandard-operator` warning
+steering toward the conventional `AND()`/`OR()`/`=`/`<>` forms.
 
 **Error recovery is the defining requirement.** Strategy:
 

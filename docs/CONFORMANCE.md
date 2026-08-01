@@ -1,7 +1,7 @@
 # CONFORMANCE.md — Validating against Salesforce's open-source engine
 
 Salesforce open-sourced its formula engine: **[salesforce/formula-engine](https://github.com/salesforce/formula-engine)**
-(BSD-3-Clause, Java, actively maintained — v0.9.13 as of 2026). Because it is
+(BSD-3-Clause, Java, actively maintained; we pin `v0.9.13`). Because it is
 Salesforce's _own_ engine, it is the authoritative oracle for how our parser and
 evaluator must behave. This document describes how the project uses it: the
 trust model, the offline oracle pipeline, and the CI conformance gate.
@@ -27,13 +27,13 @@ org-verified test  >  formula-engine oracle  >  formulon
   reimplementation rather than Salesforce code, it ranks lowest.
 
 **Caveat that shapes everything:** the open-source engine may not be identical
-to the production product. Its grammar exposes operators the product docs don't
-mention (`&&`, `||`, `==`, `!=`). So where the OSS engine disagrees with
-documented product behavior, an **org-verified** test is the tiebreaker — the
-OSS engine is authoritative _for its own behavior_, and a very strong signal
-for the product, but not a substitute for org verification on contested points.
-(Those four undocumented operators turned out to be real product behavior: the
-org accepts and evaluates all of them — see VERIFICATION.md.)
+to the production product. It implements functions no shipping context accepts
+(`IFERROR`, `IN`, `SUBSTR`, `CONCATENATE` — see VERIFICATION.md), and its
+`MOD(x, 0)` errors where the product returns `x`. So where the OSS engine
+disagrees with observed product behavior, an **org-verified** test is the
+tiebreaker — the OSS engine is authoritative _for its own behavior_, and a
+very strong signal for the product, but not a substitute for org verification
+on contested points.
 
 ## Two independent uses of the oracle
 
@@ -50,9 +50,8 @@ The grammar is plain files we can read:
   keywords, comment syntax.
 
 Reading these settled our grammar/precedence/identifier/comment questions
-directly, with the grammar as citation — no runtime needed. The discrepancies
-it surfaced in our implementation are recorded in "Grammar findings" below,
-all since resolved.
+directly, with the grammar as citation — no runtime needed. The facts it
+settled are tabulated under "Grammar findings" below.
 
 ### Use 2 — Engine as an output oracle (JVM; offline corpus generation)
 
@@ -106,9 +105,9 @@ describes. Every corpus row carries provenance and a trust tier.
 
 ## Pipeline components
 
-The conformance pipeline was built as five workstreams (WS1–WS5); the labels
-survive in commit history, VERIFICATION.md, and probe names, so they are kept
-here as component names. All five are in place.
+The conformance pipeline has five components, labeled WS1–WS5; the labels
+appear in commit history, VERIFICATION.md, and probe names, so they are kept
+as component names here.
 
 ### WS1 — Grammar reconciliation
 
@@ -131,19 +130,15 @@ A Node extractor (`scripts/extract-corpus.ts`) converts it to
 expected values (faithful for div-by-zero). See `corpus/README.md`.
 
 The engine repo also carries a legacy fixture set (`formulatests.xml` /
-`formulatests-math.xml` plus 113 `data/` input templates). Assessed
-2026-07-30: it is subsumed by V2. 404 of its 406 testcases were migrated
-(the legacy file's own header says as much), and the data templates map onto
-V2's inline rows at equal-or-better coverage (5,569 legacy rows vs 5,508 in
-V2; the only per-testcase surpluses sit on constant formulas —
-`IF(true,1,0)`, `ROUND(PI(),12)` — whose data files the formula never
-reads). Of the two unmigrated testcases, one is commented out and written in
-the weblink merge-field dialect (`{!…}`), outside our language. The one
-novel behavior — `testIfErrorDateTimeValueWithBadElse`: IFERROR whose
-fallback *also* errors — was captured through the WS3 harness
-(`oracle/probes.iferror-badelse.txt`) and locked as a golden test in
-`src/engine/evaluator.test.ts` (the fallback's error propagates; a clean
-first argument never evaluates the fallback).
+`formulatests-math.xml` plus 113 `data/` input templates); it is subsumed by
+V2. 404 of its 406 testcases were migrated upstream (the legacy file's own
+header says so), its data templates map onto V2's inline rows at
+equal-or-better coverage, and of the two unmigrated testcases one is written
+in the weblink merge-field dialect (`{!…}`), outside our language. The one
+novel behavior — IFERROR whose fallback _also_ errors — was captured through
+the WS3 harness (`oracle/probes.iferror-badelse.txt`) and locked as a golden
+test in `src/engine/evaluator.test.ts` (the fallback's error propagates; a
+clean first argument never evaluates the fallback).
 
 ### WS3 — JVM oracle harness (`oracle/`)
 
@@ -190,14 +185,18 @@ overruled are excluded from the comparable set by an evidence-backed allowlist
 in `conformance.test.ts`, each entry naming the org-verified row that
 supersedes it.
 
-How the number got there, briefly: the WS3 oracle rules took the pass rate
-0.74 → 0.86; a corpus-driven semantics pass (FLOOR/CEILING toward-zero,
-zero-mode numeric coercion, three-valued blank comparison, blank propagation,
-DATE bounds) reached 0.97; a function port moved ~740 rows out of
-"unsupported" into the comparable set; the field-valued oracle settled the
-numeric model (0.99); and the real-org probe waves plus corpus regeneration
-and the org-overruled allowlist closed the remaining gap. The full ledger of
-what each step verified lives in VERIFICATION.md.
+The excluded buckets are ours, not the oracle's. Every corpus row is something
+the OSS engine evaluates — the corpus is its own test suite — so "unsupported"
+counts rows our simulator refuses by design (rule 1: the transcendentals,
+`REGEX`, `IN`, …) and "quarantine" counts rows whose oracle rendering the
+comparator cannot yet judge faithfully. The 100% is a correctness claim about
+every answer the simulator gives, not a coverage claim about the formula
+language.
+
+The full ledger of what each verification step settled — oracle-derived
+numeric rules, the corpus-driven semantics pass, the function port, the
+field-valued numeric model, and the org probes with the org-overruled
+allowlist — lives in VERIFICATION.md.
 
 ## Licensing
 
@@ -207,20 +206,20 @@ dependency, attributed in `NOTICE`. Corpus rows derived from their test data
 (formula→result facts) carry provenance tags and a BSD-3 attribution note in
 `NOTICE`.
 
-## Grammar findings (WS1) — all resolved
+## Grammar findings (WS1)
 
 Read directly from `Formula.g4` (nesting = precedence, tightest→loosest):
 `unary > * / > ^ > + - & > < <= > >= > = <> == != > && > ||`, **all
 left-associative**.
 
-| #   | Finding                       | Ours (before)                            | SF grammar                      | Resolution                                                                                                                                                                      |
-| --- | ----------------------------- | ---------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | `&` (concat) precedence       | below `+ -`                              | **same level as `+ -`**         | Fixed; org-probed as far as observable (the `+ - &` order is unobservable in accepted formulas)                                                                                 |
-| 2   | `* /` vs `^`                  | `^` binds tighter                        | **`* /` bind tighter than `^`** | Fixed; org-verified (`2 * 3 ^ 2` = 36) despite inverting math convention                                                                                                        |
-| 3   | `^` associativity             | right                                    | **left**                        | Fixed; org-verified (`2 ^ 3 ^ 2` = 64)                                                                                                                                          |
-| 4   | `&&` / `\|\|`                 | not tokenized (`&&`→two `&`; `\|`→error) | accepted operators              | Org-verified as real product behavior; lexed, parsed, evaluated as AND/OR, flagged `nonstandard-operator`                                                                       |
-| 5   | `==` / `!=`                   | parsed, warned "nonstandard"             | first-class equality ops        | Org-verified as accepted; still flagged `nonstandard-operator` (the product docs omit them)                                                                                     |
-| 6   | identifier continuation chars | `[A-Za-z0-9_]`                           | grammar also lists `$ : . #`    | Org-verified: `:`/`#` lex as identifier chars but no real field name can contain them; our lexer keeps splitting, and the diagnostic reads as unknown-field, not a syntax error |
+| #   | Finding                       | SF grammar                      | Verification                                                                                                                                                                    |
+| --- | ----------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `&` (concat) precedence       | **same level as `+ -`**         | Org-probed as far as observable (the `+ - &` order is unobservable in accepted formulas)                                                                                        |
+| 2   | `* /` vs `^`                  | **`* /` bind tighter than `^`** | Org-verified (`2 * 3 ^ 2` = 36) despite inverting math convention                                                                                                               |
+| 3   | `^` associativity             | **left**                        | Org-verified (`2 ^ 3 ^ 2` = 64)                                                                                                                                                 |
+| 4   | `&&` / `\|\|`                 | accepted operators              | Documented (as alternatives to `AND`/`OR`) and org-verified; evaluated as AND/OR, linted `nonstandard-operator` (style)                                                         |
+| 5   | `==` / `!=`                   | first-class equality ops        | Documented as interchangeable with `=` / `<>`; org-verified; linted `nonstandard-operator` (style)                                                                              |
+| 6   | identifier continuation chars | grammar also lists `$ : . #`    | Org-verified: `:`/`#` lex as identifier chars but no real field name can contain them; our lexer keeps splitting, and the diagnostic reads as unknown-field, not a syntax error |
 
 Details and probe ids for every row live in VERIFICATION.md's "Syntax /
 parsing" section.

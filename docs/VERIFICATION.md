@@ -1,35 +1,35 @@
-# VERIFICATION.md — behaviors pending org confirmation
+# VERIFICATION.md — the verification ledger
 
-No behavioral claim about Salesforce semantics ships as
-"supported" until it is confirmed against a real dev org and encoded as a golden
-test. This file tracks every such open question. Until an item is verified, the
-implementation either follows the golden corpus or marks the construct
-unsupported — it never guesses.
+No behavioral claim about Salesforce semantics ships as "supported" until it
+is verified — against a real dev org, the formula-engine oracle, or the golden
+corpus — and encoded as a golden test. This file is the ledger: every settled
+behavior with its evidence (probe id or corpus test), plus the open questions
+that remain. Until an item is verified, the implementation either follows the
+golden corpus or marks the construct unsupported — it never guesses.
 
 Status legend: ❓ unverified · 🔬 verifying · ✅ verified (golden test id)
 
-**Org verification pass (`orgcheck/`):** waves 1–8 completed
-**2026-07-26 → 2026-07-29**, all against
-a real Developer Edition org. `corpus/org-verified.json` carries the org-tier
-semantic rows; `corpus/org-availability.json` carries the per-context
-function/global availability matrix (one save-probe per construct per
-context's own metadata container, canary-gated — see `orgcheck/README.md`).
-Deploy rejections themselves are verdicts. The org-conformance suite is at
-100% of comparable rows (664/664 after the 2026-07-30 closure pass,
-baseline locked at 1); availability
+**Org verification (`orgcheck/`):** probes run against a real Developer
+Edition org.
+`corpus/org-verified.json` carries the org-tier semantic rows;
+`corpus/org-availability.json` carries the per-context function/global
+availability matrix (one save-probe per construct per context's own metadata
+container, canary-gated — see `orgcheck/README.md`). Deploy rejections are
+themselves verdicts. The org-conformance suite passes every comparable row
+(baseline locked; see CONFORMANCE.md for the numbers), and availability
 agreement is enforced by `src/registry/org-availability.test.ts`.
 
 ## Syntax / parsing
 
-Operator precedence is now transcribed from the Salesforce open-source grammar
+Operator precedence is transcribed from the Salesforce open-source grammar
 (`salesforce/formula-engine` `Formula.g4`) — see CONFORMANCE.md. Nesting there
 gives, tightest→loosest: `* /` > `^` > `+ - &` > relational > equality, all
 left-associative, with unary tighter than everything.
 
 - ✅ **Unary binds tighter than `^`**; **comparison binds tighter than equality**
   — both confirmed by the grammar (`Formula.g4`), matching what we already had.
-- ✅ **`&` shares the additive level** with `+`/`-` (was encoded below them;
-  fixed). Settled as far as it is observable (2026-07-28 type-based probes):
+- ✅ **`&` shares the additive level** with `+`/`-`. Settled as far as it is
+  observable (type-based probes):
   the compile error's _type report_ shows `"x" & 1 > 0` and `"x" & 1 = 1`
   both fail with "operator '&' … received **Number**" — `&` grouped the
   numeric operand, so `&` binds tighter than relational and equality
@@ -44,14 +44,16 @@ left-associative, with unary tighter than everything.
   (probe `syntax:pow_vs_muldiv`).
 - ✅ **`^` is left-associative** — org-verified: `2 ^ 3 ^ 2` = `(2^3)^2` = 64
   (probe `syntax:pow_assoc`).
-- ✅ **`&&` / `||` are accepted by the product** and evaluate as AND/OR
-  (probes `syntax:andand_op`, `syntax:oror_op` — both saved and evaluated).
-  Lexed, parsed (below equality, `||` loosest), and evaluated with AND()/OR()
-  semantics; flagged `nonstandard-operator` (undocumented but accepted).
-- ✅ **`==` / `!=` are accepted by the product** (probes `syntax:eqeq_op`,
-  `syntax:noteq_op`). We already parse them; keep the `nonstandard-operator`
-  warning (the product docs still omit them) but its wording may now assert
-  they save fine.
+- ✅ **`&&` / `||` are documented product operators** and evaluate as AND/OR
+  (probes `syntax:andand_op`, `syntax:oror_op` — both saved and evaluated;
+  the operator reference — help article `customize_functions` — lists them
+  as alternatives to `AND`/`OR`). Lexed, parsed (below equality, `||`
+  loosest), and evaluated with AND()/OR() semantics; flagged
+  `nonstandard-operator` as a style nudge toward the function forms.
+- ✅ **`==` / `!=` are documented product operators** (probes
+  `syntax:eqeq_op`, `syntax:noteq_op`; the operator reference lists `=`/`==`
+  and `<>`/`!=` as interchangeable). Parsed and evaluated as first-class
+  equality; flagged `nonstandard-operator` as a style nudge toward `=`/`<>`.
 - ✅ **`:` / `#` lex as identifier chars in the product** — `foo:bar + 1` and
   `foo#bar + 1` are rejected with _unknown-field_ errors, not syntax errors
   (probes `syntax:ident_colon`, `syntax:ident_hash`), matching
@@ -63,12 +65,11 @@ left-associative, with unary tighter than everything.
   `syntax:comment_nested`).
 - ✅ **`NULL`-prefixed identifiers parse in the product** (`Null_Check__c`,
   probe `syntax:null_prefix_ident`) — the matching parse failure in
-  [formulon](https://github.com/leifg/formulon) (the MIT JavaScript formula
-  engine our evaluator was originally ported from — see DESIGN §4 and the
+  [formulon](https://github.com/leifg/formulon) (the seed baseline; see the
   CONFORMANCE.md trust order) is that library's defect alone, not product
   behavior.
-- ✅ **String-literal escapes** (oracle-verified 2026-07-29, engine v0.9.13,
-  `LEN`/`FIND` probes; decode half org-verified 2026-07-30, probes
+- ✅ **String-literal escapes** (oracle-verified against engine v0.9.13,
+  `LEN`/`FIND` probes; decode half org-verified, probes
   `syntax:esc_*_len` — all four org values match the oracle exactly). The
   grammar (`LexerRules.g4` `STRING_LITERAL`) accepts exactly nine escapes —
   `\n \r \t \N \R \T \" \' \\` — and any other backslash sequence is a
@@ -80,7 +81,7 @@ left-associative, with unary tighter than everything.
   inside single quotes (`LEN('a\'b')` = 4) while still not terminating the
   string. Encoded in `parser.test.ts`.
 
-## Registry data — settled by the wave-2 per-context pass (2026-07-28)
+## Registry data — per-context availability
 
 The matrix (`corpus/org-availability.json`) save-probed every registry
 function and global in every context whose metadata container compile-checks
@@ -124,8 +125,8 @@ Findings encoded in `functions.ts`/`contexts.ts`:
   both false, blank text still equals `""`, ISBLANK(blank) is true. There is
   no "treat blanks as zeroes" in the VR context; `blankModeToggle: false` with
   blank-mode semantics is correct config. Workflow field updates likewise
-  runtime-verified as blank mode (wave 4, `wfu_blank_add`: `blank + 5` writes
-  null), and both approval contexts too (wave 6, `ae_blank_add` /
+  runtime-verified as blank mode (`wfu_blank_add`: `blank + 5` writes
+  null), and both approval contexts too (`ae_blank_add` /
   `ae_blank_add_null` complementary pair).
 - ✅ **Source character limit org-verified**: a 3,916-char formula-field
   source rejects with "Formula is too long (3,916 characters). Maximum
@@ -161,7 +162,7 @@ Runtime error semantics in validation rules (isolated single-record objects,
 - ✅ **IFERROR cannot catch a VR error** — trivially, since IFERROR does not
   exist in the validation-rule context ("Unknown function IFERROR").
 
-## Verified via the org pass (orgcheck/, run 2026-07-26)
+## Formula-field semantics (org pass)
 
 Real Developer Edition org, formula-field context, both blank modes. Org rows
 outrank the JVM oracle; where they disagree below, the org is authoritative.
@@ -180,12 +181,13 @@ outrank the JVM oracle; where they disagree below, the org is authoritative.
   (`testIfContainsFunc`, `testFindOnText`): `CONTAINS(x, blank)` is true,
   `CONTAINS(blank, y)` is false, `FIND(y, blank)` is 0. Both are blank-aware
   in the evaluator now.
-- ✅ **Locale-aware `UPPER`/`LOWER`** — the undocumented second argument is
-  accepted and honored (`upper("idempotent", "tr")` = `"İDEMPOTENT"`,
+- ✅ **Locale-aware `UPPER`/`LOWER`** — the second (locale) argument is
+  documented ("Locale rules are applied if a locale is provided") and
+  org-verified as honored (`upper("idempotent", "tr")` = `"İDEMPOTENT"`,
   `corpus:testUpperLocale`). Implemented via ICU (`toLocaleUpperCase`), whose
   special-cased alphabets (Turkish/Azeri/Lithuanian) match Java's.
 - ✅ **Product `TEXT()` number rendering pinned down and implemented**
-  (2026-07-28 `text_*` probe batch; `renderProductNumber` in
+  (`text_*` probe batch; `renderProductNumber` in
   `src/engine/builtins.ts`): TEXT sees the _pre-materialization_ value (not
   the 32-place function boundary), renders plain notation always (never
   scientific), integers bare, trailing zeros stripped, and drops the leading
@@ -195,14 +197,13 @@ outrank the JVM oracle; where they disagree below, the org is authoritative.
   the signature of a base-100 mantissa (20 pairs) aligned to the decimal
   point. Fits every probe: `TEXT(4/3)` 39 sig, `TEXT(1000/3)` 39,
   `TEXT(20000/3)` 40, `TEXT(1/3)`/`TEXT(2/3)` 40 (HALF_UP at the boundary),
-  `TEXT(2/30000)` 40. Internal engine precision was raised 39 → 40 to carry
-  the boundary digit (oracle-tier conformance unchanged). The one remaining
-  quirk: a **bare numeric literal** is constant-folded with a conventional
-  rendering that keeps its leading zero (`TEXT(0.5)` = `"0.5"` but
-  `TEXT(-0.5)` = `"-.5"` and `TEXT(field holding 0.5)` = `".5"`) —
-  modeled by special-casing a bare-NumberLit argument. Only the
-  Percent-field TEXT interaction stays quarantined
-  (`semantics:text_percent_field`).
+  `TEXT(2/30000)` 40. The engine computes at precision 40 to carry the
+  boundary digit (numeric-model section below). One quirk: a **bare numeric
+  literal** is constant-folded with a conventional rendering that keeps its
+  leading zero (`TEXT(0.5)` = `"0.5"` but `TEXT(-0.5)` = `"-.5"` and
+  `TEXT(field holding 0.5)` = `".5"`) — modeled by special-casing a
+  bare-NumberLit argument. The Percent-field TEXT interaction is settled by
+  the `TEXT(percent)` entry below (`semantics:text_percent_field`).
 - ✅ **Text ordering is reflexive**: `"Left" > "Left"` = false, `<=` = true —
   the oracle rows claiming otherwise (`testIfTextCompareGreaterThan#8`,
   `testIfTextCompareLessEqual#8`) are oracle bugs.
@@ -216,7 +217,8 @@ outrank the JVM oracle; where they disagree below, the org is authoritative.
   Jan 31 + 1 = Feb 28 (Feb 29 in leap years), Jan 30 + 1 = Feb 28 (overflow
   clamp), Feb 28 + 1 = Mar 31 (end-of-month-preserving, as documented).
 - ✅ **`DATE()` accepts years through 9999** (`DATE(4000/4001/9999, …)` all
-  save and evaluate; 10000 errors per corpus) — `MAX_YEAR = 9999` confirmed.
+  save and evaluate, probes `semantics:date_year_*`; 10000 errors per
+  corpus) — `MAX_YEAR = 9999` confirmed.
 - ✅ **`date + number` arithmetic** — the full `testAddDate` cluster is now
   org-verified (`corpus/org-verified.json`), including blank/null cases.
 - ✅ **Unary minus over a blank number**: `-blank` = 0 in zero mode, null in
@@ -247,7 +249,6 @@ Save-time function availability in the formula-field context:
   reads null, not 42 (probes `semantics:divzero_isblank`,
   `semantics:divzero_blankvalue`). Errors propagate through blank-aware
   functions; nothing catches them in this context (`IFERROR` is unavailable).
-  Per-context surfacing (validation rules etc.) remains wave 2.
 
 The `CHR`/locale-`UPPER`/`LOWER` oracle-drift rows ("" vs null) remain
 channel-ambiguous (SOQL cannot distinguish "" from null on text), not
@@ -255,7 +256,7 @@ verdicts.
 
 ## Verified via the WS3 JVM oracle (oracle/)
 
-Confirmed against Salesforce's own engine and encoded; conformance rose 74% → 86%:
+Confirmed against Salesforce's own engine and encoded:
 
 - ✅ **Arithmetic scale = 32 decimal places, round-half-up per operation.**
   `1/3` → `0.333…` (32 places), `1000000/3` → `333333.333…` (32 places), exact
@@ -269,7 +270,7 @@ Confirmed against Salesforce's own engine and encoded; conformance rose 74% → 
 - ✅ **`LEFT`/`RIGHT`/`MID` return blank, not empty string, for an empty result.**
 - ✅ **Text `=` / `<>` are case-sensitive** (`"a" = "A"` → false).
 
-## Verified via corpus-driven semantics pass (86% → 97%)
+## Corpus-driven semantics
 
 Confirmed against the oracle corpus (`corpus/salesforce-v2.json`) and locked with
 golden tests in `evaluator.test.ts`:
@@ -291,11 +292,11 @@ golden tests in `evaluator.test.ts`:
   → March 2) and **errors outside a supported year range** (`DATE(10000, …)` →
   error).
 
-## Function port, round 2 (registry coverage — 2026-07-28)
+## Registry function coverage
 
-The registry grew 66 → 101 functions after auditing against the official
-function reference (all additions doc-confirmed; the wave-2 matrix probes
-their per-context availability). Corpus-backed and simulated:
+The registry covers 101 functions, audited against the official function
+reference (all additions doc-confirmed; the availability matrix probes each
+per context). Corpus-backed and simulated:
 
 - ✅ **`DATETIMEVALUE`** (lenient digit widths, strict ranges, GMT; invalid
   text is a runtime error — testDateTimeValue*, testTimeValueWithValidInValid).
@@ -308,9 +309,7 @@ their per-context availability). Corpus-backed and simulated:
   mid-repeat — testLpad*/testRpad*).
 - ✅ **`PI`** (Java Math.PI double, `ROUND(PI(), 12)` corpus-verified).
 
-Temporal semantics unlocked with them (conformance comparable set grew
-5,032 → 6,081 rows; both tiers have since closed to 100% — see the
-"How the conformance gap closed" section):
+Temporal semantics, corpus-verified alongside them:
 
 - ✅ **Date arithmetic**: `date ± n` truncates the fractional day toward zero
   (28 + 3.5 → Mar 2); `date − date` → whole days; `datetime ± n` in
@@ -321,9 +320,6 @@ Temporal semantics unlocked with them (conformance comparable set grew
   wraps (+26h ≡ +2h) but a negative one is a runtime error;
   `time − time` → milliseconds, wrapping forward a day when negative
   (testSubtractTwoTimeFields: earlier − later = 24h − gap).
-- ✅ **`ADDMONTHS` end-of-month rule was latent-broken**: the org-verified
-  Feb 28 + 1 = Mar 31 behavior was documented and quarantine-masked but never
-  implemented; the new temporal comparison exposed and fixed it.
 - ✅ **`TEXT(time)`** always renders full `HH:MM:SS.mmm` (oracle-verified,
   "00:00:00.000"), while the bare TimeOnly channel renders LocalTime-style
   (drops zero seconds/millis) — two channels, two shapes, both encoded.
@@ -336,9 +332,9 @@ dialect not client-reproducible), `DISTANCE`/`GEOLOCATION`, `BR`,
 `HYPERLINK`, `IMAGE`, `IMAGEPROXYURL`, `FORMATDURATION`, `JUNCTIONIDLIST`,
 `GETSESSIONID`, `CURRENCYRATE`, `ISCLONE`.
 
-Their per-context availability is org-verified (the wave-2 matrix now
-includes a `formula_field` container, so FF availability is probed uniformly
-too). Highlights encoded in `functions.ts`: **`REGEX` is not available in
+Their per-context availability is org-verified (the matrix includes a
+`formula_field` container, so formula-field availability is probed
+uniformly). Highlights encoded in `functions.ts`: **`REGEX` is not available in
 formula fields** (validation rules and most others accept it); the **encode
 family** (`HTMLENCODE`/`JSENCODE`/`JSINHTMLENCODE`/`URLENCODE`) lives only in
 flows and custom buttons; **`HYPERLINK`** only in formula fields and flows,
@@ -349,9 +345,9 @@ context (email templates are their only plausible, unverifiable home);
 rejected only by quick actions; **`DISTANCE`/`GEOLOCATION`** everywhere
 except buttons.
 
-## Wave-3 value pass (2026-07-28) — refuse-list graduations
+## Value probes and runtime channels
 
-Value probes (formula-field readback plus a new **flow interview channel**:
+Value probes (formula-field readback plus a **flow interview channel**:
 `Flow.Interview.createInterview` over the deployed Active flows, payloads
 base64'd past the debug log's entity encoding) pinned the semantics of eight
 formerly-refusing functions, now simulated with golden coverage:
@@ -378,7 +374,7 @@ formerly-refusing functions, now simulated with golden coverage:
   matches Java URLEncoder (space → `+`, `%XX` otherwise) on every probed
   character.
 - ✅ **Formula fields short-circuit like validation rules**: `AND(FALSE, …)`,
-  `OR(TRUE, …)`, and the undocumented `&&` all skip an erroring operand
+  `OR(TRUE, …)`, and `&&` all skip an erroring operand
   (`ff_shortcircuit_*`).
 - ✅ **`TEXT(percent)` renders the internal ÷100 value** through the product
   renderer (99% field → `".99"`, `× 2` → `"1.98"`) — the last TEXT
@@ -387,65 +383,57 @@ formerly-refusing functions, now simulated with golden coverage:
   confirmed for a real prefix (`001…` → `…AAA`) but the function _validates_
   its input against the org's key-prefix registry (a 15-char non-ID passes
   through unchanged, `casesafeid_mixed`) — org state a client cannot know.
-- ✅ **`^` fully bisected (waves 4+5)**: the operator has TWO code paths,
-  split by compile-time constant folding of all-literal operands.
+- ✅ **`^` has two code paths**, split by compile-time constant
+  folding of all-literal operands (parens fold away: `TEXT((0.5))` = `0.5`).
   **Folded (literal `^` literal), positive exponent: the exact value rounded
-  to 18 significant digits, HALF_UP** — digit-exact across nine wave-5
-  probes (`pw5_dbl_*`: 3^34 comes back exact at 17 digits, which no IEEE
-  double can produce; 3^39/7^25/6^30/2^90/1.5^350/0.7^80 all match
-  exact-18-sig and NOT the double — 0.7^80's double diverges in digit 16).
-  This retracts wave 4's IEEE-double reading of `2^100`/`3^40`: both values
-  coincidentally equal exact-18-sig, and the discriminating probes picked
-  exact-18-sig. Folded results render literal-style (leading zero kept:
-  `TEXT(0.7^80)` = `0.000…`, `TEXT(0.23^25)` likewise; parens fold away,
-  `TEXT((0.5))` = `0.5`) while computed values drop the zero even at tiny
-  scale (`TEXT(1/4)` = `.25`, `pw6_div_quarter` — the fold model, not a
-  scale threshold, drives the leading zero). Folded deep fractions are
+  to 18 significant digits, HALF_UP** — digit-exact across nine probes
+  (`pw5_dbl_*`: 3^34 comes back exact at 17 digits, which no IEEE double
+  can produce, and 0.7^80's double diverges in digit 16). Folded results
+  render literal-style (leading zero kept: `TEXT(0.7^80)` = `0.000…`,
+  `TEXT(0.23^25)` likewise) while computed values drop the zero even at
+  tiny scale (`TEXT(1/4)` = `.25`, `pw6_div_quarter` — the fold model, not
+  a scale threshold, drives the leading zero). Folded deep fractions are
   never tail-truncated — `0.5^76` keeps all 18 digits through place 40
-  (`pw7_clamp_05_76`, killing the scale-clamp reading) — they are either
-  kept whole or FLUSHED to zero, and the line is **truncation at 1e-39**:
-  `0.5^129` ≈ 1.47e-39 keeps all 18 digits while `0.5^130` ≈ 7.35e-40
-  flushes even though it would ROUND up to 1e-39 (`pw8_flush` bisect +
-  `pw8b` adjacent straddle — the boundary is probe-pinned, no bracket
-  remains).
+  (`pw7_clamp_05_76`) — they are either kept whole or flushed to zero, with
+  **truncation at 1e-39**: `0.5^129` ≈ 1.47e-39 keeps all 18 digits while
+  `0.5^130` ≈ 7.35e-40 flushes even though it would round up to 1e-39
+  (`pw8_flush` + `pw8b` adjacent straddle).
   **Runtime (one field operand suffices, `pw6_rt_mixed`) and every negative
   exponent in either path: decimal at scale 42, HALF_UP** — digit-exact on
   field-valued `0.7^80` / `0.5^132` / `3^-25` and literal `3^-25` / `7^-20`
   / `9^-30`; field-valued `3^40` returns the exact `…801` where the folded
-  form rounds to `…800` (`pw6_rt_int`); `1.00596^240`'s 39 rendered digits
-  are the TEXT 39-sig budget over a scale-42 value (#18); `(1e-13)^1000` →
-  0 falls out of the scale (#20); `99^-1`'s 40 rendered places likewise
-  (budget, not value scale).
+  form rounds to `…800` (`pw6_rt_int`). `1.00596^240`'s 39 rendered digits
+  and `99^-1`'s 40 rendered places are the TEXT digit budget over a
+  scale-42 value, and `(1e-13)^1000` → 0 falls out of the scale.
   **Cap: results past 1e64 are runtime errors in BOTH paths and both
   exponent signs** (`10^64` computes; literal `10^65`/`2^213`/`9^68`/
   `(10^40)^2` error; field-valued `10^80` errors, `pw6_rt_cap`; the
   `0.1^-70` reciprocal errors, `pw7_recip_cap`); the cap is `^`-only
   (1e180 via `*` computes) and does not bind tiny values.
-  **Runtime precision limit — pinned at 43 significant digits for EXACT
-  results**: #18 (43 sigs) computes; `7^52`/`7^53`/`7^54`/`7^55` (44–47
-  digits) all error (`pw8_prec` bisect — 43/44 adjacent). Terminating
-  reciprocals share the exact path and its limit: `0.5^-10` = `1024` in
-  both compile paths while `0.5^-145` (2^145, 44 digits) errors
+  **Runtime precision limit: 43 significant digits for exact results** —
+  `1.00596^240` (43 sigs) computes; `7^52`/`7^53`/`7^54`/`7^55` (44–47
+  digits) all error (`pw8_prec`, 43/44 adjacent). Terminating reciprocals
+  share the exact path and its limit: `0.5^-10` = `1024` in both compile
+  paths while `0.5^-145` (2^145, 44 digits) errors
   (`pw8_recip`/`pw8b_recip_big_term`). **Non-terminating reciprocals
   escape by rounding**: `0.3^-5` through `0.3^-72` compute, digit-exact
   against a ≥ 40-sig rounding of the true value rendered through the TEXT
   budget — up to a magnitude line at **1e38** (38 integer digits compute,
-  39 error; adjacent `pw8c`/`pw8d` probes — Oracle NUMBER's precision-38
+  39 error; `pw8c`/`pw8d` adjacent probes — Oracle NUMBER's precision-38
   ceiling showing through). The evaluator takes an exact BigInt path for
   results ≥ 10 so true significance is known rather than read off a
   rounded carry.
-  **Edges**: `0^0` = 1 in both paths (`pw5_zero_zero`, #1–#3); `0^negative`
-  is a runtime `#Error!`, not blank (`pw6_zeroneg_blank`: `ISBLANK(0^-1)`
-  errors the whole formula). The numeric-rendering quarantine remains
-  empty.
-- ✅ **WS4-derived function edges (wave 7)**: `FIND` with an empty search
-  term returns **0**, not 1 (`pw7_find_empty_needle`, and
-  `FIND("", "")` = 0 too) — the JVM oracle was right and our indexOf-based
-  1 was a bug, fixed. `VALUE("")` is **blank** while `VALUE(" ")` is a
-  runtime **`#Error!`** (`pw7_value_empty`/`pw7_value_space`) — the org
-  SPLITS what the oracle blankets as null, so probing beat adopting the
-  oracle verdict wholesale.
-- ✅ **Empty text IS blank — universally (wave 8)**: every empty-producing
+  **Edges**: `0^0` = 1 in both paths (`pw5_zero_zero`); `0^negative` is a
+  runtime `#Error!`, not blank (`pw6_zeroneg_blank`: `ISBLANK(0^-1)` errors
+  the whole formula). Simulation refuses in exactly one case — an exact
+  form too large to compute and verify (bases within ~1e-4 of 1 raised to
+  multi-thousand exponents); everything else is org-verified.
+- ✅ **WS4-derived function edges**: `FIND` with an empty search
+  term returns **0**, not 1 (`pw7_find_empty_needle`, and `FIND("", "")` =
+  0 too). `VALUE("")` is **blank** while `VALUE(" ")` is a runtime
+  **`#Error!`** (`pw7_value_empty`/`pw7_value_space`) — the org splits what
+  the oracle blankets as null.
+- ✅ **Empty text IS blank — universally**: every empty-producing
   text operation reads back blank through `ISBLANK` — `LEFT`/`MID`/`RIGHT`
   at length 0, `TRIM(" ")`, `SUBSTITUTE` deleting everything, `UPPER("")`,
   and even `"" & ""` (`pw8_be_*` riders; `TEXT(blank)` too). The product's
@@ -454,18 +442,18 @@ formerly-refusing functions, now simulated with golden coverage:
   that expected `""` from a blank argument (`testUpper`/`testLower`/
   `testInitCap` and locale variants) are org-overruled — the oracle encodes
   a distinction the product cannot represent.
-- ✅ **Approval-criteria AND/OR short-circuit (wave 8)**: `AND(false,
+- ✅ **Approval-criteria AND/OR short-circuit**: `AND(false,
 1/0=1)` reads criteria-false (`NO_APPLICABLE_PROCESS` / step-skip) and
   `OR(true, 1/0=1)` submits cleanly in BOTH approval contexts
   (`ae_sc_*`/`as_sc_*` on isolated objects) — matching validation rules.
   `IFERROR` needs no runtime probe there: it is compile-rejected in both
-  approval contexts (wave-2 availability matrix, "Unknown function
+  approval contexts (availability matrix, "Unknown function
   IFERROR").
 - Flow-context runtime facts: **div-by-zero yields null in a running flow**
   (vs `#Error!` in formula fields and a blocked save in validation rules),
   and **flow formulas reject string literals containing backslashes** at
   deploy (a syntax error there, legal text in formula fields).
-- ✅ **Workflow-field-update runtime facts** (wave 4; gated active workflow
+- ✅ **Workflow-field-update runtime facts** (gated active workflow
   rule + field update, `wfu_*` probes, DML + SOQL readback): **div-by-zero
   in an executing field-update formula blocks the entire save**
   (`CANNOT_INSERT_UPDATE_ACTIVATE_ENTITY: A workflow or approval field
@@ -475,7 +463,7 @@ update caused an error when saving this record… Division by zero`) — the
   Field-update formulas execute in **blank mode** (`blank + 5` writes null,
   not 5), blank text still equals `""` (`wfu_blank_text` → EMPTY_EQ), and
   text `=` stays case-sensitive (`wfu_case_eq` → SENSITIVE).
-- ✅ **Approval-process runtime facts** (wave 6; 19 gated ACTIVE approval
+- ✅ **Approval-process runtime facts** (19 gated ACTIVE approval
   processes, `Approval.process()` submits from anonymous Apex with a
   criteria-false control, SOQL-corroborated via
   `ProcessInstance`/`ProcessInstanceWorkitem`; `ae_*` entry-criteria and
@@ -493,15 +481,14 @@ The formula in the "…" rule or process is invalid due to the following:
   validation rules and field updates on all three. **ApprovalProcess
   compile-checks criteria on BOTH create and update** (bogus-function
   canaries rejected on create AND on a valid→bogus update flip), unlike
-  flows and weblinks — so the wave-2 approval availability verdicts carry
-  no create-path caveat.
+  flows and weblinks — so the approval availability verdicts carry no
+  create-path caveat.
 
-## Open-question closure pass (2026-07-30)
+## Open-question closure pass
 
-Two-round probe run against the standing open-questions list (the follow-up
-round triangulated boolean-null semantics after ISBLANK turned out not to
-wrap a Boolean). Every verdict below is encoded in the evaluator/checker and
-carried as org-tier corpus rows:
+A two-round probe run against the standing open-questions list. Every
+verdict below is encoded in the evaluator/checker and carried as org-tier
+corpus rows:
 
 - ✅ **BEGINS blank operands are asymmetric**: a blank search term coerces to
   `""` — `BEGINS("abc", blank)` is TRUE, every string begins with the empty
@@ -604,10 +591,10 @@ hover, but refuse to simulate per rule 1):
 - ⛔ **`IN`** — the oracle's semantics are not reproducible from the corpus
   (`IN("Left", "Left")` → `false`); refuses rather than guess.
 
-## Numeric model — resolved via the field-valued oracle (WS3 extension)
+## Numeric model (field-valued oracle, WS3)
 
-The field-valued harness (`oracle/`, `MapFormulaContext`) evaluated bare
-intermediates against the real engine and settled the numeric-scale question:
+The field-valued harness (`oracle/`, `MapFormulaContext`) evaluates bare
+intermediates against the real engine; it settled the numeric-scale model:
 
 - ✅ **39-sig-fig internal math, materialized to 32 decimal places.** Salesforce's
   `/` and `*` compute at 39 significant figures (`MathContext(39, HALF_UP)`) and
@@ -616,56 +603,30 @@ intermediates against the real engine and settled the numeric-scale question:
   Verified raw: `(1/9)*9 → 1.000…`, `FLOOR((1/9)*9) → 1`, `1/3 → 0.333…(32)`. Our
   engine mirrors this (`evaluator.ts` `materialize`; `value.ts` runs at
   precision 40 — the oracle's 39 significant figures plus the carry digit the
-  org-verified TEXT() rendering needs, see the TEXT() entry above), which
-  flipped the whole `FLOOR/CEILING/TRUNC((x/y)*y)` cluster to pass.
+  org-verified TEXT() rendering needs, see the TEXT() entry above).
 - ✅ **`+` concatenates text operands** (`"aaaa" + "bbbb"` → `"aaaabbbb"`). The
   oracle's blank half (blank text operand propagates to null) is contradicted
   by the org pass: the product absorbs the blank (`"aaaa" + blank` → `"aaaa"`,
   probe rows `corpus:testAddConcatSimple#2/#3`) — org wins.
 
-## How the conformance gap closed (2026-07-29)
-
-The gap to 100% is closed: `src/engine/conformance.test.ts` (oracle tier)
-passes 6,312/6,312 comparable rows and `src/engine/org-conformance.test.ts`
-(org tier) passes every comparable row (664/664 after the 2026-07-30
-closure pass) with no quarantined rows (`semantics:text_percent_field` was
-settled by the org pass), both baselines locked at 1. The org-overruled oracle clusters are excluded by the
-evidence-backed allowlist in `conformance.test.ts`, each entry naming the org
-row that supersedes it. The items below record how each gap was resolved:
-
-- ✅ **Date arithmetic** — implemented and corpus-verified (function-port-2
-  section above); Java-style datetime renderings in the oracle remain
-  incomparable (quarantined), and `TEXT(datetime)` renders the documented GMT
-  `YYYY-MM-DD HH:MM:SSZ` shape (org-verified via `corpus:testOriginDateTime`).
-- ✅ **`$System.originDateTime`** simulates as its fixed value,
-  1900-01-01 00:00 GMT (org-verified).
-- ✅ **Blank interactions** (`CONTAINS`/`FIND`/`SUBSTITUTE`) — org-settled and
-  implemented (org-pass section).
-- ✅ **`DATE()` upper year bound is 9999** — org-verified (`DATE(4001, 1, 1)`
-  and `DATE(9999, 12, 31)` both evaluate; probes `semantics:date_year_*`).
-- ✅ **Locale-aware `UPPER`/`LOWER`** — implemented (org-pass section).
-- ✅ **Product `TEXT()` number rendering** — pinned down and implemented
-  (Oracle-NUMBER-parity digit budget; org-pass section). Only the
-  Percent-field TEXT interaction remains quarantined.
-- ✅ **Unary minus over blank** — org-verified `-blank` = 0 in zero mode,
-  null in blank mode (`semantics:unary_minus_blank`); encoded.
-
 ## CLAUDE.md NEEDS-VERIFICATION list — status
 
 - ✅ **Case sensitivity of text `=` / `<>`** — oracle-verified case-sensitive,
-  and re-confirmed per context: formula fields (wave 1) and validation rules
-  at runtime (wave 2, `rt_case_eq`) agree.
+  and re-confirmed per context: formula fields
+  (`semantics:case_eq_formula_field`) and validation rules at runtime
+  (`rt_case_eq`) agree.
 - ✅ **Div-by-zero surfacing per context** — five distinct behaviors, all
-  runtime-verified: formula fields produce a real `#Error!` (wave 1);
-  validation rules block the save with a system error naming the rule
-  (wave 2, `err_divzero`); flows yield null (wave 3); workflow field updates
-  block the save with `CANNOT_INSERT_UPDATE_ACTIVATE_ENTITY` (wave 4,
-  `wfu_divzero`); approval criteria block the SUBMIT while the save goes
-  through (wave 6, `ae_divzero`/`as_divzero`). `^` overflow surfacing
-  settled in waves 4–6 (result > 1e64 errors, both compile paths).
+  runtime-verified: formula fields produce a real `#Error!`
+  (`semantics:divzero_isblank`/`divzero_blankvalue`); validation rules block
+  the save with a system error naming the rule (`err_divzero`); flows yield
+  null (flow-interview channel); workflow field updates block the save with
+  `CANNOT_INSERT_UPDATE_ACTIVATE_ENTITY` (`wfu_divzero`); approval criteria
+  block the SUBMIT while the save goes through (`ae_divzero`/`as_divzero`).
+  `^` overflow surfacing is settled too (results > 1e64 error in both
+  compile paths — see the `^` entry).
 - ✅ **Blank propagation through arithmetic/comparison under both blank modes** —
-  corpus-verified (semantics-pass section above); validation rules
-  additionally runtime-verified as blank-mode (wave-2 `rt_blank_*` probes).
+  corpus-verified (corpus-driven semantics section above); validation rules
+  additionally runtime-verified as blank-mode (`rt_blank_*` probes).
 - ✅ **Date/datetime arithmetic edge cases** — month-end `ADDMONTHS`
   org-verified and implemented; **DST closed by analysis**: the verification
   org runs on America/Los_Angeles (DST-observing), and
@@ -676,75 +637,34 @@ row that supersedes it. The items below record how each gap was resolved:
   datetime renderings remain incomparable (quarantined).
 - ✅ **Numeric precision/scale limits** — internal model resolved and refined:
   40-sig-fig carry, 32-place materialization, Oracle-NUMBER-parity TEXT
-  rendering (org-pass sections above). Display-boundary rounding settled
-  2026-07-30: the declared field scale rounds HALF_UP at the API/storage
-  boundary while TEXT() sees the pre-materialization value (closure-pass
-  section, `scale_*` probes).
+  rendering (org-pass sections above). Display-boundary rounding is settled:
+  the declared field scale rounds HALF_UP at the API/storage boundary while
+  TEXT() sees the pre-materialization value (closure-pass section, `scale_*`
+  probes).
 - ✅ **Per-context function and global availability** — org-verified for every
   context whose container compile-checks formulas
   (`corpus/org-availability.json`; registry `contexts`/globals updated; those
   contexts are Tier 1 now). `email_template` is structurally unverifiable at
   deploy (no compile check) and stays Tier 2 best-effort.
 
-## Verification history
-
-The org pass ran as eight probe waves (2026-07-26 → 2026-07-29) plus an
-open-question closure pass (2026-07-30); every fact they settled is recorded
-in the sections above with its probe id. In brief: wave 1 established the
-deploy/readback channels and the formula-field semantics; wave 2 built the
-per-context availability matrix and the validation-rule runtime facts;
-wave 3 added the flow-interview runtime channel (`flowValueProbes` in
-`orgcheck/probes/contexts.json`) and graduated eight formerly-refusing
-functions; wave 4 added the workflow-field-update channel and pinned the
-source/compiled/output size limits; waves 5–8 bisected the `^` operator's
-two code paths (retracting two interim models along the way), added the
-approval-process channels, and settled the empty-text-is-blank rule; the
-closure pass settled BEGINS blank semantics, the NULL literal, the temporal
-boundaries (no 9999 ceiling; hybrid Julian/Gregorian calendar), boolean-null
-equality, escape decoding, and field-scale boundary rounding. DST was closed
-by analysis rather than probing: datetimes are GMT instants, and the org
-applies no zone arithmetic a client must reproduce.
-
-Alongside the probe waves:
-
-- **Oracle corpus regeneration** (2026-07-29): `salesforce-v2.json`
-  re-extracted with the whitespace-preserving extractor (restoring 249 rows'
-  fidelity), the `textarea`→Text mapping live (98 rows newly comparable), and
-  `phone`/`email`/`url` mapped — their JVM-only empty-string-field state is
-  org-overruled (unreachable in the product, where whitespace-only text saves
-  as null).
-- **Automation (WS5)**: `oracle.yml` runs the weekly differential fuzz job
-  and opens corpus-regeneration drift PRs.
-- **Registry function coverage** (2026-07-28): audited against the official
-  function reference — 101 functions registered; 35 added, of which 16
-  corpus-backed and simulated (see the function-port-2 section). The wave-3
-  graduations closed the client-reproducible refuse list (encode family,
-  `BR`, `INCLUDES`, `PICKLISTCOUNT`, `FORMATDURATION`); `CASESAFEID` is the
-  one deliberate holdout (org-state prefix validation).
-
-The `^` operator now refuses in exactly one situation: an exact form too
-large to compute and verify (bases within ~1e-4 of 1 raised to
-multi-thousand exponents). Everything else about the operator is
-org-verified behavior.
-
 ## Open questions
 
-The remaining unverified edges (most surfaced by the 2026-07-29 pre-release
-audit). Each is either refused or chosen conservatively in the
-implementation; all want an org probe before being called settled:
+The remaining unverified edges. Each is either refused or chosen
+conservatively in the implementation; all want an org probe before being
+called settled:
 
 - **POWER()** — no corpus row in either tier pins whether it shares `^`'s
   rules (integer-only exponent, 1e64 cap, folded/runtime precision split).
   `simulatable: false` (it previously simulated through decimal.js's `pow`,
   which leaked non-finite values and fake precision). **Structurally
-  unobservable by the current harness** (analysis 2026-07-30): its only
+  unobservable by the current harness**: its only
   accepting context is custom buttons/links, and none of the five runtime
   channels reach that context — every channel's own context (formula
   fields, validation rules, flows, field updates, approvals) compile-rejects
   POWER, and a weblink's URL formula is merged client-side at click time
   with no API that returns the evaluated result. The refusal stands until a
   button-rendering channel exists.
-- **Pre-cutover (Julian) day-line simulation** — the 2026-07-30 pass proved
+- **Pre-cutover (Julian) day-line simulation** — the closure pass proved
   the product's hybrid Julian/Gregorian calendar (closure-pass section);
   day-line computations on pre-1582-10-15 dates currently refuse.
   Implementing hybrid arithmetic (Julian leap rules, the ten-day gap,
@@ -764,7 +684,7 @@ implementation; all want an org probe before being called settled:
   metadata container never compile-checks merge formulas at deploy); stays
   Tier 2 best-effort unless a new observation channel appears.
 - **Constant-fold boundary for computed-from-literal operands** — the WS4
-  fuzzer (seed 1, 2026-07-31) caught the OSS engine constant-folding whole
+  fuzzer (seed 1) caught the OSS engine constant-folding whole
   constant expressions where our model folds only bare literals
   (`isFoldedNumericLiteral`): `SQRT(1234.5 - 12.125) ^ 3` and
   `(1000 / 1.5 * 7) ^ 2` come back 18-significant-digit folded from the
@@ -777,7 +697,7 @@ implementation; all want an org probe before being called settled:
   `semantics:pow_fold_boundary_func`,
   `semantics:text_measure_leading_zero`. Until settled, fuzz triage routes
   both shapes to org-probe-candidate rather than suspected our-bug.
-- **`VALUE("")` — blank or error** — the WS4 fuzzer (seed 1, 2026-07-31) has
+- **`VALUE("")` — blank or error** — the WS4 fuzzer (seed 1) has
   the oracle throwing `NumberFormatException` ("Character N …" — null
   apparently stringified into `"NaN"` before parsing) for
   `ABS(0) / CEILING(VALUE(""))` where we propagate blank end to end. The

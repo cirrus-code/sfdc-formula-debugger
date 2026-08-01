@@ -17,7 +17,7 @@ export const checker = {
   comparisonTypeMismatch: (left: string, right: string, op: string) =>
     `Cannot compare ${left} and ${right} with '${op}'.`,
   nonstandardOperator: (op: string, replacement: string) =>
-    `'${op}' is undocumented (but accepted by Salesforce); prefer '${replacement}'.`,
+    `'${op}' is valid; '${replacement}' is the conventional Salesforce form.`,
   logicalOperatorTypeMismatch: (op: string, type: string) =>
     `Operator '${op}' expects a checkbox (boolean), got ${type}.`,
   unknownFunction: (name: string) => `Unknown function '${name}'.`,

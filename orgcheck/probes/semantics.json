@@ -419,7 +419,7 @@
     },
     {
       "id": "ff_shortcircuit_and",
-      "question": "Wave-3: does AND short-circuit past a runtime #Error! in FORMULA FIELDS (org-verified for validation rules)?",
+      "question": "Does AND short-circuit past a runtime #Error! in FORMULA FIELDS (org-verified for validation rules)?",
       "formula": "IF(AND(FALSE, (1 / 0) = 1), 1, 2)",
       "returns": "Number",
       "interpret": {
@@ -429,7 +429,7 @@
     },
     {
       "id": "ff_shortcircuit_or",
-      "question": "Wave-3: does OR short-circuit past a runtime #Error! in formula fields?",
+      "question": "Does OR short-circuit past a runtime #Error! in formula fields?",
       "formula": "IF(OR(TRUE, (1 / 0) = 1), 1, 2)",
       "returns": "Number",
       "interpret": {
@@ -439,7 +439,7 @@
     },
     {
       "id": "ff_shortcircuit_ampamp",
-      "question": "Wave-3: does the undocumented && operator short-circuit past #Error! like AND()?",
+      "question": "Does the && operator short-circuit past #Error! like AND()?",
       "formula": "IF(FALSE && (1 / 0) = 1, 1, 2)",
       "returns": "Number",
       "interpret": {
@@ -449,7 +449,7 @@
     },
     {
       "id": "overflow_pow_isblank",
-      "question": "Wave-3: overflow surfacing — does 10^300 compute, blank, or #Error! in a formula field? (Oracle NUMBER caps near 1e126.)",
+      "question": "Overflow surfacing — does 10^300 compute, blank, or #Error! in a formula field? (Oracle NUMBER caps near 1e126.)",
       "formula": "IF(ISBLANK(10 ^ 300), \"BLANKRESULT\", \"VALUERESULT\")",
       "returns": "Text",
       "interpret": {
@@ -460,73 +460,73 @@
     },
     {
       "id": "overflow_pow_text",
-      "question": "Wave-3: if 10^300 computes, what does TEXT render? (null ⇒ overflow errors.)",
+      "question": "If 10^300 computes, what does TEXT render? (null ⇒ overflow errors.)",
       "formula": "TEXT(10 ^ 300)",
       "returns": "Text"
     },
     {
       "id": "overflow_pow_edge",
-      "question": "Wave-3: Oracle NUMBER's ceiling — does 10^125 still compute where 10^126 may not?",
+      "question": "Oracle NUMBER's ceiling — does 10^125 still compute where 10^126 may not?",
       "formula": "TEXT(10 ^ 125)",
       "returns": "Text"
     },
     {
       "id": "overflow_b40",
-      "question": "Wave-3 overflow bisect: 10^40.",
+      "question": "Overflow bisect: 10^40.",
       "formula": "TEXT(10 ^ 40)",
       "returns": "Text"
     },
     {
       "id": "overflow_b60",
-      "question": "Wave-3 overflow bisect: 10^60.",
+      "question": "Overflow bisect: 10^60.",
       "formula": "TEXT(10 ^ 60)",
       "returns": "Text"
     },
     {
       "id": "overflow_b80",
-      "question": "Wave-3 overflow bisect: 10^80.",
+      "question": "Overflow bisect: 10^80.",
       "formula": "TEXT(10 ^ 80)",
       "returns": "Text"
     },
     {
       "id": "overflow_b90",
-      "question": "Wave-3 overflow bisect: 10^90.",
+      "question": "Overflow bisect: 10^90.",
       "formula": "TEXT(10 ^ 90)",
       "returns": "Text"
     },
     {
       "id": "overflow_b98",
-      "question": "Wave-3 overflow bisect: 10^98.",
+      "question": "Overflow bisect: 10^98.",
       "formula": "TEXT(10 ^ 98)",
       "returns": "Text"
     },
     {
       "id": "overflow_b99",
-      "question": "Wave-3 overflow bisect: 10^99 (a 100-digit integer).",
+      "question": "Overflow bisect: 10^99 (a 100-digit integer).",
       "formula": "TEXT(10 ^ 99)",
       "returns": "Text"
     },
     {
       "id": "overflow_b100",
-      "question": "Wave-3 overflow bisect: 10^100 (101 digits).",
+      "question": "Overflow bisect: 10^100 (101 digits).",
       "formula": "TEXT(10 ^ 100)",
       "returns": "Text"
     },
     {
       "id": "overflow_b110",
-      "question": "Wave-3 overflow bisect: 10^110.",
+      "question": "Overflow bisect: 10^110.",
       "formula": "TEXT(10 ^ 110)",
       "returns": "Text"
     },
     {
       "id": "overflow_mult",
-      "question": "Wave-3 overflow: is the boundary about ^ specifically, or any operation — 10^60 × 10^60 via multiplication.",
+      "question": "Overflow: is the boundary about ^ specifically, or any operation — 10^60 × 10^60 via multiplication.",
       "formula": "TEXT((10 ^ 60) * (10 ^ 60))",
       "returns": "Text"
     },
     {
       "id": "ispickval_case",
-      "question": "Wave-3: is ISPICKVAL case-sensitive (text = is, org-verified)?",
+      "question": "Is ISPICKVAL case-sensitive (text = is, org-verified)?",
       "formula": "IF(ISPICKVAL(custompick__c, \"A\"), 1, 2)",
       "returns": "Number",
       "fields": {
@@ -542,7 +542,7 @@
     },
     {
       "id": "ispickval_space",
-      "question": "Wave-3: does ISPICKVAL trim/ignore trailing whitespace in the literal?",
+      "question": "Does ISPICKVAL trim/ignore trailing whitespace in the literal?",
       "formula": "IF(ISPICKVAL(custompick__c, \"a \"), 1, 2)",
       "returns": "Number",
       "fields": {
@@ -558,51 +558,51 @@
     },
     {
       "id": "br_render",
-      "question": "Wave-3: what does BR() concatenate as in a formula-field value (newline? CR LF?) — SOQL JSON shows the raw characters.",
+      "question": "What does BR() concatenate as in a formula-field value (newline? CR LF?) — SOQL JSON shows the raw characters.",
       "formula": "\"a\" & BR() & \"b\"",
       "returns": "Text"
     },
     {
       "id": "casesafeid_std",
-      "question": "Wave-3: CASESAFEID of a known 15-char ID — pins the 18-char suffix algorithm.",
+      "question": "CASESAFEID of a known 15-char ID — pins the 18-char suffix algorithm.",
       "formula": "CASESAFEID(\"001000000000001\")",
       "returns": "Text"
     },
     {
       "id": "casesafeid_mixed",
-      "question": "Wave-3: CASESAFEID with mixed-case letters (each uppercase letter sets a bit in the suffix).",
+      "question": "CASESAFEID with mixed-case letters (each uppercase letter sets a bit in the suffix).",
       "formula": "CASESAFEID(\"a0B1c2D3e4F5g6h\")",
       "returns": "Text"
     },
     {
       "id": "casesafeid_short",
-      "question": "Wave-3: CASESAFEID of non-ID text — error, null, or pass-through?",
+      "question": "CASESAFEID of non-ID text — error, null, or pass-through?",
       "formula": "CASESAFEID(\"abc\")",
       "returns": "Text",
       "expectSaveError": "maybe"
     },
     {
       "id": "formatduration_hms",
-      "question": "Wave-3: FORMATDURATION(3661) rendering — HH:MM:SS shape?",
+      "question": "FORMATDURATION(3661) rendering — HH:MM:SS shape?",
       "formula": "FORMATDURATION(3661)",
       "returns": "Text"
     },
     {
       "id": "formatduration_day",
-      "question": "Wave-3: FORMATDURATION past 24h — do hours accumulate (25:01:01) or roll into days?",
+      "question": "FORMATDURATION past 24h — do hours accumulate (25:01:01) or roll into days?",
       "formula": "FORMATDURATION(90061)",
       "returns": "Text"
     },
     {
       "id": "formatduration_days_arg",
-      "question": "Wave-3: the optional second argument (include days) — accepted shape and effect.",
+      "question": "The optional second argument (include days) — accepted shape and effect.",
       "formula": "FORMATDURATION(90061, TRUE)",
       "returns": "Text",
       "expectSaveError": "maybe"
     },
     {
       "id": "includes_basic",
-      "question": "Wave-3: INCLUDES membership over a;b.",
+      "question": "INCLUDES membership over a;b.",
       "formula": "IF(INCLUDES(custommulti__c, \"a\"), 1, 2)",
       "returns": "Number",
       "fields": {
@@ -618,7 +618,7 @@
     },
     {
       "id": "includes_case",
-      "question": "Wave-3: is INCLUDES case-sensitive?",
+      "question": "Is INCLUDES case-sensitive?",
       "formula": "IF(INCLUDES(custommulti__c, \"A\"), 1, 2)",
       "returns": "Number",
       "fields": {
@@ -634,7 +634,7 @@
     },
     {
       "id": "includes_joined",
-      "question": "Wave-3: does INCLUDES match a semicolon-joined literal (\"a;b\") or only single values?",
+      "question": "Does INCLUDES match a semicolon-joined literal (\"a;b\") or only single values?",
       "formula": "IF(INCLUDES(custommulti__c, \"a;b\"), 1, 2)",
       "returns": "Number",
       "fields": {
@@ -650,7 +650,7 @@
     },
     {
       "id": "includes_blank",
-      "question": "Wave-3: INCLUDES over a blank multi-select — false or null?",
+      "question": "INCLUDES over a blank multi-select — false or null?",
       "formula": "IF(INCLUDES(custommulti__c, \"a\"), 1, 2)",
       "returns": "Number",
       "blankMode": "both",
@@ -663,7 +663,7 @@
     },
     {
       "id": "picklistcount_two",
-      "question": "Wave-3: PICKLISTCOUNT over two selections.",
+      "question": "PICKLISTCOUNT over two selections.",
       "formula": "PICKLISTCOUNT(custommulti__c)",
       "returns": "Number",
       "fields": {
@@ -675,7 +675,7 @@
     },
     {
       "id": "picklistcount_blank",
-      "question": "Wave-3: PICKLISTCOUNT over a blank multi-select — 0 or null?",
+      "question": "PICKLISTCOUNT over a blank multi-select — 0 or null?",
       "formula": "PICKLISTCOUNT(custommulti__c)",
       "returns": "Number",
       "blankMode": "both",
@@ -706,7 +706,7 @@
     },
     {
       "id": "ff_concatenate",
-      "question": "❓ Registry FF availability: wave 2 shows CONCATENATE is 'Unknown function' in every verifiable non-FF context except flows — does the formula-field compiler know it? (Oracle-tier only until now.)",
+      "question": "❓ Registry FF availability: the availability matrix shows CONCATENATE is 'Unknown function' in every verifiable non-FF context except flows — does the formula-field compiler know it?",
       "formula": "CONCATENATE(\"a\", \"b\")",
       "returns": "Text",
       "expectSaveError": "maybe",
@@ -716,7 +716,7 @@
     },
     {
       "id": "ff_power",
-      "question": "❓ Registry FF availability: POWER is 'may not be used' in wave-2 contexts — formula fields?",
+      "question": "❓ Registry FF availability: POWER is 'may not be used' in the availability-matrix contexts — formula fields?",
       "formula": "POWER(2, 3)",
       "returns": "Number",
       "expectSaveError": "maybe",
@@ -726,7 +726,7 @@
     },
     {
       "id": "ff_in",
-      "question": "❓ Registry FF availability: IN is 'Unknown function' in wave-2 contexts but accepted by flows — formula fields?",
+      "question": "❓ Registry FF availability: IN is 'Unknown function' in the availability-matrix contexts but accepted by flows — formula fields?",
       "formula": "IF(IN(\"a\", \"a\", \"b\"), 1, 2)",
       "returns": "Number",
       "expectSaveError": "maybe"
@@ -783,7 +783,7 @@
     },
     {
       "id": "ff_api_global",
-      "question": "❓ Registry FF availability: $Api — wave 2 shows it resolves only in flows among verifiable contexts; formula fields are documented users of $Api, verify.",
+      "question": "❓ Registry FF availability: $Api — the availability matrix shows it resolves only in flows among verifiable contexts; formula fields are documented users of $Api, verify.",
       "formula": "$Api.Session_ID",
       "returns": "Text",
       "expectSaveError": "maybe",
@@ -791,91 +791,91 @@
     },
     {
       "id": "owb_65",
-      "question": "Wave-4 ^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
+      "question": "^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
       "formula": "TEXT(10 ^ 65)",
       "returns": "Text"
     },
     {
       "id": "owb_70",
-      "question": "Wave-4 ^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
+      "question": "^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
       "formula": "TEXT(10 ^ 70)",
       "returns": "Text"
     },
     {
       "id": "owb_72",
-      "question": "Wave-4 ^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
+      "question": "^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
       "formula": "TEXT(10 ^ 72)",
       "returns": "Text"
     },
     {
       "id": "owb_74",
-      "question": "Wave-4 ^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
+      "question": "^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
       "formula": "TEXT(10 ^ 74)",
       "returns": "Text"
     },
     {
       "id": "owb_76",
-      "question": "Wave-4 ^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
+      "question": "^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
       "formula": "TEXT(10 ^ 76)",
       "returns": "Text"
     },
     {
       "id": "owb_78",
-      "question": "Wave-4 ^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
+      "question": "^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
       "formula": "TEXT(10 ^ 78)",
       "returns": "Text"
     },
     {
       "id": "owb_79",
-      "question": "Wave-4 ^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
+      "question": "^ overflow bisect: boundary lies in (60, 80]; null ⇒ runtime error.",
       "formula": "TEXT(10 ^ 79)",
       "returns": "Text"
     },
     {
       "id": "owm_pow_of_pow",
-      "question": "Wave-4 ^ mechanism: (10^40)^2 — exponent 2, magnitude 1e80. Computes ⇒ the cap is exponent-based; null ⇒ magnitude-based.",
+      "question": "^ mechanism: (10^40)^2 — exponent 2, magnitude 1e80. Computes ⇒ the cap is exponent-based; null ⇒ magnitude-based.",
       "formula": "TEXT((10 ^ 40) ^ 2)",
       "returns": "Text"
     },
     {
       "id": "owm_2_100",
-      "question": "Wave-4 ^ mechanism: 2^100 ≈ 1.3e30 — small magnitude, exponent 100. Null ⇒ exponent-based cap ≤ 100.",
+      "question": "^ mechanism: 2^100 ≈ 1.3e30 — small magnitude, exponent 100. Null ⇒ exponent-based cap ≤ 100.",
       "formula": "TEXT(2 ^ 100)",
       "returns": "Text"
     },
     {
       "id": "owm_2_250",
-      "question": "Wave-4 ^ mechanism: 2^250 ≈ 1.8e75 — magnitude just under 10^76's, exponent 250.",
+      "question": "^ mechanism: 2^250 ≈ 1.8e75 — magnitude just under 10^76's, exponent 250.",
       "formula": "TEXT(2 ^ 250)",
       "returns": "Text"
     },
     {
       "id": "owm_3_160",
-      "question": "Wave-4 ^ mechanism: 3^160 ≈ 2.2e76 — magnitude near the candidate boundary, non-10 base.",
+      "question": "^ mechanism: 3^160 ≈ 2.2e76 — magnitude near the candidate boundary, non-10 base.",
       "formula": "TEXT(3 ^ 160)",
       "returns": "Text"
     },
     {
       "id": "owm_neg_exp",
-      "question": "Wave-4 ^ mechanism: 10^-80 — does the cap apply to negative exponents / tiny magnitudes?",
+      "question": "^ mechanism: 10^-80 — does the cap apply to negative exponents / tiny magnitudes?",
       "formula": "TEXT(10 ^ -80)",
       "returns": "Text"
     },
     {
       "id": "owm_mult_chain",
-      "question": "Wave-4 value-domain ceiling via *: (10^60)*(10^60)*(10^60) = 1e180 — where does multiplication itself overflow (Oracle NUMBER ~1e126)?",
+      "question": "Value-domain ceiling via *: (10^60)*(10^60)*(10^60) = 1e180 — where does multiplication itself overflow (Oracle NUMBER ~1e126)?",
       "formula": "TEXT((10 ^ 60) * (10 ^ 60) * (10 ^ 60))",
       "returns": "Text"
     },
     {
       "id": "csize_base",
-      "question": "Wave-4 compiled-size: a ~2.3k-char literal formula (base for the inlining probes; compiled size ≈ source size for literals).",
+      "question": "Compiled-size: a ~2.3k-char literal formula (base for the inlining probes; compiled size ≈ source size for literals).",
       "formula": "\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
       "returns": "Text"
     },
     {
       "id": "csize_2x",
-      "question": "Wave-4 compiled-size: referencing the base formula field twice inlines its compiled form — ≈4.6k, should stay under the 5,000-char compiled limit.",
+      "question": "Compiled-size: referencing the base formula field twice inlines its compiled form — ≈4.6k, should stay under the 5,000-char compiled limit.",
       "formula": "Pb_csize_base__c & Pb_csize_base__c",
       "returns": "Text",
       "expectSaveError": "maybe",
@@ -883,7 +883,7 @@
     },
     {
       "id": "csize_3x",
-      "question": "Wave-4 compiled-size: three inlinings ≈ 6.9k — expected to breach the compiled limit; capture the exact error message and stated maximum.",
+      "question": "Compiled-size: three inlinings ≈ 6.9k — expected to breach the compiled limit; capture the exact error message and stated maximum.",
       "formula": "Pb_csize_base__c & Pb_csize_base__c & Pb_csize_base__c",
       "returns": "Text",
       "expectSaveError": "maybe",
@@ -891,73 +891,73 @@
     },
     {
       "id": "owb2_61",
-      "question": "Wave-4 bisect round 2: 10^61 (62 digits).",
+      "question": "Bisect round 2: 10^61 (62 digits).",
       "formula": "TEXT(10 ^ 61)",
       "returns": "Text"
     },
     {
       "id": "owb2_62",
-      "question": "Wave-4 bisect round 2: 10^62.",
+      "question": "Bisect round 2: 10^62.",
       "formula": "TEXT(10 ^ 62)",
       "returns": "Text"
     },
     {
       "id": "owb2_63",
-      "question": "Wave-4 bisect round 2: 10^63.",
+      "question": "Bisect round 2: 10^63.",
       "formula": "TEXT(10 ^ 63)",
       "returns": "Text"
     },
     {
       "id": "owb2_64",
-      "question": "Wave-4 bisect round 2: 10^64 (65 digits).",
+      "question": "Bisect round 2: 10^64 (65 digits).",
       "formula": "TEXT(10 ^ 64)",
       "returns": "Text"
     },
     {
       "id": "owc_3_40",
-      "question": "Wave-4 ^ mechanism: 3^40 = 12157665459056928801 exactly (20 digits, NOT double-representable) — exact digits ⇒ decimal path; …929000-ish ⇒ double path.",
+      "question": "^ mechanism: 3^40 = 12157665459056928801 exactly (20 digits, NOT double-representable) — exact digits ⇒ decimal path; …929000-ish ⇒ double path.",
       "formula": "TEXT(3 ^ 40)",
       "returns": "Text"
     },
     {
       "id": "owc_99_neg1",
-      "question": "Wave-4 ^ mechanism: 99^-1 — double gives 0.010101010101010102 (17 digits); decimal division gives the 40-digit repetend.",
+      "question": "^ mechanism: 99^-1 — double gives 0.010101010101010102 (17 digits); decimal division gives the 40-digit repetend.",
       "formula": "TEXT(99 ^ -1)",
       "returns": "Text"
     },
     {
       "id": "owc_2_213",
-      "question": "Wave-4 digit-boundary: 2^213 ≈ 1.3e64 (65 digits).",
+      "question": "Digit-boundary: 2^213 ≈ 1.3e64 (65 digits).",
       "formula": "TEXT(2 ^ 213)",
       "returns": "Text"
     },
     {
       "id": "owc_2_216",
-      "question": "Wave-4 digit-boundary: 2^216 ≈ 1.05e65 (66 digits).",
+      "question": "Digit-boundary: 2^216 ≈ 1.05e65 (66 digits).",
       "formula": "TEXT(2 ^ 216)",
       "returns": "Text"
     },
     {
       "id": "owc_9_68",
-      "question": "Wave-4 digit-boundary: 9^68 ≈ 7.8e64 (65 digits), non-binary base.",
+      "question": "Digit-boundary: 9^68 ≈ 7.8e64 (65 digits), non-binary base.",
       "formula": "TEXT(9 ^ 68)",
       "returns": "Text"
     },
     {
       "id": "owc_div_1e80",
-      "question": "Wave-4: reaching 1e-80 via division instead of ^ — 0 (scale-32 materialization) or error?",
+      "question": "Reaching 1e-80 via division instead of ^ — 0 (scale-32 materialization) or error?",
       "formula": "TEXT(1 / (10 ^ 40) / (10 ^ 40))",
       "returns": "Text"
     },
     {
       "id": "owc_half_pow",
-      "question": "Wave-4: sub-1 base, large exponent — 0.5^200 ≈ 6.2e-61; materializes to 0, errors, or renders?",
+      "question": "Sub-1 base, large exponent — 0.5^200 ≈ 6.2e-61; materializes to 0, errors, or renders?",
       "formula": "TEXT(0.5 ^ 200)",
       "returns": "Text"
     },
     {
       "id": "csize_l3",
-      "question": "Wave-4 compiled-size chain: (2x base) & (2x base) ≈ 9.2k inlined — errors iff references inline toward a ~5k compiled limit.",
+      "question": "Compiled-size chain: (2x base) & (2x base) ≈ 9.2k inlined — errors iff references inline toward a ~5k compiled limit.",
       "formula": "Pb_csize_2x__c & Pb_csize_2x__c",
       "returns": "Text",
       "expectSaveError": "maybe",
@@ -965,7 +965,7 @@
     },
     {
       "id": "csize_l4",
-      "question": "Wave-4 compiled-size chain: ≈18.4k inlined.",
+      "question": "Compiled-size chain: ≈18.4k inlined.",
       "formula": "Pb_csize_l3__c & Pb_csize_l3__c",
       "returns": "Text",
       "expectSaveError": "maybe",
@@ -973,7 +973,7 @@
     },
     {
       "id": "csize_l6",
-      "question": "Wave-4 compiled-size chain: ≈74k inlined — if even this saves, the compiled-size limit is either huge or not reference-transitive.",
+      "question": "Compiled-size chain: ≈74k inlined — if even this saves, the compiled-size limit is either huge or not reference-transitive.",
       "formula": "Pb_csize_l4__c & Pb_csize_l4__c & Pb_csize_l4__c & Pb_csize_l4__c",
       "returns": "Text",
       "expectSaveError": "maybe",
@@ -981,149 +981,149 @@
     },
     {
       "id": "pw5_zero_zero",
-      "question": "Wave-5 ^ edges: 0^0 — 1 (Java/decimal convention), error, or deploy-reject?",
+      "question": "^ edges: 0^0 — 1 (Java/decimal convention), error, or deploy-reject?",
       "formula": "TEXT(0 ^ 0)",
       "returns": "Text",
       "expectSaveError": "maybe"
     },
     {
       "id": "pw5_zero_neg",
-      "question": "Wave-5 ^ edges: 0^-1 — runtime error (reciprocal of 0), null, or deploy-reject? Evaluator currently refuses.",
+      "question": "^ edges: 0^-1 — runtime error (reciprocal of 0), null, or deploy-reject? Evaluator currently refuses.",
       "formula": "TEXT(0 ^ -1)",
       "returns": "Text",
       "expectSaveError": "maybe"
     },
     {
       "id": "pw5_zero_neg2",
-      "question": "Wave-5 ^ edges: 0^-2 — same as 0^-1 or sign-dependent?",
+      "question": "^ edges: 0^-2 — same as 0^-1 or sign-dependent?",
       "formula": "TEXT(0 ^ -2)",
       "returns": "Text",
       "expectSaveError": "maybe"
     },
     {
       "id": "pw5_negbase_odd",
-      "question": "Wave-5 ^ edges: negative base, odd exponent — expect -8.",
+      "question": "^ edges: negative base, odd exponent — expect -8.",
       "formula": "TEXT((0 - 2) ^ 3)",
       "returns": "Text"
     },
     {
       "id": "pw5_negbase_cap",
-      "question": "Wave-5 ^ cap: (0-10)^65 = -1e65 — does the 1e64 cap apply to |result| (null) or only positive results (renders)?",
+      "question": "^ cap: (0-10)^65 = -1e65 — does the 1e64 cap apply to |result| (null) or only positive results (renders)?",
       "formula": "TEXT((0 - 10) ^ 65)",
       "returns": "Text"
     },
     {
       "id": "pw5_scale_3_neg25",
-      "question": "Wave-5 ^ scale: 3^-25 ≈ 1.18e-12 — scale-40 truncates to 28 sig digits (ends at dp40); precision-40 renders 39 (TEXT parity budget). THE negative-exponent scale discriminator.",
+      "question": "^ scale: 3^-25 ≈ 1.18e-12 — scale-40 truncates to 28 sig digits (ends at dp40); precision-40 renders 39 (TEXT parity budget). THE negative-exponent scale discriminator.",
       "formula": "TEXT(3 ^ -25)",
       "returns": "Text"
     },
     {
       "id": "pw5_scale_7_neg20",
-      "question": "Wave-5 ^ scale: 7^-20 ≈ 1.25e-17 — scale-40 → 23 sig digits; precision-40 → 39/40.",
+      "question": "^ scale: 7^-20 ≈ 1.25e-17 — scale-40 → 23 sig digits; precision-40 → 39/40.",
       "formula": "TEXT(7 ^ -20)",
       "returns": "Text"
     },
     {
       "id": "pw5_scale_9_neg30",
-      "question": "Wave-5 ^ scale: 9^-30 ≈ 2.35e-29 — scale-40 → 12 sig digits; precision-40 → 39/40. Unmistakable midpoint.",
+      "question": "^ scale: 9^-30 ≈ 2.35e-29 — scale-40 → 12 sig digits; precision-40 → 39/40. Unmistakable midpoint.",
       "formula": "TEXT(9 ^ -30)",
       "returns": "Text"
     },
     {
       "id": "pw5_scale_07_80",
-      "question": "Wave-5 ^ scale, fractional base: 0.7^80 ≈ 4.06e-13 — scale-40 → 28 sig digits; exact/precision-40 → 39/40.",
+      "question": "^ scale, fractional base: 0.7^80 ≈ 4.06e-13 — scale-40 → 28 sig digits; exact/precision-40 → 39/40.",
       "formula": "TEXT(0.7 ^ 80)",
       "returns": "Text"
     },
     {
       "id": "pw5_scale_05_132",
-      "question": "Wave-5 ^ scale: 0.5^132 ≈ 1.837e-40 — scale-40 HALF_UP → .0…02 (one digit at dp40); exact → long string.",
+      "question": "^ scale: 0.5^132 ≈ 1.837e-40 — scale-40 HALF_UP → .0…02 (one digit at dp40); exact → long string.",
       "formula": "TEXT(0.5 ^ 132)",
       "returns": "Text"
     },
     {
       "id": "pw5_scale_05_135",
-      "question": "Wave-5 ^ scale: 0.5^135 ≈ 2.3e-41 — scale-40 → 0 (like 0.5^200); exact → digits.",
+      "question": "^ scale: 0.5^135 ≈ 2.3e-41 — scale-40 → 0 (like 0.5^200); exact → digits.",
       "formula": "TEXT(0.5 ^ 135)",
       "returns": "Text"
     },
     {
       "id": "pw5_scale_01_41",
-      "question": "Wave-5 ^ scale: 0.1^41 = 1e-41 exactly — scale-40 → 0; any exact path → .0…01 (41 dp).",
+      "question": "^ scale: 0.1^41 = 1e-41 exactly — scale-40 → 0; any exact path → .0…01 (41 dp).",
       "formula": "TEXT(0.1 ^ 41)",
       "returns": "Text"
     },
     {
       "id": "pw5_frac_cap",
-      "question": "Wave-5 ^ cap: 1.5^400 ≈ 2.7e70 — does the 1e64 result cap bind fractional bases too (null) or only integer bases (renders)? Evaluator currently caps all bases.",
+      "question": "^ cap: 1.5^400 ≈ 2.7e70 — does the 1e64 result cap bind fractional bases too (null) or only integer bases (renders)? Evaluator currently caps all bases.",
       "formula": "TEXT(1.5 ^ 400)",
       "returns": "Text"
     },
     {
       "id": "pw5_frac_big",
-      "question": "Wave-5 ^ fractional path: 1.5^350 ≈ 3.3e61 (under cap) — decimal renders the exact leading 39/40 digits; a double path would show ~17 digits + zeros.",
+      "question": "^ fractional path: 1.5^350 ≈ 3.3e61 (under cap) — decimal renders the exact leading 39/40 digits; a double path would show ~17 digits + zeros.",
       "formula": "TEXT(1.5 ^ 350)",
       "returns": "Text"
     },
     {
       "id": "pw5_dbl_3_34",
-      "question": "Wave-5 ^ double rule: 3^34 = 16677181699666569 exact (just past 2^53). Correctly-rounded-double-at-18-sig → …568; exact decimal → …569.",
+      "question": "^ double rule: 3^34 = 16677181699666569 exact (just past 2^53). Correctly-rounded-double-at-18-sig → …568; exact decimal → …569.",
       "formula": "TEXT(3 ^ 34)",
       "returns": "Text"
     },
     {
       "id": "pw5_dbl_3_39",
-      "question": "Wave-5 ^ double rule: 3^39 exact …267; correctly-rounded double …256 at 18 sig → …260.",
+      "question": "^ double rule: 3^39 exact …267; correctly-rounded double …256 at 18 sig → …260.",
       "formula": "TEXT(3 ^ 39)",
       "returns": "Text"
     },
     {
       "id": "pw5_dbl_7_25",
-      "question": "Wave-5 ^ double rule: 7^25 = 1341068619663964900807 exact — double-at-18-sig prediction differs in the tail.",
+      "question": "^ double rule: 7^25 = 1341068619663964900807 exact — double-at-18-sig prediction differs in the tail.",
       "formula": "TEXT(7 ^ 25)",
       "returns": "Text"
     },
     {
       "id": "pw5_dbl_6_30",
-      "question": "Wave-5 ^ double rule: 6^30 ≈ 2.21e23 — third independent 18-sig-vs-exact case.",
+      "question": "^ double rule: 6^30 ≈ 2.21e23 — third independent 18-sig-vs-exact case.",
       "formula": "TEXT(6 ^ 30)",
       "returns": "Text"
     },
     {
       "id": "pw5_dbl_2_90",
-      "question": "Wave-5 ^ double rule: 2^90 is double-EXACT (28 digits). 18-sig rendering → …380270…; JS shortest-repr (17) → …380300…. Discriminates 18-sig from shortest-repr.",
+      "question": "^ double rule: 2^90 is double-EXACT (28 digits). 18-sig rendering → …380270…; JS shortest-repr (17) → …380300…. Discriminates 18-sig from shortest-repr.",
       "formula": "TEXT(2 ^ 90)",
       "returns": "Text"
     },
     {
       "id": "pw6_clamp_023_25",
-      "question": "Wave-6 rider: folded tail clamp — 0.23^25 ≈ 1.12e-16, 18-sig ends at place 33. Truncated ⇒ clamp ∈[30,32]; full ⇒ ∈[33,39].",
+      "question": "Rider: folded tail clamp — 0.23^25 ≈ 1.12e-16, 18-sig ends at place 33. Truncated ⇒ clamp ∈[30,32]; full ⇒ ∈[33,39].",
       "formula": "TEXT(0.23 ^ 25)",
       "returns": "Text"
     },
     {
       "id": "pw6_paren_lit",
-      "question": "Wave-6 rider: does a parenthesized literal render literal-style? \"0.5\" ⇒ parens fold away; \".5\" ⇒ computed-style.",
+      "question": "Rider: does a parenthesized literal render literal-style? \"0.5\" ⇒ parens fold away; \".5\" ⇒ computed-style.",
       "formula": "TEXT((0.5))",
       "returns": "Text"
     },
     {
       "id": "pw6_div_quarter",
-      "question": "Wave-6 rider: leading-zero mechanism — \".25\" ⇒ fold-based (division never folds); \"0.25\" ⇒ scale-threshold rendering.",
+      "question": "Rider: leading-zero mechanism — \".25\" ⇒ fold-based (division never folds); \"0.25\" ⇒ scale-threshold rendering.",
       "formula": "TEXT(1 / 4)",
       "returns": "Text"
     },
     {
       "id": "pw6_zeroneg_blank",
-      "question": "Wave-6 rider: 0^-1 disambiguation — null ⇒ runtime error; BLANKRESULT ⇒ blank.",
+      "question": "Rider: 0^-1 disambiguation — null ⇒ runtime error; BLANKRESULT ⇒ blank.",
       "formula": "IF(ISBLANK(0 ^ -1), \"BLANKRESULT\", \"VALUERESULT\")",
       "returns": "Text",
       "expectSaveError": "maybe"
     },
     {
       "id": "pw6_rt_int",
-      "question": "Wave-6 rider: field-valued 3^40 — exact 12157665459056928801 ⇒ runtime is full decimal precision; …800 ⇒ 18-sig applies at runtime too.",
+      "question": "Rider: field-valued 3^40 — exact 12157665459056928801 ⇒ runtime is full decimal precision; …800 ⇒ 18-sig applies at runtime too.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1139,7 +1139,7 @@
     },
     {
       "id": "pw6_rt_frac",
-      "question": "Wave-6 rider: field-valued 0.7^80 — long 39/40-sig render without leading zero ⇒ runtime full precision + computed-style rendering; 18 digits with leading zero ⇒ folding is value-based, not syntax-based.",
+      "question": "Rider: field-valued 0.7^80 — long 39/40-sig render without leading zero ⇒ runtime full precision + computed-style rendering; 18 digits with leading zero ⇒ folding is value-based, not syntax-based.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1155,7 +1155,7 @@
     },
     {
       "id": "pw6_rt_neg",
-      "question": "Wave-6 rider: field-valued 3^-25 — 42 places ⇒ runtime negative exponents share scale 42 (predicted from #6).",
+      "question": "Rider: field-valued 3^-25 — 42 places ⇒ runtime negative exponents share scale 42 (predicted from #6).",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1171,7 +1171,7 @@
     },
     {
       "id": "pw6_rt_cap",
-      "question": "Wave-6 rider: field-valued 10^80 — null ⇒ the 1e64 cap binds at runtime; digits ⇒ cap is fold-only.",
+      "question": "Rider: field-valued 10^80 — null ⇒ the 1e64 cap binds at runtime; digits ⇒ cap is fold-only.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1187,7 +1187,7 @@
     },
     {
       "id": "pw6_rt_deep",
-      "question": "Wave-6 rider: field-valued 0.5^132 ≈ 1.8e-40 — long render ⇒ runtime keeps deep fractions (clamp is fold-only); 0 ⇒ a runtime scale clamp exists between 1e-40 and 1e-130.",
+      "question": "Rider: field-valued 0.5^132 ≈ 1.8e-40 — long render ⇒ runtime keeps deep fractions (clamp is fold-only); 0 ⇒ a runtime scale clamp exists between 1e-40 and 1e-130.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1203,7 +1203,7 @@
     },
     {
       "id": "pw6_rt_mixed",
-      "question": "Wave-6 rider: literal base, field exponent (0.7 ^ field=80) — runtime-style ⇒ one field operand blocks folding.",
+      "question": "Rider: literal base, field exponent (0.7 ^ field=80) — runtime-style ⇒ one field operand blocks folding.",
       "formula": "TEXT(0.7 ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1215,25 +1215,25 @@
     },
     {
       "id": "pw7_clamp_05_73",
-      "question": "Wave-7: folded clamp — 0.5^73's 18-sig value ends at place 39. Full ⇒ clamp = 39; truncated ⇒ clamp ∈[33,38].",
+      "question": "Folded clamp — 0.5^73's 18-sig value ends at place 39. Full ⇒ clamp = 39; truncated ⇒ clamp ∈[33,38].",
       "formula": "TEXT(0.5 ^ 73)",
       "returns": "Text"
     },
     {
       "id": "pw7_clamp_05_76",
-      "question": "Wave-7: folded clamp vs magnitude floor — 0.5^76 ≈ 1.32e-23, 18-sig ends at place 40. Full 18 digits ⇒ a 1e-40 magnitude floor, not a scale clamp; cut at 39 ⇒ scale-39.",
+      "question": "Folded clamp vs magnitude floor — 0.5^76 ≈ 1.32e-23, 18-sig ends at place 40. Full 18 digits ⇒ a 1e-40 magnitude floor, not a scale clamp; cut at 39 ⇒ scale-39.",
       "formula": "TEXT(0.5 ^ 76)",
       "returns": "Text"
     },
     {
       "id": "pw7_recip_cap",
-      "question": "Wave-7: oversized negative-exponent reciprocal — 0.1^-70 = 1e70 > 1e64. null ⇒ the cap binds negatives too; digits ⇒ negatives are uncapped.",
+      "question": "Oversized negative-exponent reciprocal — 0.1^-70 = 1e70 > 1e64. null ⇒ the cap binds negatives too; digits ⇒ negatives are uncapped.",
       "formula": "TEXT(0.1 ^ -70)",
       "returns": "Text"
     },
     {
       "id": "pw7_rt_bigsig",
-      "question": "Wave-7: field-valued 7^55 (47 digits) — scale-42 needs 47 sigs, past Oracle NUMBER's ~40. Exact leading digits vs rounded tail pins the runtime carry.",
+      "question": "Field-valued 7^55 (47 digits) — scale-42 needs 47 sigs, past Oracle NUMBER's ~40. Exact leading digits vs rounded tail pins the runtime carry.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1275,31 +1275,31 @@
     },
     {
       "id": "pw8_flush_05_80",
-      "question": "Wave-8 flush bisect: 0.5^80 ≈ 8.3e-25 — kept 18 digits ⇒ boundary below 8.3e-25; 0 ⇒ above.",
+      "question": "Flush bisect: 0.5^80 ≈ 8.3e-25 — kept 18 digits ⇒ boundary below 8.3e-25; 0 ⇒ above.",
       "formula": "TEXT(0.5 ^ 80)",
       "returns": "Text"
     },
     {
       "id": "pw8_flush_05_100",
-      "question": "Wave-8 flush bisect: 0.5^100 ≈ 7.9e-31.",
+      "question": "Flush bisect: 0.5^100 ≈ 7.9e-31.",
       "formula": "TEXT(0.5 ^ 100)",
       "returns": "Text"
     },
     {
       "id": "pw8_flush_05_120",
-      "question": "Wave-8 flush bisect: 0.5^120 ≈ 7.5e-37.",
+      "question": "Flush bisect: 0.5^120 ≈ 7.5e-37.",
       "formula": "TEXT(0.5 ^ 120)",
       "returns": "Text"
     },
     {
       "id": "pw8_flush_05_129",
-      "question": "Wave-8 flush bisect: 0.5^129 ≈ 1.5e-39 — the last magnitude above the rounds-to-zero-at-39-places line (5e-40). Kept ⇒ the flush IS the 39-place rounding; 0 ⇒ a higher floor.",
+      "question": "Flush bisect: 0.5^129 ≈ 1.5e-39 — the last magnitude above the rounds-to-zero-at-39-places line (5e-40). Kept ⇒ the flush IS the 39-place rounding; 0 ⇒ a higher floor.",
       "formula": "TEXT(0.5 ^ 129)",
       "returns": "Text"
     },
     {
       "id": "pw8_prec_7_52",
-      "question": "Wave-8 precision bisect: field 7^52 = 44 sig digits. Digits ⇒ limit ≥ 44; null ⇒ limit is 44.",
+      "question": "Precision bisect: field 7^52 = 44 sig digits. Digits ⇒ limit ≥ 44; null ⇒ limit is 44.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1315,7 +1315,7 @@
     },
     {
       "id": "pw8_prec_7_53",
-      "question": "Wave-8 precision bisect: field 7^53 = 45 sig digits.",
+      "question": "Precision bisect: field 7^53 = 45 sig digits.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1331,7 +1331,7 @@
     },
     {
       "id": "pw8_prec_7_54",
-      "question": "Wave-8 precision bisect: field 7^54 = 46 sig digits.",
+      "question": "Precision bisect: field 7^54 = 46 sig digits.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1347,13 +1347,13 @@
     },
     {
       "id": "pw8_recip_lit_dyadic",
-      "question": "Wave-8: literal 0.5^-10 = 1024 exactly (terminating reciprocal ≥ 10) — computes, or errors like large non-terminating reciprocals would?",
+      "question": "Literal 0.5^-10 = 1024 exactly (terminating reciprocal ≥ 10) — computes, or errors like large non-terminating reciprocals would?",
       "formula": "TEXT(0.5 ^ -10)",
       "returns": "Text"
     },
     {
       "id": "pw8_recip_rt_dyadic",
-      "question": "Wave-8: field 0.5^-10 — runtime terminating reciprocal.",
+      "question": "Field 0.5^-10 — runtime terminating reciprocal.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1369,7 +1369,7 @@
     },
     {
       "id": "pw8_recip_rt_nonterm",
-      "question": "Wave-8: field 0.3^-5 ≈ 411.52… — non-terminating, needs 45 sigs at scale 42; probes the precision limit from the negative-exponent side.",
+      "question": "Field 0.3^-5 ≈ 411.52… — non-terminating, needs 45 sigs at scale 42; probes the precision limit from the negative-exponent side.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1387,49 +1387,49 @@
       "id": "pw8_be_left0",
       "formula": "IF(ISBLANK(LEFT(\"ab\", 0)), \"BLANKRESULT\", \"VALUERESULT\")",
       "returns": "Text",
-      "question": "Wave-8 blank-vs-empty: does a zero-length LEFT yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+      "question": "Blank-vs-empty: does a zero-length LEFT yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
     },
     {
       "id": "pw8_be_mid0",
       "formula": "IF(ISBLANK(MID(\"ab\", 1, 0)), \"BLANKRESULT\", \"VALUERESULT\")",
       "returns": "Text",
-      "question": "Wave-8 blank-vs-empty: does a zero-length MID yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+      "question": "Blank-vs-empty: does a zero-length MID yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
     },
     {
       "id": "pw8_be_right0",
       "formula": "IF(ISBLANK(RIGHT(\"ab\", 0)), \"BLANKRESULT\", \"VALUERESULT\")",
       "returns": "Text",
-      "question": "Wave-8 blank-vs-empty: does a zero-length RIGHT yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+      "question": "Blank-vs-empty: does a zero-length RIGHT yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
     },
     {
       "id": "pw8_be_trim",
       "formula": "IF(ISBLANK(TRIM(\" \")), \"BLANKRESULT\", \"VALUERESULT\")",
       "returns": "Text",
-      "question": "Wave-8 blank-vs-empty: does TRIM of pure whitespace yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+      "question": "Blank-vs-empty: does TRIM of pure whitespace yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
     },
     {
       "id": "pw8_be_substitute",
       "formula": "IF(ISBLANK(SUBSTITUTE(\"a\", \"a\", \"\")), \"BLANKRESULT\", \"VALUERESULT\")",
       "returns": "Text",
-      "question": "Wave-8 blank-vs-empty: does SUBSTITUTE that deletes everything yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+      "question": "Blank-vs-empty: does SUBSTITUTE that deletes everything yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
     },
     {
       "id": "pw8_be_upper",
       "formula": "IF(ISBLANK(UPPER(\"\")), \"BLANKRESULT\", \"VALUERESULT\")",
       "returns": "Text",
-      "question": "Wave-8 blank-vs-empty: does UPPER of an empty literal yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+      "question": "Blank-vs-empty: does UPPER of an empty literal yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
     },
     {
       "id": "pw8_be_concat",
       "formula": "IF(ISBLANK(\"\" & \"\"), \"BLANKRESULT\", \"VALUERESULT\")",
       "returns": "Text",
-      "question": "Wave-8 blank-vs-empty: does concatenating two empty strings yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
+      "question": "Blank-vs-empty: does concatenating two empty strings yield blank or empty text (WS4 fuzz cluster; org readback can't tell \"\" from null, so ISBLANK arbitrates directly)."
     },
     {
       "id": "pw8_be_text_blank",
       "formula": "IF(ISBLANK(TEXT(pw8bn__c)), \"BLANKRESULT\", \"VALUERESULT\")",
       "returns": "Text",
-      "question": "Wave-8 blank-vs-empty: TEXT of a blank Number field — blank (oracle, testTextFunctionWithCustomDate analogue) or empty text?",
+      "question": "Blank-vs-empty: TEXT of a blank Number field — blank (oracle, testTextFunctionWithCustomDate analogue) or empty text?",
       "fields": {
         "pw8bn__c": {
           "type": "Number",
@@ -1439,19 +1439,19 @@
     },
     {
       "id": "pw8b_flush_05_130",
-      "question": "Wave-8b flush boundary: 0.5^130 ≈ 7.35e-40, just ABOVE the 5e-40 rounds-to-zero-at-39-places line — kept ⇒ the line is the rule.",
+      "question": "Flush boundary: 0.5^130 ≈ 7.35e-40, just ABOVE the 5e-40 rounds-to-zero-at-39-places line — kept ⇒ the line is the rule.",
       "formula": "TEXT(0.5 ^ 130)",
       "returns": "Text"
     },
     {
       "id": "pw8b_flush_05_131",
-      "question": "Wave-8b flush boundary: 0.5^131 ≈ 3.67e-40, just BELOW 5e-40 — 0 ⇒ the line is the rule.",
+      "question": "Flush boundary: 0.5^131 ≈ 3.67e-40, just BELOW 5e-40 — 0 ⇒ the line is the rule.",
       "formula": "TEXT(0.5 ^ 131)",
       "returns": "Text"
     },
     {
       "id": "pw8b_recip_big_term",
-      "question": "Wave-8b: field 0.5^-145 = 2^145 (44 digits, terminating) — null ⇒ the 43-sig limit binds terminating reciprocals like positive exponents; digits ⇒ reciprocals escape it.",
+      "question": "Field 0.5^-145 = 2^145 (44 digits, terminating) — null ⇒ the 43-sig limit binds terminating reciprocals like positive exponents; digits ⇒ reciprocals escape it.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1467,7 +1467,7 @@
     },
     {
       "id": "pw8b_recip_big_nonterm",
-      "question": "Wave-8b: field 0.3^-81 ≈ 1.7e42 (non-terminating) — digits ⇒ big non-terminating reciprocals round like 0.3^-5; null ⇒ a magnitude line exists for them.",
+      "question": "Field 0.3^-81 ≈ 1.7e42 (non-terminating) — digits ⇒ big non-terminating reciprocals round like 0.3^-5; null ⇒ a magnitude line exists for them.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1483,7 +1483,7 @@
     },
     {
       "id": "pw8c_nonterm_19",
-      "question": "Wave-8c non-terminating reciprocal bisect: field 0.3^-19 ≈ 1e9 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e9. Straddles the 40-integer-digit hypothesis at m=76/78.",
+      "question": "Non-terminating reciprocal bisect: field 0.3^-19 ≈ 1e9 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e9. Straddles the 40-integer-digit hypothesis at m=76/78.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1499,7 +1499,7 @@
     },
     {
       "id": "pw8c_nonterm_40",
-      "question": "Wave-8c non-terminating reciprocal bisect: field 0.3^-40 ≈ 1e20 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e20. Straddles the 40-integer-digit hypothesis at m=76/78.",
+      "question": "Non-terminating reciprocal bisect: field 0.3^-40 ≈ 1e20 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e20. Straddles the 40-integer-digit hypothesis at m=76/78.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1515,7 +1515,7 @@
     },
     {
       "id": "pw8c_nonterm_60",
-      "question": "Wave-8c non-terminating reciprocal bisect: field 0.3^-60 ≈ 1e31 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e31. Straddles the 40-integer-digit hypothesis at m=76/78.",
+      "question": "Non-terminating reciprocal bisect: field 0.3^-60 ≈ 1e31 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e31. Straddles the 40-integer-digit hypothesis at m=76/78.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1531,7 +1531,7 @@
     },
     {
       "id": "pw8c_nonterm_76",
-      "question": "Wave-8c non-terminating reciprocal bisect: field 0.3^-76 ≈ 1e39 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e39. Straddles the 40-integer-digit hypothesis at m=76/78.",
+      "question": "Non-terminating reciprocal bisect: field 0.3^-76 ≈ 1e39 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e39. Straddles the 40-integer-digit hypothesis at m=76/78.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1547,7 +1547,7 @@
     },
     {
       "id": "pw8c_nonterm_78",
-      "question": "Wave-8c non-terminating reciprocal bisect: field 0.3^-78 ≈ 1e40 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e40. Straddles the 40-integer-digit hypothesis at m=76/78.",
+      "question": "Non-terminating reciprocal bisect: field 0.3^-78 ≈ 1e40 — digits ⇒ rounds like 0.3^-5; null ⇒ the error line for non-terminating reciprocals is at or below ~1e40. Straddles the 40-integer-digit hypothesis at m=76/78.",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1563,7 +1563,7 @@
     },
     {
       "id": "pw8d_nonterm_64",
-      "question": "Wave-8d: field 0.3^-64 — 34 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
+      "question": "Field 0.3^-64 — 34 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1579,7 +1579,7 @@
     },
     {
       "id": "pw8d_nonterm_68",
-      "question": "Wave-8d: field 0.3^-68 — 36 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
+      "question": "Field 0.3^-68 — 36 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1595,7 +1595,7 @@
     },
     {
       "id": "pw8d_nonterm_72",
-      "question": "Wave-8d: field 0.3^-72 — 38 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
+      "question": "Field 0.3^-72 — 38 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {
@@ -1611,7 +1611,7 @@
     },
     {
       "id": "pw8d_nonterm_74",
-      "question": "Wave-8d: field 0.3^-74 — 39 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
+      "question": "Field 0.3^-74 — 39 integer digits. Pins the non-terminating error line (32 int digits computes, 40 errors).",
       "formula": "TEXT(pw6na__c ^ pw6nb__c)",
       "returns": "Text",
       "fields": {

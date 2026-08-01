@@ -317,7 +317,7 @@ export const FUNCTIONS: readonly FunctionSpec[] = [
   },
   {
     name: "UPPER",
-    // The locale argument is undocumented but org-verified as accepted
+    // The optional locale argument is documented and org-verified
     // (probe corpus:testUpperLocale).
     params: [req("text", "Text"), opt("locale", "Text")],
     returnType: fixed("Text"),
