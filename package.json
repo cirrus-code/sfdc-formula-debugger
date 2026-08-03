@@ -9,10 +9,10 @@
   "homepage": "https://formulas.cirrus.tools",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cirrus-code/sfdc-formula-analyzer.git"
+    "url": "git+https://github.com/cirrus-code/sfdc-formula-debugger.git"
   },
   "bugs": {
-    "url": "https://github.com/cirrus-code/sfdc-formula-analyzer/issues"
+    "url": "https://github.com/cirrus-code/sfdc-formula-debugger/issues"
   },
   "scripts": {
     "dev": "vite",
