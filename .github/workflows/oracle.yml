@@ -34,13 +34,6 @@ jobs:
       - name: Build formula-engine + harness, run smoke probes
         run: nix develop --no-pure-eval .#oracle --command bash oracle/ci-smoke.sh
 
-      - name: Save oracle build for the fuzz job
-        uses: actions/upload-artifact@v6
-        with:
-          name: oracle-target
-          path: oracle/target
-          retention-days: 1
-
   # WS5: the committed corpus must be exactly what the extractor emits from
   # the vendored XML. Drift (an extractor change merged without regeneration,
   # or an updated vendored oracle) opens a PR rather than rotting silently.
@@ -95,11 +88,18 @@ jobs:
             extra-substituters = https://devenv.cachix.org
             extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
 
-      - name: Restore oracle build
-        uses: actions/download-artifact@v7
+      - name: Cache Maven repository
+        uses: actions/cache@v6
         with:
-          name: oracle-target
-          path: oracle/target
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-formula-engine-0.9.13
+
+      # Built here rather than carried from build-oracle: the harness is not
+      # just target/classes, it is also oracle/cp.txt, whose entries are
+      # absolute paths into ~/.m2. Rebuilding on the runner that runs it keeps
+      # those paths valid without assuming two runners share a layout.
+      - name: Build the oracle harness
+        run: nix develop --no-pure-eval .#oracle --command bash oracle/ci-smoke.sh
 
       - name: Run the differential fuzzer
         env:
