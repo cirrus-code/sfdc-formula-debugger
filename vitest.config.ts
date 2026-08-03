@@ -7,6 +7,9 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "node",
-    exclude: [...defaultExclude, "**/*.browser.test.{ts,tsx}"],
+    // direnv symlinks the flake inputs into .direnv, and one of them is a store
+    // snapshot of this repo, so the default include glob collected every suite a
+    // second time from frozen sources that drift as the working tree moves.
+    exclude: [...defaultExclude, "**/.direnv/**", "**/*.browser.test.{ts,tsx}"],
   },
 });

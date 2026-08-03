@@ -21,7 +21,7 @@ export const product = {
    */
   platformUrl: null as string | null,
   /** Public source repository, linked in the footer. */
-  repoUrl: "https://github.com/cirrus-code/sfdc-formula-analyzer",
+  repoUrl: "https://github.com/cirrus-code/sfdc-formula-debugger",
 } as const;
 
 export const palette = {
