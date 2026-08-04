@@ -1,7 +1,15 @@
 import { t } from "../i18n/index.ts";
 import { span, type Span } from "./span.ts";
-import type { Diagnostic } from "./diagnostic.ts";
+import type { Diagnostic, DiagnosticFix, TextEdit } from "./diagnostic.ts";
 import type { LexResult, Token, TokenKind, Trivia } from "./token.ts";
+import {
+  classifyPasteChar,
+  codePointHex,
+  CONFUSABLE_REPLACEMENTS,
+  isQuoteOpener,
+  stringClosers,
+  type PasteCharKind,
+} from "./chars.ts";
 
 /**
  * Hand-written scanner producing a flat, lossless token stream with spans.
@@ -13,6 +21,13 @@ import type { LexResult, Token, TokenKind, Trivia } from "./token.ts";
  *  - No reserved identifier prefixes: `Null_Check__c`, `TRUEFIELD__c` lex as
  *    identifiers. `TRUE`/`FALSE`/`NULL` are recognized only as complete,
  *    case-insensitive tokens.
+ *
+ * Pasted invisible characters (zero-width spaces from Salesforce's own help
+ * pages, no-break spaces from HTML) become `"invisible"` trivia — not error
+ * tokens — each run diagnosed once with a removal/replacement fix, so a paste
+ * yields a handful of precise, fixable diagnostics instead of a parse-error
+ * cascade. Visible typographic characters (curly quotes, en dashes) stay
+ * error tokens but carry the intended ASCII replacement as a fix.
  */
 export function lex(source: string): LexResult {
   return new Lexer(source).run();
@@ -65,6 +80,12 @@ class Lexer {
     return this.src[this.pos + offset] ?? "";
   }
 
+  /** The full code point at the cursor (1 or 2 UTF-16 units); "" at EOF. */
+  private peekChar(): string {
+    const cp = this.src.codePointAt(this.pos);
+    return cp === undefined ? "" : String.fromCodePoint(cp);
+  }
+
   private token(
     kind: TokenKind,
     start: number,
@@ -78,8 +99,13 @@ class Lexer {
     };
   }
 
-  private error(code: Diagnostic["code"], s: Span, message: string): void {
-    this.diagnostics.push({ code, severity: "error", span: s, message });
+  private error(
+    code: Diagnostic["code"],
+    s: Span,
+    message: string,
+    fix?: DiagnosticFix,
+  ): void {
+    this.diagnostics.push({ code, severity: "error", span: s, message, fix });
   }
 
   // --- Trivia -------------------------------------------------------------
@@ -104,10 +130,58 @@ class Lexer {
       } else if (c === "/" && this.peek(1) === "*") {
         trivia.push(this.scanBlockComment());
       } else {
-        break;
+        const ch = this.peekChar();
+        const pasteKind = classifyPasteChar(ch);
+        if (pasteKind === null) {
+          break;
+        }
+        trivia.push(this.scanPasteArtifact(ch, pasteKind));
       }
     }
     return trivia;
+  }
+
+  /**
+   * A run of one repeated invisible/non-standard character becomes a single
+   * piece of `"invisible"` trivia plus one error diagnostic carrying a
+   * removal fix (format/control characters — the user never saw them) or a
+   * replace-with-space fix (Unicode spaces — they visually separate tokens).
+   */
+  private scanPasteArtifact(ch: string, kind: PasteCharKind): Trivia {
+    const start = this.pos;
+    while (this.src.startsWith(ch, this.pos)) {
+      this.pos += ch.length;
+    }
+    const count = (this.pos - start) / ch.length;
+    const s = span(start, this.pos);
+    const hex = codePointHex(ch);
+    const name = t().syntax.lexer.characterNames[hex] ?? null;
+    if (kind === "space") {
+      this.error(
+        "nonstandard-whitespace",
+        s,
+        t().syntax.lexer.nonstandardSpace(hex, name, count),
+        {
+          title: t().syntax.lexer.fixes.replaceWithSpace(count),
+          edits: [{ span: s, newText: " ".repeat(count) }],
+        },
+      );
+    } else {
+      this.error(
+        "invisible-character",
+        s,
+        t().syntax.lexer.invisibleCharacter(hex, name, count),
+        {
+          title: t().syntax.lexer.fixes.removeInvisible(count),
+          edits: [{ span: s, newText: "" }],
+        },
+      );
+    }
+    return {
+      kind: "invisible",
+      text: this.src.slice(start, this.pos),
+      span: s,
+    };
   }
 
   private scanBlockComment(): Trivia {
@@ -152,7 +226,7 @@ class Lexer {
     const start = this.pos;
     const c = this.peek();
 
-    if (c === '"' || c === "'") {
+    if (isQuoteOpener(c)) {
       return this.scanString(start, leading);
     }
     if (isDigit(c)) {
@@ -171,9 +245,17 @@ class Lexer {
     return this.scanPunctuationOrOperator(start, leading, c);
   }
 
+  /**
+   * Strings open with straight or typographic quotes (see chars.ts for the
+   * accepted opener→closer pairs). A typographically-quoted string still lexes
+   * as one string token — recovery that keeps the AST intact — but is
+   * diagnosed as an error with a straighten-the-quotes fix.
+   */
   private scanString(start: number, leading: readonly Trivia[]): Token {
     const quote = this.peek();
+    const closers = stringClosers(quote);
     this.pos++; // opening quote
+    let closer: string | null = null;
     for (;;) {
       const c = this.peek();
       if (c === "") {
@@ -199,9 +281,32 @@ class Lexer {
         continue;
       }
       this.pos++;
-      if (c === quote) {
+      if (closers.includes(c)) {
+        closer = c;
         break;
       }
+    }
+    const edits: TextEdit[] = [];
+    const straightOpen = CONFUSABLE_REPLACEMENTS.get(quote);
+    if (straightOpen !== undefined) {
+      edits.push({ span: span(start, start + 1), newText: straightOpen });
+    }
+    if (closer !== null) {
+      const straightClose = CONFUSABLE_REPLACEMENTS.get(closer);
+      if (straightClose !== undefined) {
+        edits.push({
+          span: span(this.pos - 1, this.pos),
+          newText: straightClose,
+        });
+      }
+    }
+    if (edits.length > 0) {
+      this.error(
+        "confusable-character",
+        span(start, this.pos),
+        t().syntax.lexer.typographicQuotes,
+        { title: t().syntax.lexer.fixes.straightenQuotes, edits },
+      );
     }
     return this.token("string", start, leading);
   }
@@ -325,14 +430,37 @@ class Lexer {
           t().syntax.lexer.unexpectedBang,
         );
         return this.token("error", start, leading);
-      default:
-        this.pos++;
-        this.error(
-          "unexpected-character",
-          span(start, this.pos),
-          t().syntax.lexer.unexpectedCharacter(c),
-        );
+      default: {
+        // Consume a full code point so an astral character (emoji) yields one
+        // error token with a real hex, not two mojibake surrogate halves.
+        const ch = this.peekChar();
+        this.pos += ch.length;
+        const s = span(start, this.pos);
+        const replacement = CONFUSABLE_REPLACEMENTS.get(ch);
+        if (replacement !== undefined) {
+          this.error(
+            "confusable-character",
+            s,
+            t().syntax.lexer.confusableCharacter(
+              ch,
+              codePointHex(ch),
+              replacement,
+            ),
+            {
+              title: t().syntax.lexer.fixes.replaceWith(replacement),
+              edits: [{ span: s, newText: replacement }],
+            },
+          );
+        } else {
+          const hex = (ch.codePointAt(0) ?? 0) > 0x7e ? codePointHex(ch) : null;
+          this.error(
+            "unexpected-character",
+            s,
+            t().syntax.lexer.unexpectedCharacter(ch, hex),
+          );
+        }
         return this.token("error", start, leading);
+      }
     }
   }
 }

@@ -13,6 +13,9 @@ export type DiagnosticCode =
   | "unterminated-string"
   | "unterminated-comment"
   | "unexpected-character"
+  | "invisible-character"
+  | "nonstandard-whitespace"
+  | "confusable-character"
   | "nested-comment"
   | "invalid-escape"
   // Parser
@@ -35,7 +38,26 @@ export type DiagnosticCode =
   | "deep-if-nesting"
   | "prefer-ispickval"
   | "discouraged-function"
-  | "char-limit";
+  | "char-limit"
+  | "invisible-in-string";
+
+/** A single replacement of a source range; `newText: ""` deletes it. */
+export interface TextEdit {
+  readonly span: Span;
+  readonly newText: string;
+}
+
+/**
+ * Machine-applicable remedy attached to a diagnostic, surfaced by the editor
+ * as a quick-fix action. Edits address original-source offsets; the edits of
+ * one fix never overlap, and fixes of distinct diagnostics never overlap
+ * either, so any subset can be applied in one batch.
+ */
+export interface DiagnosticFix {
+  /** Short imperative label (localized), e.g. "Remove invisible character". */
+  readonly title: string;
+  readonly edits: readonly TextEdit[];
+}
 
 export interface Diagnostic {
   readonly code: DiagnosticCode;
@@ -44,4 +66,6 @@ export interface Diagnostic {
   readonly message: string;
   /** Optional "learn more" link, rendered by the Problems panel. */
   readonly docsUrl?: string | undefined;
+  /** Optional quick-fix, rendered by the editor as a clickable action. */
+  readonly fix?: DiagnosticFix | undefined;
 }

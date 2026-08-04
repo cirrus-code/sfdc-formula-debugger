@@ -1,6 +1,8 @@
 import { expect, test, beforeEach, afterEach, vi } from "vitest";
 import { userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
+import { EditorView } from "@codemirror/view";
+import { openLintPanel } from "@codemirror/lint";
 import { App } from "./App.tsx";
 
 /**
@@ -265,6 +267,79 @@ test("copies a permalink and restores formula, inputs, and result from it", asyn
   await expect
     .element(second.getByText("10", { exact: true }))
     .toBeInTheDocument();
+});
+
+test("flags pasted invisible characters, refuses to simulate, and fixes them all in one click", async () => {
+  const screen = await render(<App />);
+  await expect
+    .poll(() => screen.container.querySelector(".cm-content"))
+    .toBeTruthy();
+
+  await typeFormula(screen.container, "IF(A\u200B > 1, 1,\u00A0 0)");
+
+  // highlightSpecialChars renders both pasted characters as visible dots.
+  await expect
+    .poll(() => screen.container.querySelectorAll(".cm-specialChar").length)
+    .toBeGreaterThanOrEqual(2);
+  // Both diagnostics feed the Problems panel (fed synchronously from parse).
+  await expect
+    .element(screen.getByText(/Invisible character/))
+    .toBeInTheDocument();
+  await expect
+    .element(screen.getByText(/Non-standard space/))
+    .toBeInTheDocument();
+  // And CodeMirror's own linter registered them too (the gutter marker, not
+  // the inline underline: the character's whole span is a replaced
+  // special-char widget, so there is no ordinary text run left for the lint
+  // mark to decorate).
+  await expect
+    .poll(
+      () => screen.container.querySelectorAll(".cm-lint-marker-error").length,
+    )
+    .toBeGreaterThan(0);
+
+  // Rule 1: recovery hands the simulator a structurally complete AST for this
+  // invalid text, and it must refuse rather than answer for a formula
+  // Salesforce would reject.
+  await expect
+    .element(screen.getByText(/Fix the syntax errors to simulate/))
+    .toBeInTheDocument();
+
+  // The lint panel is normally opened via a keybinding CM provides
+  // (lintKeymap), which this editor doesn't wire up; call the same command
+  // CodeMirror exports for it directly against the mounted view.
+  const view = EditorView.findFromDOM(screen.container);
+  expect(view).toBeTruthy();
+  openLintPanel(view!);
+
+  // Two fixable paste diagnostics \u2014 each carries its own fix plus the
+  // combined fix-all action.
+  const findFixAll = () =>
+    Array.from(
+      screen.container.querySelectorAll<HTMLButtonElement>(
+        ".cm-diagnosticAction",
+      ),
+    ).find((b) => b.textContent?.includes("Fix all"));
+  await expect.poll(() => findFixAll()).toBeTruthy();
+  await userEvent.click(findFixAll()!);
+
+  // One click cleans the whole paste: ZWSP removed, NBSP now a regular space.
+  await expect
+    .poll(
+      () => screen.container.querySelector(".cm-content")?.textContent ?? "",
+    )
+    .not.toContain("\u200B");
+  expect(
+    screen.container.querySelector(".cm-content")?.textContent ?? "",
+  ).not.toContain("\u00A0");
+  // Re-linting after the edit no longer reports the pasted characters...
+  await expect
+    .poll(() => screen.container.textContent ?? "")
+    .not.toContain("Invisible character");
+  // ...and with the syntax errors gone, simulation is unblocked.
+  await expect
+    .poll(() => screen.container.textContent ?? "")
+    .not.toContain("Fix the syntax errors to simulate");
 });
 
 test("renders without console errors", async () => {

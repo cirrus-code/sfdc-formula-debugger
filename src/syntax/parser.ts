@@ -1,5 +1,6 @@
 import { t } from "../i18n/index.ts";
 import { lex } from "./lexer.ts";
+import { stringClosers } from "./chars.ts";
 import { mergeSpans, span, type Span } from "./span.ts";
 import type { Diagnostic, DiagnosticCode } from "./diagnostic.ts";
 import type { Token } from "./token.ts";
@@ -404,7 +405,11 @@ function decodeString(raw: string): string {
   }
   const quote = raw[0]!;
   let body = raw.slice(1);
-  if (body.length > 0 && body.endsWith(quote)) {
+  // A typographically-quoted token may close with a different character than
+  // it opened with (`“abc”`, or `“abc"` when half-fixed) — strip whatever
+  // closer the lexer accepted for this opener.
+  const closers = stringClosers(quote);
+  if (body.length > 0 && closers.includes(body[body.length - 1]!)) {
     body = body.slice(0, -1);
   }
   let out = "";

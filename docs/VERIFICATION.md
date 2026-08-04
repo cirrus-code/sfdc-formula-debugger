@@ -647,6 +647,33 @@ intermediates against the real engine; it settled the numeric-scale model:
   contexts are Tier 1 now). `email_template` is structurally unverifiable at
   deploy (no compile check) and stays Tier 2 best-effort.
 
+## Pasted / non-ASCII characters
+
+None of this section has an org or oracle probe behind it yet; every entry is
+a deliberate conservative assumption baked into the lexer, not a settled
+verdict:
+
+- ❓ **Zero-width and other format/control characters (U+200B etc.) outside
+  string literals** — we assume Salesforce's compiler rejects them in
+  formula source and refuse to simulate a formula that contains one. No org
+  probe has confirmed the rejection; it is plausible the compiler silently
+  strips or ignores some of these instead.
+- ❓ **Non-standard Unicode spaces (U+00A0 etc.) as token separators** — we
+  conservatively diagnose them as errors rather than treating them as
+  whitespace equivalent to the ASCII space. Whether the product's own
+  compiler accepts any of them as a separator is unverified.
+- ❓ **Typographic quotes as string delimiters** — the formula-engine grammar
+  (`LexerRules.g4` `STRING_LITERAL`) admits only straight `'`/`"` quotes,
+  which grounds the "confusable-character" diagnostic for curly quotes, but
+  no golden or org test has confirmed the product rejects a curly-quoted
+  string rather than, say, treating the curly quote as an ordinary text
+  character.
+- ❓ **Invisible characters inside string literals** — assumed legal but
+  hazardous: the string still lexes and simulates, and the linter surfaces a
+  warning (code `invisible-in-string`) rather than an error. Whether the
+  product's own compiler treats these characters as ordinary string content
+  identically to what we simulate is unverified.
+
 ## Open questions
 
 The remaining unverified edges. Each is either refused or chosen

@@ -3,6 +3,8 @@ import {
   span,
   childrenOf,
   visitExpr,
+  codePointHex,
+  findPasteCharRuns,
   type BinaryOp,
   type Diagnostic,
   type Expr,
@@ -77,6 +79,7 @@ export function lint(
     switch (node.kind) {
       case "StringLit":
         checkHardcodedId(node, out);
+        checkInvisibleInString(node, out);
         return;
       case "BinaryOp":
         checkTextPicklistComparison(node, out);
@@ -111,6 +114,36 @@ function checkHardcodedId(node: StringLit, out: Diagnostic[]): void {
     span: node.span,
     message: t().linter.hardcodedId(node.value),
   });
+}
+
+/**
+ * Invisible characters inside a string literal are legal — Salesforce
+ * compiles them — but they become part of the compared value, so equality
+ * against text that *looks* identical fails with no visible reason. Warn with
+ * a removal fix. Non-standard spaces (no-break space etc.) are left alone:
+ * space-like content inside a string may be intentional.
+ */
+function checkInvisibleInString(node: StringLit, out: Diagnostic[]): void {
+  for (const run of findPasteCharRuns(node.raw, node.span.start)) {
+    if (run.kind !== "format") {
+      continue;
+    }
+    const hex = codePointHex(run.char);
+    out.push({
+      code: "invisible-in-string",
+      severity: "warning",
+      span: run.span,
+      message: t().linter.invisibleInString(
+        hex,
+        t().syntax.lexer.characterNames[hex] ?? null,
+        run.count,
+      ),
+      fix: {
+        title: t().syntax.lexer.fixes.removeInvisible(run.count),
+        edits: [{ span: run.span, newText: "" }],
+      },
+    });
+  }
 }
 
 /**

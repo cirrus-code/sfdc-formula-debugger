@@ -66,10 +66,29 @@ Hand-written scanner producing a flat token stream with spans. Token kinds: iden
 (including dotted paths and `$Global.Path` references as single tokens or trivially joinable
 sequences — parser's choice, but dotted paths end up as one AST reference), string literals
 (single and double quoted), number literals, operators (`+ - * / ^ & = <> < <= > >= == != && ||`),
-punctuation, and trivia (whitespace, `/* */` comments). Trivia is retained and attached to
-tokens (leading/trailing) so the formatter can preserve comments. Lexing never fails: unknown
-characters become error tokens with diagnostics, and highlighting is driven purely by the token
-stream so it works even when parsing fails.
+punctuation, and trivia (whitespace, `/* */` comments, and a third kind, invisible). Trivia is
+retained and attached to tokens (leading/trailing) so the formatter can preserve comments.
+Lexing never fails: unknown characters become error tokens with diagnostics, and highlighting
+is driven purely by the token stream so it works even when parsing fails.
+
+Pasted formulas routinely carry non-ASCII passengers — Salesforce's own help pages embed a
+zero-width space (U+200B) in sample formula text — so the lexer treats two families specially
+rather than failing outright. Invisible and non-standard-whitespace characters (Unicode Cf/Cc
+format and control code points; Zs/Zl/Zp spaces beyond the ASCII space) lex as the third trivia
+kind, "invisible", so the surrounding formula still parses; each maximal run of identical
+characters produces one error diagnostic, coded "invisible-character" for format/control code
+points or "nonstandard-whitespace" for non-ASCII spaces. Typographic confusables — curly
+quotes, en/em dashes, `×`, `÷`, fullwidth punctuation — stay error tokens (they are visible and
+change the formula's apparent meaning, so they are not silently absorbed as trivia), coded
+"confusable-character". A run of smart-quoted text (`“abc”`) lexes as a single string token
+plus one "confusable-character" diagnostic rather than splitting on the curly quotes.
+
+Diagnostics may carry an optional machine-applicable fix: a title plus a list of non-overlapping
+text edits against the original source. The invisible/nonstandard-whitespace diagnostics fix by
+deleting or replacing with a regular space, the confusable-character diagnostics fix by
+substituting the ASCII equivalent, and the smart-quote diagnostic's fix straightens both quotes
+at once. The editor surfaces these as quick-fix actions; nothing about the fix mechanism is
+specific to this character class.
 
 Reserved-word handling: there are no reserved identifier prefixes. `Null_Check__c`,
 `TRUEFIELD__c`, etc. must lex and parse as identifiers. Keywords (`TRUE`, `FALSE`, `NULL`) are

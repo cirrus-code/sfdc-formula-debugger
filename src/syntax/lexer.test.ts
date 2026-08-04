@@ -247,6 +247,213 @@ describe("lexer: error recovery", () => {
   });
 });
 
+describe("lexer: pasted invisible characters", () => {
+  it("recovers a zero-width space between tokens as invisible trivia with a removal fix", () => {
+    const source = "1\u200B+2";
+    const { tokens, diagnostics } = lex(source);
+    const toks = tokens.filter((t) => t.kind !== "eof");
+    expect(toks.map((t) => [t.kind, t.text])).toEqual([
+      ["number", "1"],
+      ["operator", "+"],
+      ["number", "2"],
+    ]);
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]!.code).toBe("invisible-character");
+    expect(diagnostics[0]!.span).toEqual({ start: 1, end: 2 });
+    expect(diagnostics[0]!.fix?.edits).toEqual([
+      { span: { start: 1, end: 2 }, newText: "" },
+    ]);
+    expect(toks[1]!.leadingTrivia.map((tr) => tr.kind)).toContain("invisible");
+    expect(tokensToSource(tokens)).toBe(source);
+  });
+
+  it("collapses a doubled run of zero-width spaces into one diagnostic covering both", () => {
+    const source = "IF(\u200B\u200B1, 2, 3)";
+    const { diagnostics } = lex(source);
+    const invisible = diagnostics.filter(
+      (d) => d.code === "invisible-character",
+    );
+    expect(invisible).toHaveLength(1);
+    const d = invisible[0]!;
+    expect(d.span.end - d.span.start).toBe(2);
+    expect(d.fix?.edits).toEqual([{ span: d.span, newText: "" }]);
+  });
+
+  it("recovers a non-breaking space as nonstandard whitespace with a space-replacement fix", () => {
+    const source = "1\u00A0+ 2";
+    const { diagnostics } = lex(source);
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]!.code).toBe("nonstandard-whitespace");
+    expect(diagnostics[0]!.fix?.edits).toEqual([
+      { span: diagnostics[0]!.span, newText: " " },
+    ]);
+  });
+
+  it("replaces a run of non-breaking spaces with an equal-length run of regular spaces", () => {
+    const source = "1\u00A0\u00A0+2";
+    const { diagnostics } = lex(source);
+    const nonstd = diagnostics.filter(
+      (d) => d.code === "nonstandard-whitespace",
+    );
+    expect(nonstd).toHaveLength(1);
+    expect(nonstd[0]!.fix?.edits).toEqual([
+      { span: nonstd[0]!.span, newText: "  " },
+    ]);
+  });
+
+  it("treats adjacent runs of different paste characters as separate diagnostics", () => {
+    const source = "\u200B\u00A01";
+    const { diagnostics } = lex(source);
+    expect(diagnostics.map((d) => d.code)).toEqual([
+      "invisible-character",
+      "nonstandard-whitespace",
+    ]);
+    expect(diagnostics[0]!.span).toEqual({ start: 0, end: 1 });
+    expect(diagnostics[1]!.span).toEqual({ start: 1, end: 2 });
+  });
+
+  it("splits an identifier around a pasted invisible character", () => {
+    expect(kinds("ISPICK\u200BVAL")).toEqual([
+      ["identifier", "ISPICK"],
+      ["identifier", "VAL"],
+    ]);
+    const { diagnostics } = lex("ISPICK\u200BVAL");
+    expect(diagnostics.map((d) => d.code)).toEqual(["invisible-character"]);
+  });
+
+  it("recovers a leading byte-order mark as invisible trivia", () => {
+    const { tokens, diagnostics } = lex("\uFEFF1");
+    const toks = tokens.filter((t) => t.kind !== "eof");
+    expect(toks.map((t) => [t.kind, t.text])).toEqual([["number", "1"]]);
+    expect(diagnostics.map((d) => d.code)).toEqual(["invisible-character"]);
+    expect(diagnostics[0]!.span).toEqual({ start: 0, end: 1 });
+  });
+
+  it("does not diagnose an invisible character inside a comment", () => {
+    expect(lex("/* \u200B */1").diagnostics).toEqual([]);
+  });
+});
+
+describe("lexer: confusable characters", () => {
+  it("lexes a smart-quoted string as one token with a straighten-both-quotes fix", () => {
+    const source = "\u201Cabc\u201D";
+    const tok = only(source);
+    expect(tok.kind).toBe("string");
+    expect(tok.text).toBe(source);
+    const { diagnostics } = lex(source);
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]!.code).toBe("confusable-character");
+    expect(diagnostics[0]!.span).toEqual({ start: 0, end: source.length });
+    expect(diagnostics[0]!.fix?.edits).toEqual([
+      { span: { start: 0, end: 1 }, newText: '"' },
+      { span: { start: source.length - 1, end: source.length }, newText: '"' },
+    ]);
+  });
+
+  it("gives a half-fixed smart string (straight closer already typed) one edit, for the opener only", () => {
+    const source = '\u201Cabc"';
+    const tok = only(source);
+    expect(tok.kind).toBe("string");
+    expect(tok.text).toBe(source);
+    const { diagnostics } = lex(source);
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]!.fix?.edits).toEqual([
+      { span: { start: 0, end: 1 }, newText: '"' },
+    ]);
+  });
+
+  it("lexes a standalone unpaired curly apostrophe as a confusable error token", () => {
+    const { tokens, diagnostics } = lex("\u2019");
+    expect(tokens[0]!.kind).toBe("error");
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]!.code).toBe("confusable-character");
+    expect(diagnostics[0]!.fix?.edits).toEqual([
+      { span: { start: 0, end: 1 }, newText: "'" },
+    ]);
+  });
+
+  it("maps a confusable dash to a plain hyphen-minus", () => {
+    const { diagnostics } = lex("1 \u2013 2");
+    const dash = diagnostics.find((d) => d.code === "confusable-character")!;
+    expect(dash).toBeDefined();
+    expect(dash.fix?.edits).toEqual([{ span: dash.span, newText: "-" }]);
+  });
+
+  it("maps the multiplication sign to *", () => {
+    const { diagnostics } = lex("\u00D7");
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]!.code).toBe("confusable-character");
+    expect(diagnostics[0]!.fix?.edits).toEqual([
+      { span: { start: 0, end: 1 }, newText: "*" },
+    ]);
+  });
+
+  it("maps a fullwidth paren to its ASCII replacement", () => {
+    const { diagnostics } = lex("\uFF08");
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]!.code).toBe("confusable-character");
+    expect(diagnostics[0]!.fix?.edits).toEqual([
+      { span: { start: 0, end: 1 }, newText: "(" },
+    ]);
+  });
+
+  it("maps the division sign to /", () => {
+    const { diagnostics } = lex("\u00F7");
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]!.code).toBe("confusable-character");
+    expect(diagnostics[0]!.fix?.edits).toEqual([
+      { span: { start: 0, end: 1 }, newText: "/" },
+    ]);
+  });
+
+  it("places the closer fix correctly when escapes precede the smart closer", () => {
+    // \\n is a two-character escape the scanner steps over; the closer's fix
+    // span must land on the closer itself, not drift into the escape.
+    const source = '\u201Ca\\n b\u201D';
+    const tok = only(source);
+    expect(tok.kind).toBe("string");
+    const { diagnostics } = lex(source);
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]!.fix?.edits).toEqual([
+      { span: { start: 0, end: 1 }, newText: '"' },
+      { span: { start: source.length - 1, end: source.length }, newText: '"' },
+    ]);
+  });
+
+  it("diagnoses only the delimiters, not an invisible character inside a smart-quoted string", () => {
+    const { diagnostics } = lex("\u201Ca\u200Bb\u201D");
+    expect(diagnostics.map((d) => d.code)).toEqual(["confusable-character"]);
+  });
+
+  it("does not diagnose an invisible character inside a straight-quoted string", () => {
+    const source = '"a\u200Bb"';
+    const { tokens, diagnostics } = lex(source);
+    expect(diagnostics).toEqual([]);
+    expect(tokens[0]!.kind).toBe("string");
+    expect(tokens[0]!.text).toBe(source);
+  });
+
+  it("lexes an astral character as one error token with one diagnostic", () => {
+    const source = "\uD83C\uDF89"; // U+1F389 PARTY POPPER
+    const { tokens, diagnostics } = lex(source);
+    const toks = tokens.filter((t) => t.kind !== "eof");
+    expect(toks).toHaveLength(1);
+    expect(toks[0]!.kind).toBe("error");
+    expect(toks[0]!.text).toBe(source);
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]!.code).toBe("unexpected-character");
+    expect(diagnostics[0]!.span).toEqual({ start: 0, end: 2 });
+  });
+
+  it("keeps a curly quote inside a straight-quoted string as legal content", () => {
+    const source = '"a\u201Db"';
+    const tok = only(source);
+    expect(tok.kind).toBe("string");
+    expect(tok.text).toBe(source);
+    expect(lex(source).diagnostics).toEqual([]);
+  });
+});
+
 describe("lexer: properties", () => {
   it("is lossless: re-concatenating tokens + trivia yields the source", () => {
     fc.assert(
@@ -272,6 +479,10 @@ describe("lexer: properties", () => {
       ",",
       "TRUE",
       "Null_Check__c",
+      "\u200B",
+      "\u00A0",
+      "\u201Cq\u201D",
+      "\u2013",
     );
     fc.assert(
       fc.property(

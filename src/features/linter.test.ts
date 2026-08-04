@@ -121,6 +121,32 @@ describe("linter: character limit", () => {
   });
 });
 
+describe("linter: invisible characters inside string literals", () => {
+  it("flags a zero-width space inside a string literal, anchored to just the character", () => {
+    const src = '"a\u200Bb" & X';
+    const { ast } = parse(src);
+    const diags = lint(ast, src, "formula_field");
+    expect(diags.map((d) => d.code)).toEqual(["invisible-in-string"]);
+    expect(diags[0]!.severity).toBe("warning");
+    expect(diags[0]!.span).toEqual({ start: 2, end: 3 });
+    expect(diags[0]!.fix?.edits).toEqual([
+      { span: { start: 2, end: 3 }, newText: "" },
+    ]);
+  });
+
+  it("does not flag a non-breaking space inside a string literal", () => {
+    expect(lintCodes('"a\u00A0b" & X')).toEqual([]);
+  });
+
+  it("does not report invisible-in-string for a zero-width space outside any string", () => {
+    // Outside a string it is the lexer's invisible-character diagnostic, not
+    // a lint finding — diagnose() merges both pipelines in one call.
+    const codes = diagnose("\u200B1", "formula_field").map((d) => d.code);
+    expect(codes).toEqual(["invisible-character"]);
+    expect(codes).not.toContain("invisible-in-string");
+  });
+});
+
 describe("diagnose: full pipeline", () => {
   it("merges syntax, analysis, and lint findings in source order", () => {
     // Unknown function (analysis) + hardcoded ID (lint) in one formula.

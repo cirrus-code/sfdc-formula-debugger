@@ -9,6 +9,16 @@ export * from "./span.ts";
 export * from "./diagnostic.ts";
 export * from "./token.ts";
 export * from "./ast.ts";
+export {
+  classifyPasteChar,
+  codePointHex,
+  CONFUSABLE_REPLACEMENTS,
+  findPasteCharRuns,
+  isBlankSource,
+  PASTE_CHAR_PATTERN,
+  type PasteCharKind,
+  type PasteCharRun,
+} from "./chars.ts";
 export { lex } from "./lexer.ts";
 export { parse, BINARY_PRECEDENCE, type ParseResult } from "./parser.ts";
 export { astEqual } from "./equal.ts";

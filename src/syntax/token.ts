@@ -28,7 +28,7 @@ export type TokenKind =
   | "error"
   | "eof";
 
-export type TriviaKind = "whitespace" | "comment";
+export type TriviaKind = "whitespace" | "comment" | "invisible";
 
 /**
  * Non-semantic source text (whitespace and slash-star block comments)
@@ -36,6 +36,12 @@ export type TriviaKind = "whitespace" | "comment";
  * Trivia is never
  * discarded — it is attached as leading trivia to the following token (trailing
  * trivia on the final `eof` token).
+ *
+ * `"invisible"` is a run of pasted invisible/non-standard characters (see
+ * syntax/chars.ts). Recovering them as trivia rather than error tokens keeps
+ * the surrounding formula parseable — the run is diagnosed once, with a fix,
+ * instead of derailing the parser into a cascade — while every consumer that
+ * cares only about comments skips it naturally.
  */
 export interface Trivia {
   readonly kind: TriviaKind;

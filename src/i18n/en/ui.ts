@@ -6,6 +6,8 @@
 export const ui = {
   editor: {
     placeholder: "Type a Salesforce formula...",
+    fixAllSpecialChars: (n: number) =>
+      `Fix all invisible/typographic characters (${n})`,
   },
   toolbar: {
     format: "Format",
@@ -37,6 +39,7 @@ export const ui = {
     cannotSimulate: (functionName: string) =>
       `Cannot simulate: ${functionName} depends on org state`,
     errorResult: "Salesforce would show #Error! here",
+    invalidFormula: "Fix the syntax errors to simulate this formula",
     copyLink: "Copy link",
     copied: "Copied!",
     linkInUrlBar: "Link is in the URL bar",
