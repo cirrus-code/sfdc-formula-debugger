@@ -156,6 +156,20 @@ describe("formatter: canonical output", () => {
   });
 });
 
+describe("formatter: pasted invisible characters", () => {
+  it("leaves a formula with an invisible character outside a string untouched", () => {
+    // Paste artifacts are error-severity diagnostics, so format() bails out
+    // rather than risk reformatting text the user hasn't fixed yet.
+    const src = "1 + \u200B2";
+    expect(f(src)).toBe(src);
+  });
+
+  it("preserves an invisible character inside a string literal exactly", () => {
+    const src = 'IF(x = "a\u200Bb", 1, 0)';
+    expect(f(src)).toBe(src);
+  });
+});
+
 const comments = (s: string): string[] => s.match(/\/\*[\s\S]*?\*\//g) ?? [];
 
 describe("formatter: comment preservation", () => {

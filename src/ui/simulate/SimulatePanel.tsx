@@ -27,7 +27,8 @@ import {
  */
 type Outcome =
   | ResultOutcome
-  | { readonly kind: "unsupported"; readonly functionName: string };
+  | { readonly kind: "unsupported"; readonly functionName: string }
+  | { readonly kind: "invalid" };
 
 interface FieldInput {
   readonly type: SfType;
@@ -37,6 +38,11 @@ interface FieldInput {
 
 interface SimulatePanelProps {
   readonly ast: Expr;
+  /** True when the source has error-severity syntax diagnostics. Recovery can
+   * hand us a complete AST for invalid text (pasted invisible characters,
+   * typographic quotes); simulating that AST would silently answer for a
+   * formula Salesforce rejects, so evaluation refuses instead (rule 1). */
+  readonly syntaxErrors: boolean;
   readonly blankToggle: boolean;
   /** Current formula context id, for localizing runtimeErrorNote. */
   readonly contextId: string;
@@ -72,6 +78,7 @@ function seedInputs(
 
 export function SimulatePanel({
   ast,
+  syntaxErrors,
   blankToggle,
   contextId,
   runtimeErrorNote,
@@ -103,6 +110,9 @@ export function SimulatePanel({
   };
 
   const outcome = useMemo((): Outcome => {
+    if (syntaxErrors) {
+      return { kind: "invalid" };
+    }
     const map = new Map<string, SfValue>();
     for (const f of fields) {
       const input = inputs[f.name] ?? {
@@ -124,7 +134,7 @@ export function SimulatePanel({
       }
       return { kind: "error", text: "#Error!" };
     }
-  }, [ast, fields, inputs, blankMode, now]);
+  }, [ast, syntaxErrors, fields, inputs, blankMode, now]);
 
   return (
     <Panel
@@ -358,6 +368,8 @@ function resultLabel(outcome: Outcome): string {
   switch (outcome.kind) {
     case "unsupported":
       return t().ui.simulate.cannotSimulate(outcome.functionName);
+    case "invalid":
+      return t().ui.simulate.invalidFormula;
     case "error":
       return t().ui.simulate.errorResult;
     case "value":
@@ -375,7 +387,7 @@ function ResultBar({
   const label = resultLabel(outcome);
   let led = "led--ok";
   let color: string = palette.text;
-  if (outcome.kind === "unsupported") {
+  if (outcome.kind === "unsupported" || outcome.kind === "invalid") {
     led = "led--warn";
     color = palette.textMuted;
   } else if (outcome.kind === "error") {

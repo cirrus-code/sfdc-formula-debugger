@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useRef, useState } from "react";
-import { parse } from "../syntax/index.ts";
+import { isBlankSource, parse } from "../syntax/index.ts";
 import { analyze } from "../analysis/index.ts";
 // Deep imports: the features barrel re-exports the simplifier, whose engine
 // dependency (decimal.js sets global config at module load) must stay in the
@@ -90,17 +90,29 @@ export function App() {
     return url;
   };
 
-  const { ast, diagnostics } = useMemo(() => {
+  const { ast, diagnostics, syntaxErrors } = useMemo(() => {
     const parsed = parse(source);
-    if (source.trim() === "") {
-      return { ast: parsed.ast, diagnostics: [] as ReturnType<typeof analyze> };
+    // Error-recovery can produce a complete AST from invalid text (e.g.
+    // pasted invisible characters recovered as trivia), so "is the syntax
+    // valid" must be read off the diagnostics, not off the AST shape.
+    const syntaxErrors = parsed.diagnostics.some(
+      (d) => d.severity === "error",
+    );
+    // Not trim(): trim() also strips NBSP/BOM-class paste artifacts, which
+    // would report a document containing only them as clean.
+    if (isBlankSource(source)) {
+      return {
+        ast: parsed.ast,
+        diagnostics: [] as ReturnType<typeof analyze>,
+        syntaxErrors,
+      };
     }
     const merged = [
       ...parsed.diagnostics,
       ...analyze(parsed.ast, contextId),
       ...lint(parsed.ast, source, contextId),
     ].sort((a, b) => a.span.start - b.span.start);
-    return { ast: parsed.ast, diagnostics: merged };
+    return { ast: parsed.ast, diagnostics: merged, syntaxErrors };
   }, [source, contextId]);
 
   const context = getContext(contextId);
@@ -184,10 +196,11 @@ export function App() {
       ) : null}
 
       <div className="rise rise-3">
-        {source.trim() === "" ? null : (
+        {isBlankSource(source) ? null : (
           <Suspense fallback={null}>
             <SimulatePanel
               ast={ast}
+              syntaxErrors={syntaxErrors}
               blankToggle={context?.blankModeToggle ?? false}
               contextId={contextId}
               runtimeErrorNote={context?.runtimeErrorNote}

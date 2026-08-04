@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import * as fc from "fast-check";
 import { parse } from "./parser.ts";
-import type { BinaryOp, Expr, FieldRef, FunctionCall } from "./ast.ts";
+import type {
+  BinaryOp,
+  Expr,
+  FieldRef,
+  FunctionCall,
+  StringLit,
+} from "./ast.ts";
+import type { Diagnostic } from "./diagnostic.ts";
 
 function ast(source: string): Expr {
   return parse(source).ast;
@@ -15,6 +22,24 @@ function expectClean(source: string): Expr {
   const { ast, diagnostics } = parse(source);
   expect(diagnostics).toEqual([]);
   return ast;
+}
+
+/** Apply every diagnostic's fix edits to `source` in one batch (descending
+ * span order, since edits never overlap), for round-tripping paste-artifact
+ * fixes through the parser. */
+function applyFixes(
+  source: string,
+  diagnostics: readonly Diagnostic[],
+): string {
+  const edits = diagnostics
+    .flatMap((d) => d.fix?.edits ?? [])
+    .sort((a, b) => b.span.start - a.span.start);
+  let out = source;
+  for (const edit of edits) {
+    out =
+      out.slice(0, edit.span.start) + edit.newText + out.slice(edit.span.end);
+  }
+  return out;
 }
 
 describe("parser: literals", () => {
@@ -293,6 +318,47 @@ describe("parser: error recovery", () => {
     }
     // Realistic nesting is untouched.
     expect(expectClean("(".repeat(50) + "1" + ")".repeat(50))).toBeTruthy();
+  });
+});
+
+describe("parser: pasted invisible/confusable characters", () => {
+  it("parses a Salesforce help-page paste around zero-width spaces, and the fixes clean it", () => {
+    // Real-world fixture: U+200B at offsets 20, 38, 71-72, 110-111.
+    const source =
+      'CASE(1, IF(ISPICKVAL\u200B (Term__c, "12"),\u200B 1, 0),\n 12 * Monthly_Commit__c,\u200B\u200B\n IF(ISPICKVAL(Term__c, "24"), 1, 0),\u200B\u200B\n 24 * Monthly_Commit__c, 0)';
+    const { ast, diagnostics } = parse(source);
+    expect(diagnostics).toHaveLength(4);
+    expect(diagnostics.map((d) => d.code)).toEqual([
+      "invisible-character",
+      "invisible-character",
+      "invisible-character",
+      "invisible-character",
+    ]);
+
+    const call = ast as FunctionCall;
+    expect(call.kind).toBe("FunctionCall");
+    expect(call.callee).toBe("CASE");
+    expect(call.args).toHaveLength(6);
+
+    const fixed = applyFixes(source, diagnostics);
+    expect(parse(fixed).diagnostics).toEqual([]);
+  });
+
+  it("lexes a smart-quoted string argument and decodes it to its straight value", () => {
+    const source = "IF(x = \u201Ca\u201D, 1, 0)";
+    expect(codes(source)).toEqual(["confusable-character"]);
+    const call = ast(source) as FunctionCall;
+    const cmp = call.args[0] as BinaryOp;
+    expect((cmp.right as StringLit).value).toBe("a");
+  });
+
+  it("reports both the non-breaking space and the resulting trailing-token error", () => {
+    // The NBSP separates "1" and "2" into two number tokens instead of joining
+    // them, so the parser also sees unconsumed trailing input.
+    expect(codes("1\u00A02")).toEqual([
+      "nonstandard-whitespace",
+      "unexpected-token",
+    ]);
   });
 });
 

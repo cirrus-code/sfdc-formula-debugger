@@ -50,6 +50,10 @@ export const sfEditorTheme = EditorView.theme(
       color: "currentColor !important",
     },
     ".cm-placeholder": { color: palette.textMuted, fontStyle: "italic" },
+    // highlightSpecialChars' placeholder dot for invisible/confusable paste
+    // artifacts (FormulaEditor.tsx) — same danger red as error diagnostics,
+    // so a stray zero-width space reads as a problem at a glance.
+    ".cm-specialChar": { color: palette.danger },
 
     ".cm-gutters": {
       backgroundColor: "transparent",

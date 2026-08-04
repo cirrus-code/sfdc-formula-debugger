@@ -3,6 +3,7 @@ import { EditorState } from "@codemirror/state";
 import {
   drawSelection,
   EditorView,
+  highlightSpecialChars,
   keymap,
   placeholder,
   tooltips,
@@ -12,6 +13,7 @@ import { lintGutter } from "@codemirror/lint";
 import { completionKeymap, snippet } from "@codemirror/autocomplete";
 // Deep import — keeps the engine-dependent simplifier out of the eager bundle.
 import { format } from "../../features/formatter.ts";
+import { PASTE_CHAR_PATTERN } from "../../syntax/index.ts";
 import { t } from "../../i18n/index.ts";
 import { sfHighlight } from "./highlight.ts";
 import { sfLinter } from "./lint.ts";
@@ -125,6 +127,12 @@ export function FormulaEditor({
             ...historyKeymap,
           ]),
           placeholder(t().ui.editor.placeholder),
+          // Render every character the lexer diagnoses as a paste artifact —
+          // the pattern is derived from the same classification (chars.ts),
+          // so a diagnosed character always gets a visible placeholder. That
+          // placeholder is also the quick-fix's hover target: the characters
+          // themselves are zero-width.
+          highlightSpecialChars({ addSpecialChars: PASTE_CHAR_PATTERN }),
           // Mount tooltips on <body>: the .rise entrance animations create
           // stacking contexts on the page sections, so tooltips rendered
           // inside the editor would paint beneath later siblings (e.g. the
