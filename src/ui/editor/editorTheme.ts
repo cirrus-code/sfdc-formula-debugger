@@ -9,10 +9,15 @@ import { palette, syntax, theme } from "../../theme/theme.ts";
  */
 export const sfEditorTheme = EditorView.theme(
   {
+    // Inherited text styles only — `&` also matches the body-mounted tooltip
+    // container (tooltips({parent}) stamps the theme classes onto it), so any
+    // box paint here would render a stray full-width bar at viewport height.
     "&": {
       color: palette.text,
-      backgroundColor: palette.well,
       fontSize: "15px",
+    },
+    "&.cm-editor": {
+      backgroundColor: palette.well,
       borderRadius: "12px",
       border: `1px solid ${palette.border}`,
     },
